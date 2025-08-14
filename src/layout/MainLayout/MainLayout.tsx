@@ -9,21 +9,11 @@ import Header from "./Header";
 import Sidebar from "./Sidebar/Sidebar";
 import { SIDEBAR_WIDTH } from "./constants";
 import { useLayoutContext } from "@/contexts/LayoutContext";
-import { useAutoQuery } from "@/hooks/useAutoQuery";
 
 type TabItem = {
   key: string;
   title: string;
   path: string;
-};
-
-interface MenuItem {
-  id : number;
-  upperId : number;
-  name : string;
-  path : string;
-  depth : number;
-  children?: MenuItem[];
 };
 
 export default function MainLayout() {
@@ -34,39 +24,35 @@ export default function MainLayout() {
   const [tabs, setTabs] = useState<TabItem[]>([]);
   const [activeKey, setActiveKey] = useState(location.pathname);
 
-
-  const { data : menu, isLoading, error } = useAutoQuery<MenuItem[]>('/api/menu/getList');
-  
-  if (isLoading) return <div>Loading menu...</div>;
-  if (error) return <div>Error loading menu: {error.message}</div>;
-
   // location.pathname 변경될 때마다 탭 추가 (최대 10개)
   useEffect(() => {
     const handleRegisterTab = (e: Event) => {
-        const { key, title, path } = (e as CustomEvent<TabItem>).detail;
+      const { key, title, path } = (e as CustomEvent<TabItem>).detail;
 
-        setTabs((prevTabs) => {
+      setTabs((prevTabs) => {
         const exists = prevTabs.find((tab) => tab.key === key);
         if (exists) return prevTabs;
 
         if (prevTabs.length >= 10) {
-            alert("최대 10개 탭까지 생성할 수 있습니다.");
-            return prevTabs;
+          alert("최대 10개 탭까지 생성할 수 있습니다.");
+          return prevTabs;
         }
 
         return [...prevTabs, { key, title, path }];
-        });
+      });
 
-        setActiveKey(key);
+      setActiveKey(key);
     };
 
     window.addEventListener("register-tab", handleRegisterTab);
     return () => window.removeEventListener("register-tab", handleRegisterTab);
-    }, []);
+  }, []);
+
   // 탭 클릭 시 이동
   const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setActiveKey(newValue);
-    navigate(newValue);
+    const tab = tabs.find((t) => t.key === newValue);
+    if (tab) navigate(tab.path);
   };
 
   // 탭 닫기 처리
@@ -97,14 +83,14 @@ export default function MainLayout() {
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
           ml: sidebarOpen ? `${SIDEBAR_WIDTH}px` : 0,
           transition: (theme) =>
             theme.transitions.create(["margin"], {
               easing: theme.transitions.easing.easeOut,
               duration: theme.transitions.duration.enteringScreen,
             }),
-          flexDirection: "column",
-          flexGrow: 1,
         }}
       >
         <Header />
@@ -142,9 +128,8 @@ export default function MainLayout() {
             />
           ))}
         </Tabs>
-        
-        <Box component="main" sx={{ p: 3, flexGrow: 1, overflow: "auto" }}>
 
+        <Box component="main" sx={{ p: 3, flexGrow: 1, overflow: "auto" }}>
           <Outlet />
         </Box>
       </Box>

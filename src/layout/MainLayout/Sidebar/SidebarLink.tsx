@@ -8,14 +8,14 @@ import {
 import { JSX } from "@emotion/react/jsx-runtime";
 
 interface Props {
-
   title: string;
   to: string;
-  icon: JSX.Element;
+  icon: JSX.Element; // 아이콘은 필수
 }
 
 const SidebarLink = ({ title, icon, to }: Props) => {
   const handleClick = () => {
+    // 탭 등록 이벤트
     const event = new CustomEvent("register-tab", {
       detail: {
         key: to,
@@ -23,7 +23,6 @@ const SidebarLink = ({ title, icon, to }: Props) => {
         path: to,
       },
     });
-
     window.dispatchEvent(event);
   };
 
