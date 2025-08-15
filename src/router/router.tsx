@@ -1,35 +1,36 @@
+// src/router.tsx
 import { createBrowserRouter, RouteObject } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import MainLayout from "@/layout/MainLayout/MainLayout";
-import { useMenus } from "@/hooks/useMenus";
+import { Menu } from "@/hooks/useMenus";
 
-// 메뉴 fetch + 캐시 (한 번만 호출)
-export function router() {
-  const { data: menus, isLoading, error } = useMenus();
-
-  if (isLoading || !menus) return []; // 로딩 중엔 빈 배열 반환
-  if (error) throw error;
-
-  const children: RouteObject[] = menus.map(menu => {
-    const Component = lazy(() => import(`@/pages/${menu.path}`));
-    return {
-      path: menu.path === "/" ? undefined : menu.path.substring(1), // index route 처리
-      index: menu.index,
-      element: <Component />,
-    };
-  });
+export function buildRoutes(menus: Menu[]): RouteObject[] {
+  
+  const renderRoutes = (parentId: number = 0 ): RouteObject[] => {
+    return menus
+      .filter(menu => menu.upperId === parentId)
+      .map(menu => {
+        const children = renderRoutes(menu.id);
+        
+        const Component = lazy(() => import(`@/pages${menu.path}`)); // pages 경로에 맞게 수정
+        return {
+          path: menu.path === "/" ? undefined : menu.path.substring(1),
+          index: menu.index,
+          element: <Component />,
+          children: children.length ? children : undefined,
+        };
+      });
+  };
 
   return [
     {
       path: "/",
       element: <MainLayout />,
-      children,
+      children: renderRoutes(),
     },
   ];
 }
 
-// 최종 router 생성
-export function createAppRouter() {
-  const routes = router();
-  return createBrowserRouter(routes);
+export function createAppRouter(menus: Menu[]) {
+  return createBrowserRouter(buildRoutes(menus));
 }

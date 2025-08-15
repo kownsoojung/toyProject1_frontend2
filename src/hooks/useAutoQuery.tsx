@@ -1,46 +1,18 @@
-import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-
-function buildQueryString(params?: Record<string, any>): string {
-  if (!params) return '';
-  return (
-    '?' +
-    Object.entries(params)
-      .filter(([, v]) => v !== undefined && v !== null)
-      .map(([k, v]) =>
-        Array.isArray(v)
-          ? v.map(val => `${encodeURIComponent(k)}[]=${encodeURIComponent(val)}`).join('&')
-          : `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
-      )
-      .join('&')
-  );
-}
+import { useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 
 export function useAutoQuery<T = unknown>(
-  url: string,
-  queryParams?: Record<string, any>,
+  key: string,
+  endpoint: string, // 반드시 "/api/..." 형태
   options?: UseQueryOptions<T, Error, T>
 ): UseQueryResult<T> {
-  const queryKey = [url + buildQueryString(queryParams)];
-
   const fetcher = async (): Promise<T> => {
-    const finalUrl = url + buildQueryString(queryParams);
-
-    const res = await fetch(finalUrl, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(endpoint, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
     });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Error ${res.status}: ${errorText}`);
-    }
-
+    if (!res.ok) throw new Error(`Error ${res.status}`);
     return res.json();
   };
 
-  return useQuery<T, Error>({
-    queryKey,
-    queryFn: fetcher,
-    ...options,
-  });
+  return useQuery<T, Error>({ queryKey: [key], queryFn: fetcher, ...options });
 }

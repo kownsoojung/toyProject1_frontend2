@@ -15,5 +15,6 @@ export interface Menu {
 }
 
 export function useMenus() {
-  return useAutoQuery<Menu[]>("/api/menus");
+  return useAutoQuery<Menu[]>("menus", "/api/menu/getList");
+
 }

@@ -1,38 +1,28 @@
-import { PropsWithChildren, useState } from "react";
+// src/layout/Sidebar/SidebarSubmenu.tsx
+import { useState, ReactNode, Fragment } from "react";
+import { Collapse, List, ListItemButton, ListItemText } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import {
-    Collapse,
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-} from "@mui/material";
-import { JSX } from "@emotion/react/jsx-runtime";
 
-interface Props extends PropsWithChildren {
-    text: string;
-    icon: JSX.Element;
+interface Props {
+  text: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
 }
 
-const SidebarSubmenu = ({ text, icon, children }: Props) => {
-    const [open, setOpen] = useState(false);
+const SidebarSubmenu = ({ text, children, defaultOpen = false }: Props) => {
+  const [open, setOpen] = useState(defaultOpen);
 
-    const handleClick = () => {
-        setOpen(!open);
-    };
-    return (
-        <>
-            <ListItemButton onClick={handleClick}>
-                <ListItemIcon>{icon}</ListItemIcon>
-                <ListItemText primary={text} />
-                {open ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-            <Collapse in={open} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                    {children}
-                </List>
-            </Collapse>
-        </>
-    );
+  return (
+    <Fragment>
+      <ListItemButton onClick={() => setOpen(prev => !prev)}>
+        <ListItemText primary={text} />
+        {open ? <ExpandLess /> : <ExpandMore />}
+      </ListItemButton>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>{children}</List>
+      </Collapse>
+    </Fragment>
+  );
 };
+
 export default SidebarSubmenu;

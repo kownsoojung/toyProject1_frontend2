@@ -1,35 +1,26 @@
+// src/layout/Sidebar/SidebarLink.tsx
 import { Link as RouterLink } from "react-router-dom";
-import {
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-import { JSX } from "@emotion/react/jsx-runtime";
+import { ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { startTransition } from "react";
 
 interface Props {
   title: string;
   to: string;
-  icon: JSX.Element; // 아이콘은 필수
 }
 
-const SidebarLink = ({ title, icon, to }: Props) => {
+const SidebarLink = ({ title, to }: Props) => {
   const handleClick = () => {
-    // 탭 등록 이벤트
-    const event = new CustomEvent("register-tab", {
-      detail: {
-        key: to,
-        title,
-        path: to,
-      },
+    startTransition(() => {
+      const event = new CustomEvent("register-tab", {
+        detail: { key: to, title, path: to },
+      });
+      window.dispatchEvent(event);
     });
-    window.dispatchEvent(event);
   };
 
   return (
     <ListItem disablePadding>
       <ListItemButton component={RouterLink} to={to} onClick={handleClick}>
-        <ListItemIcon>{icon}</ListItemIcon>
         <ListItemText primary={title} />
       </ListItemButton>
     </ListItem>

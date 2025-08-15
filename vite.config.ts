@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:4000",  // 백엔드 서버 주소로 바꿔주세요
+        target: "http://localhost:8080", // 백엔드 서버
         changeOrigin: true,
         secure: false,
       },
