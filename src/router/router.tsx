@@ -12,9 +12,11 @@ export function buildRoutes(menus: Menu[]): RouteObject[] {
       .map(menu => {
         const children = renderRoutes(menu.id);
         
-        const Component = lazy(() => import(`@/pages${menu.path}`)); // pages 경로에 맞게 수정
+        const modules = import.meta.glob("/src/pages/**/*.tsx"); 
+
+        const Component = lazy(modules[`/src/pages${menu.path}.tsx`] as () => Promise<{ default: React.ComponentType<any> }>);
         return {
-          path: menu.path === "/" ? undefined : menu.path.substring(1),
+          path: menu.path === null ? undefined : menu.path.substring(1),
           index: menu.index,
           element: <Component />,
           children: children.length ? children : undefined,
