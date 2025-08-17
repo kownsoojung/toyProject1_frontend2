@@ -1,24 +1,30 @@
-// src/router.tsx
 import { createBrowserRouter, RouteObject } from "react-router-dom";
 import { lazy } from "react";
 import MainLayout from "@/layout/MainLayout/MainLayout";
+import DashboardPage from "@/pages/Dashboard"; // Dashboard 기본 페이지
 import { Menu } from "@/hooks/useMenus";
 
 export function buildRoutes(menus: Menu[]): RouteObject[] {
-  
-  const renderRoutes = (parentId: number = 0 ): RouteObject[] => {
+  const renderRoutes = (parentId: number = 0): RouteObject[] => {
     return menus
       .filter(menu => menu.upperId === parentId)
       .map(menu => {
         const children = renderRoutes(menu.id);
-        
-        const modules = import.meta.glob("/src/pages/**/*.tsx"); 
+        const modules = import.meta.glob("/src/pages/**/*.tsx");
+        let Component: React.LazyExoticComponent<React.ComponentType<any>> | undefined;
 
-        const Component = lazy(modules[`/src/pages${menu.path}.tsx`] as () => Promise<{ default: React.ComponentType<any> }>);
+        if (menu.path) {
+          const importKey = `/src/pages${menu.path}.tsx`;
+          if (modules[importKey]) {
+            Component = lazy(modules[importKey] as () => Promise<{ default: React.ComponentType<any> }>);
+          } else {
+            console.warn(`Page not found for path: ${importKey}`);
+          }
+        }
+
         return {
-          path: menu.path === null ? undefined : menu.path.substring(1),
-          index: menu.index,
-          element: <Component />,
+          path: menu.path ? menu.path.substring(1) : "",
+          element: Component ? <Component /> : undefined,
           children: children.length ? children : undefined,
         };
       });
@@ -28,7 +34,13 @@ export function buildRoutes(menus: Menu[]): RouteObject[] {
     {
       path: "/",
       element: <MainLayout />,
-      children: renderRoutes(),
+      children: [
+        {
+          index: true, // 기본 페이지
+          element: <DashboardPage />, // / 접속 시 Dashboard 보여줌
+        },
+        ...renderRoutes(), // 메뉴 기반 라우트
+      ],
     },
   ];
 }

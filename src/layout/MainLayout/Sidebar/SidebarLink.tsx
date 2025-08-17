@@ -1,18 +1,16 @@
-// src/layout/Sidebar/SidebarLink.tsx
-import { Link as RouterLink } from "react-router-dom";
 import { ListItem, ListItemButton, ListItemText } from "@mui/material";
 import { startTransition } from "react";
 
 interface Props {
   title: string;
-  to: string;
+  keyName: string;
 }
 
-const SidebarLink = ({ title, to }: Props) => {
+const SidebarLink = ({ title, keyName }: Props) => {
   const handleClick = () => {
     startTransition(() => {
       const event = new CustomEvent("register-tab", {
-        detail: { key: to, title, path: to },
+        detail: { key: keyName, title, Component: undefined } // 동적 컴포넌트는 나중에 등록 가능
       });
       window.dispatchEvent(event);
     });
@@ -20,7 +18,7 @@ const SidebarLink = ({ title, to }: Props) => {
 
   return (
     <ListItem disablePadding>
-      <ListItemButton component={RouterLink} to={to} onClick={handleClick}>
+      <ListItemButton onClick={handleClick}>
         <ListItemText primary={title} />
       </ListItemButton>
     </ListItem>

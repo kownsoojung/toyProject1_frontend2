@@ -1,6 +1,5 @@
-// src/layout/Sidebar/SidebarSubmenu.tsx
 import { useState, ReactNode, Fragment } from "react";
-import { Collapse, List, ListItemButton, ListItemText } from "@mui/material";
+import { Collapse, ListItemButton, ListItemText, List } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
 interface Props {
@@ -18,8 +17,11 @@ const SidebarSubmenu = ({ text, children, defaultOpen = false }: Props) => {
         <ListItemText primary={text} />
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
+
       <Collapse in={open} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>{children}</List>
+        <List component="div" disablePadding sx={{ pl: 2 }}>
+          {children} {/* 재귀된 하위 메뉴 */}
+        </List>
       </Collapse>
     </Fragment>
   );

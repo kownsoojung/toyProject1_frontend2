@@ -12,6 +12,7 @@ export interface Menu {
   path: string;
   depth: number;
   useFlag: number;
+  isLeaf:number;
 }
 
 export function useMenus() {

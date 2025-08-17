@@ -1,4 +1,3 @@
-// src/layout/Sidebar/Sidebar.tsx
 import { Box, Divider, Drawer, List, Toolbar } from "@mui/material";
 import { useLayoutContext } from "@/contexts/LayoutContext";
 import useIsMobile from "@/hooks/useIsMobile";
@@ -11,7 +10,7 @@ import { useLocation } from "react-router-dom";
 const Sidebar = () => {
   const isMobile = useIsMobile();
   const { sidebarOpen, setSidebarOpen } = useLayoutContext();
-  const { data: menus, isLoading, error } = useMenus();
+  const { data: menus } = useMenus();
   const location = useLocation();
 
   const renderMenuTree = (parentId: number = 0) => {
@@ -20,25 +19,23 @@ const Sidebar = () => {
     return menus
       .filter(menu => menu.upperId === parentId)
       .map(menu => {
-        const children = menus.filter(m => m.upperId === menu.id);
-        const defaultOpen = children.some(c => c.path === location.pathname);
+        const childrenMenus = menus.filter(m => m.upperId === menu.id);
+        const hasChild = childrenMenus.length > 0;
+        const defaultOpen = hasChild && childrenMenus.some(c => c.path === location.pathname);
 
-        if (children.length > 0) {
+        if (hasChild) {
           return (
-            <SidebarSubmenu
-              key={menu.id}
-              text={menu.name}
-              defaultOpen={defaultOpen}
-            >
+            <SidebarSubmenu key={menu.id} text={menu.name} defaultOpen={defaultOpen}>
               {renderMenuTree(menu.id)}
             </SidebarSubmenu>
           );
         }
 
+        // URL 변경 없이 탭 등록만
         return (
           <SidebarLink
             key={menu.id}
-            to={menu.path}
+            keyName={menu.path || `menu-${menu.id}`}
             title={menu.name}
           />
         );

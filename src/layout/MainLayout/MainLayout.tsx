@@ -1,78 +1,60 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Box, Toolbar, Tabs, Tab } from "@mui/material";
 import { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import CloseIcon from "@mui/icons-material/Close";
 import Header from "./Header";
 import Sidebar from "./Sidebar/Sidebar";
 import { SIDEBAR_WIDTH } from "./constants";
 import { useLayoutContext } from "@/contexts/LayoutContext";
+import { Outlet, useNavigate } from "react-router-dom";
 
 type TabItem = {
-  key: string;
+  key: string; // URL
   title: string;
-  path: string;
+  closable?: boolean;
 };
 
 export default function MainLayout() {
-  const location = useLocation();
-  const navigate = useNavigate();
   const { sidebarOpen } = useLayoutContext();
+  const navigate = useNavigate();
 
-  const [tabs, setTabs] = useState<TabItem[]>([]);
-  const [activeKey, setActiveKey] = useState(location.pathname);
+  const [tabs, setTabs] = useState<TabItem[]>([
+    { key: "/Dashboard", title: "Dashboard", closable: false },
+  ]);
+  const [activeKey, setActiveKey] = useState("/Dashboard");
 
-  // location.pathname 변경될 때마다 탭 추가 (최대 10개)
+  // CustomEvent로 탭 등록
   useEffect(() => {
     const handleRegisterTab = (e: Event) => {
-      const { key, title, path } = (e as CustomEvent<TabItem>).detail;
+      const { key, title } = (e as CustomEvent<TabItem>).detail;
 
-      setTabs((prevTabs) => {
-        const exists = prevTabs.find((tab) => tab.key === key);
-        if (exists) return prevTabs;
-
-        if (prevTabs.length >= 10) {
-          alert("최대 10개 탭까지 생성할 수 있습니다.");
-          return prevTabs;
-        }
-
-        return [...prevTabs, { key, title, path }];
+      setTabs(prev => {
+        if (prev.find(t => t.key === key)) return prev;
+        return [...prev, { key, title, closable: true }];
       });
 
       setActiveKey(key);
+      navigate(key); // URL 이동
     };
 
     window.addEventListener("register-tab", handleRegisterTab);
     return () => window.removeEventListener("register-tab", handleRegisterTab);
-  }, []);
+  }, [navigate]);
 
-  // 탭 클릭 시 이동
+  // 탭 클릭 시 URL 이동
   const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setActiveKey(newValue);
-    const tab = tabs.find((t) => t.key === newValue);
-    if (tab) navigate(tab.path);
+    navigate(newValue);
   };
 
-  // 탭 닫기 처리
+  // 탭 닫기
   const handleTabClose = (e: React.MouseEvent, key: string) => {
     e.stopPropagation();
-    setTabs((prevTabs) => {
-      const newTabs = prevTabs.filter((tab) => tab.key !== key);
-
-      if (activeKey === key) {
-        // 닫은 탭이 현재 활성 탭이면
-        if (newTabs.length > 0) {
-          const lastTab = newTabs[newTabs.length - 1];
-          setActiveKey(lastTab.key);
-          navigate(lastTab.path);
-        } else {
-          setActiveKey("/");
-          navigate("/");
-        }
+    setTabs(prev => {
+      const newTabs = prev.filter(t => t.key !== key);
+      if (activeKey === key && newTabs.length > 0) {
+        setActiveKey(newTabs[newTabs.length - 1].key);
+        navigate(newTabs[newTabs.length - 1].key);
       }
-
       return newTabs;
     });
   };
@@ -86,7 +68,7 @@ export default function MainLayout() {
           flexDirection: "column",
           flexGrow: 1,
           ml: sidebarOpen ? `${SIDEBAR_WIDTH}px` : 0,
-          transition: (theme) =>
+          transition: theme =>
             theme.transitions.create(["margin"], {
               easing: theme.transitions.easing.easeOut,
               duration: theme.transitions.duration.enteringScreen,
@@ -102,26 +84,28 @@ export default function MainLayout() {
           scrollButtons="auto"
           sx={{ px: 2, borderBottom: 1, borderColor: "divider", minHeight: 40 }}
         >
-          {tabs.map((tab) => (
+          {tabs.map(tab => (
             <Tab
               key={tab.key}
               value={tab.key}
               label={
                 <Box sx={{ display: "flex", alignItems: "center", minWidth: 80 }}>
                   {tab.title}
-                  <Box
-                    component="span"
-                    onClick={(e) => handleTabClose(e, tab.key)}
-                    sx={{
-                      ml: 1,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      userSelect: "none",
-                    }}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </Box>
+                  {tab.closable && (
+                    <Box
+                      component="span"
+                      onClick={e => handleTabClose(e, tab.key)}
+                      sx={{
+                        ml: 1,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        userSelect: "none",
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </Box>
+                  )}
                 </Box>
               }
               sx={{ minHeight: 40 }}
@@ -130,6 +114,7 @@ export default function MainLayout() {
         </Tabs>
 
         <Box component="main" sx={{ p: 3, flexGrow: 1, overflow: "auto" }}>
+          {/* 페이지 렌더링은 router가 담당 */}
           <Outlet />
         </Box>
       </Box>
