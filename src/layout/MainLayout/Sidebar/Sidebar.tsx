@@ -4,13 +4,12 @@ import useIsMobile from "@/hooks/useIsMobile";
 import { SIDEBAR_WIDTH } from "../constants";
 import SidebarLink from "./SidebarLink";
 import SidebarSubmenu from "./SidebarSubmenu";
-import { useMenus } from "@/hooks/useMenus";
 import { useLocation } from "react-router-dom";
-
+import { useMenuStore } from "@/stores/menuStore";
 const Sidebar = () => {
   const isMobile = useIsMobile();
   const { sidebarOpen, setSidebarOpen } = useLayoutContext();
-  const { data: menus } = useMenus();
+  const menus = useMenuStore((state) => state.menus); 
   const location = useLocation();
 
   const renderMenuTree = (parentId: number = 0) => {

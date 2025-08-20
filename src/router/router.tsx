@@ -1,8 +1,11 @@
-import { createBrowserRouter, RouteObject } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 import { lazy } from "react";
 import MainLayout from "@/layout/MainLayout/MainLayout";
 import DashboardPage from "@/pages/Dashboard"; // Dashboard 기본 페이지
-import { Menu } from "@/hooks/useMenus";
+import { Menu } from "@/stores/menuStore";
+import LoginPage from "@/pages/Login";
+import RegisterPage from "@/pages/register";
+
 
 export function buildRoutes(menus: Menu[]): RouteObject[] {
   const renderRoutes = (parentId: number = 0): RouteObject[] => {
@@ -30,16 +33,23 @@ export function buildRoutes(menus: Menu[]): RouteObject[] {
       });
   };
 
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
   return [
     {
+      path: "/login",
+      element: isLoggedIn ? <Navigate to="/" /> : <LoginPage />,
+    },
+     {
+      path: "/register",
+      element: <RegisterPage />,
+    },
+    {
       path: "/",
-      element: <MainLayout />,
+      element: isLoggedIn ? <MainLayout /> : <Navigate to="/login" />,
       children: [
-        {
-          index: true, // 기본 페이지
-          element: <DashboardPage />, // / 접속 시 Dashboard 보여줌
-        },
-        ...renderRoutes(), // 메뉴 기반 라우트
+        { index: true, element: <DashboardPage /> },
+        ...renderRoutes(),
       ],
     },
   ];
