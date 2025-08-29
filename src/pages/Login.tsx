@@ -1,60 +1,82 @@
-import { Box, Button, ButtonGroup, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { Form, Input, Button, Typography, Space } from "antd";
 import { useNavigate } from "react-router-dom";
 
+const { Title } = Typography;
+
 function LoginPage() {
-
+  const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    localStorage.setItem("isLoggedIn", "true"); // 임시 예시
-    navigate("/"); // 로그인 후 메인 페이지로 이동
+  // 로그인 처리
+  const handleLogin = (values: { username: string; password: string }) => {
+    console.log("로그인 시도:", values);
 
-  }
+    // 임시 예시: localStorage 로그인 상태 저장
+    localStorage.setItem("isLoggedIn", "true");
 
-  const handleJoins =() => {
-    navigate("/register"); 
-  }
+    // 로그인 후 메인 페이지 이동
+    navigate("/");
+  };
 
-  return ( 
-    <Box
-      sx={{display:"flex", 
-        flexDirection:"column",
-        alignItems:"center",
+  // 회원가입 이동
+  const handleJoin = () => {
+    navigate("/register");
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
         justifyContent: "center",
         height: "100vh",
       }}
     >
-        <Typography variant="h4" mb={3}>로그인</Typography>
-        <TextField
+      <Title level={2} style={{ marginBottom: 24 }}>
+        로그인
+      </Title>
+
+      <Form
+        form={form}
+        layout="vertical"
+        style={{ width: 300 }}
+        onFinish={handleLogin}
+      >
+        <Form.Item
           label="아이디"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          sx={{ mb: 2 }}
-          inputProps={{ maxLength: 20 }} 
-          type="text"
-        />
-        <TextField
+          name="username"
+          rules={[{ required: true, message: "아이디를 입력하세요" }]}
+        >
+          <Input placeholder="아이디 입력" maxLength={20} />
+        </Form.Item>
+
+        <Form.Item
           label="비밀번호"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        
-        <Box sx={{display:"flex", gap:1}}>
-          <Button variant="contained" onClick={handleLogin}>
-            로그인
-          </Button>
-          <Button variant="outlined" onClick={handleJoins}>
-            회원가입
-          </Button>
-        </Box>
-      </Box>
-   );
+          name="password"
+          rules={[{ required: true, message: "비밀번호를 입력하세요" }]}
+        >
+          <Input.Password placeholder="비밀번호 입력" />
+        </Form.Item>
+
+        <Form.Item>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              로그인
+            </Button>
+            <Button
+              onClick={() => {
+                form.resetFields(); // 입력값 초기화
+              }}
+            >
+              초기화
+            </Button>
+            <Button onClick={handleJoin}>회원가입</Button>
+          </Space>
+        </Form.Item>
+      </Form>
+    </div>
+  );
 }
 
 export default LoginPage;
-

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 
 export interface Menu {
-  [x: string]: any;
   id: number;
   centerId: number;
   upperId: number;
