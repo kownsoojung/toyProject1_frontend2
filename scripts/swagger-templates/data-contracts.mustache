@@ -1,0 +1,11 @@
+/* eslint-disable */
+/* tslint:disable */
+// @ts-nocheck
+
+{{#each types}}
+export interface {{name}} {
+{{#each properties}}
+  {{name}}{{#if optional}}?{{/if}}: {{type}};
+{{/each}}
+}
+{{/each}}

@@ -9,7 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "format": "prettier . --write",
-    "gen:api": "swagger-typescript-api -p http://localhost:8080/v3/api-docs -o ./src/api -n api.ts --http-client fetch"
+    "open-api": "openapi-generator-cli generate -i ./scripts/openapi.json -g typescript-axios -c ./openapitools.json -o ./src/generate"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-query-devtools": "^5.85.0",
     "antd": "^5.27.1",
+    "axios": "^1.11.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet-async": "^2.0.5",
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "^24.3.1",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.6",
     "@typescript-eslint/eslint-plugin": "^8.33.1",
@@ -44,6 +46,7 @@
     "globals": "^16.2.0",
     "prettier": "^3.5.3",
     "swagger-typescript-api": "^13.2.8",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.1",
     "vite": "^6.3.5"

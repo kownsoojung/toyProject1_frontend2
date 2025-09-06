@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { useAutoQuery } from "./useAutoQuery";
-import { useMenuStore, type Menu } from "@/stores/menuStore";
-import type { MenuAgentDTO } from "@/generated";
-
+import { MenuAgentDTO, MenuControllerApi } from "../generate";
+import { Menu, useMenuStore } from "../stores/menuStore";
 // DTO → 내부 모델로 변환 함수
 function mapMenu(dto: MenuAgentDTO): Menu {
   return {
@@ -20,17 +19,24 @@ function mapMenu(dto: MenuAgentDTO): Menu {
 
 export function useMenus() {
   const setMenus = useMenuStore((state) => state.setMenus);
-
-  // useAutoQuery로 API 호출
-  const query = useAutoQuery<MenuAgentDTO[]>("menus", "/api/menu/getList");
-
+  const menuApi = new MenuControllerApi();
+  
   useEffect(() => {
-    if (query.data) {
-      const menus: Menu[] = query.data.map(mapMenu);
-      setMenus(menus); // 안전하게 Zustand store에 저장
-    }
-  }, [query.data, setMenus]);
+    
+    const fetchMenus = async () => {
+      try {
+        const res = await menuApi.getList();       // MenuControllerApi에서 getList 호출
+        const menus = res.data.map(mapMenu);       // DTO → 내부 모델 변환
+        setMenus(menus);                           // Zustand store에 저장
+      } catch (err) {
+        console.error("Menu API error:", err);
+      }
+    };
+
+    fetchMenus();
+  }, [setMenus]);
+
 
   const menus = useMenuStore((state) => state.menus);
-  return { data: menus, isLoading: query.isLoading, error: query.error };
+  return { data: menus, isLoading: false, error: null };
 }

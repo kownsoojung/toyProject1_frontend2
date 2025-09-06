@@ -1,0 +1,17 @@
+.gitignore
+.npmignore
+README.md
+api.ts
+base.ts
+common.ts
+configuration.ts
+docs/MenuAgentDTO.md
+docs/MenuControllerApi.md
+git_push.sh
+index.ts
+package.json
+src/generate/api/menu-controller-api.ts
+src/generate/model/index.ts
+src/generate/model/menu-agent-dto.ts
+tsconfig.esm.json
+tsconfig.json

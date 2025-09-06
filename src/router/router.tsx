@@ -1,10 +1,11 @@
 import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 import { lazy } from "react";
-import MainLayout from "@/layout/MainLayout/MainLayout";
-import DashboardPage from "@/pages/Dashboard"; // Dashboard 기본 페이지
 import { Menu } from "@/stores/menuStore";
 import LoginPage from "@/pages/Login";
 import RegisterPage from "@/pages/register";
+import MainLayout from "@/layout/MainLayout/MainLayout";
+import DashboardPage from "@/pages/DashboardPage";
+
 
 
 export function buildRoutes(menus: Menu[]): RouteObject[] {
