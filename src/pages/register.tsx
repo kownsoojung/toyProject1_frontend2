@@ -1,8 +1,7 @@
-import { Card, Form, Input } from "antd";
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { Padding } from "@mui/icons-material";
+import { Card, Col, Form, Input, Row } from "antd";
 import Title from "antd/es/typography/Title";
-import AFormItem from "@/components/AFormItem";
+import AFormItem from "@/components/AFormItem/AFormItem";
+import styles from "@/components/AFormItem/AFormItem.module.css";
 
 function RegisterPage() {
 
@@ -31,11 +30,31 @@ function RegisterPage() {
           initialValues={{ remember: true }}
           onFinish={onFinish}
         >
-          <AFormItem name="id" label="id" required minLength={3} pattern={{ regex: /^[A-Za-z0-9]+$/, message: "아이디는 영어/숫자만 가능합니다" }}>
-            <Input prefix={<UserOutlined className={"site-form-item-icon"} maxLength={20}  /> }/>
-          </AFormItem>
-          
-
+          <div
+            className={styles["aform-layout"]}
+            style={{ "--label-width": "120px" } as React.CSSProperties} // 여기서 변경
+          >
+            <Row gutter={16}> 
+              <Col span={24}> 
+                <AFormItem
+                  name="id" label="아이디" required minLength={3} maxLengthInput={20} placeholder="아이디 입력"
+                  pattern={{
+                    regex: /^[A-Za-z0-9]+$/,
+                    message: "아이디는 영어/숫자만 가능합니다",
+                  }}
+                />
+              </Col>
+              <Col span={24}> 
+                <AFormItem
+                  name="password" label="패스워드" type="password" required minLength={3} placeholder="비밀번호 입력"
+                  pattern={{
+                    regex: /^[A-Za-z0-9]+$/,
+                    message: "패스워드는 영어/숫자만 가능합니다",
+                  }}
+                />
+              </Col>
+            </Row>
+         </div>
           
         </Form>
       </Card>
