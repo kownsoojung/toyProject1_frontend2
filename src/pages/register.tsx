@@ -1,9 +1,8 @@
-import { Card, Col, Form, Input, Row, Button, message } from "antd";
+import { Card, Col, Form, Row, Button, message } from "antd";
 import Title from "antd/es/typography/Title";
 import AFormItem from "@/components/AFormItem/AFormItem";
 import styles from "@/components/AFormItem/AFormItem.module.css";
 import { useRef } from "react";
-
 
 const errorKey = "form-error";
 
@@ -11,15 +10,26 @@ export default function AdminForm() {
   const [form] = Form.useForm();
   const isSubmitting = useRef(false);
 
-   const showError = (text: string) => {
+  const fieldsConfig = [
+    { name: "username", label: "아이디", required: true, minLength: 3, pattern: "numalpha", placeholder: "아이디 입력" },
+    { name: "password", label: "비밀번호", type: "password", required: true, minLength: 6, pattern: "numalpha", placeholder: "비밀번호 입력" },
+    { name: "email", label: "이메일", required: true, pattern: "email", placeholder: "aaa@bbb.ccc" },
+    { name: "phone", label: "연락처", pattern: "phone", placeholder: "010-1234-5678" },
+    { name: "company", label: "회사명", placeholder: "회사명 입력" },
+    { name: "department", label: "부서", placeholder: "부서 입력" },
+    { name: "position", label: "직급", placeholder: "직급 입력" },
+    { name: "remarks", label: "비고", placeholder: "비고 입력" },
+  ];
+
+  const showError = (text: string) => {
     message.open({
       content: text,
       type: "error",
       duration: 2,
-      key: errorKey, // 같은 key면 기존 메시지 삭제 후 새로 표시
+      key: errorKey,
     });
   };
-  
+
   const onSubmit = async () => {
     if (isSubmitting.current) return;
     isSubmitting.current = true;
@@ -27,17 +37,16 @@ export default function AdminForm() {
     try {
       const values = await form.validateFields();
       console.log("폼 제출 성공:", values);
-      message.success("폼이 정상적으로 제출되었습니다.", 2);
+      message.success({ content: "폼이 정상적으로 제출되었습니다.", duration: 2 });
     } catch (errorInfo: any) {
-      if (errorInfo.errorFields && errorInfo.errorFields.length > 0) {
+      if (errorInfo.errorFields?.length > 0) {
         const firstError = errorInfo.errorFields[0].errors[0];
-        showError(firstError); 
+        showError(firstError);
       }
     } finally {
       isSubmitting.current = false;
     }
   };
-
 
   return (
     <div
@@ -73,31 +82,11 @@ export default function AdminForm() {
             style={{ "--label-width": "120px" } as React.CSSProperties}
           >
             <Row gutter={16}>
-              {/* 필드 예시 8개 */}
-              <Col span={24}>
-                <AFormItem name="username" label="아이디" required minLength={3} placeholder="아이디 입력" pattern="numalpha" />
-              </Col>
-              <Col span={24}>
-                <AFormItem name="password" label="비밀번호" type="password" required minLength={6} placeholder="비밀번호 입력" pattern="numalpha" />
-              </Col>
-              <Col span={24}>
-                <AFormItem name="email" label="이메일" required placeholder="aaa@bbb.ccc" pattern="email" />
-              </Col>
-              <Col span={24}>
-                <AFormItem name="phone" label="연락처" placeholder="010-1234-5678" pattern="phone" />
-              </Col>
-              <Col span={24}>
-                <AFormItem name="company" label="회사명" placeholder="회사명 입력" />
-              </Col>
-              <Col span={24}>
-                <AFormItem name="department" label="부서" placeholder="부서 입력" />
-              </Col>
-              <Col span={24}>
-                <AFormItem name="position" label="직급" placeholder="직급 입력" />
-              </Col>
-              <Col span={24}>
-                <AFormItem name="remarks" label="비고" placeholder="비고 입력" />
-              </Col>
+              {fieldsConfig.map(field => (
+                <Col span={24} key={field.name}>
+                  <AFormItem {...field} />
+                </Col>
+              ))}
 
               <Col span={24} style={{ textAlign: "center", marginTop: 16 }}>
                 <Button type="primary" onClick={onSubmit}>
