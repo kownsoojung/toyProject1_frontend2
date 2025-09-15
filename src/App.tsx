@@ -9,7 +9,7 @@ export default function App() {
   const { data: menus, isLoading, error } = useMenus();
 
   if (isLoading || !menus) return <Spin tip="로딩중..." />;
-  if (error) return <Alert message="에러" description={error.message} type="error" />;
+  if (error) return  <Alert message="에러" description={(error as Error).message} type="error" />;
 
   const router = createAppRouter(menus);
 
