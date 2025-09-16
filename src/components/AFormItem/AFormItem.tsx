@@ -21,6 +21,7 @@ interface AFormItemProps {
   customValidator?: (rule: RuleObject, value: StoreValue) => Promise<void>;
   placeholder?: string;
   maxLengthInput?: number;
+  colspan?:number ;
 }
 
 export default function AFormItem({
@@ -34,6 +35,8 @@ export default function AFormItem({
   customValidator,
   placeholder,
   maxLengthInput,
+  colspan=1
+
 }: AFormItemProps) {
   const appliedRules: Rule[] = [];
 
@@ -61,14 +64,26 @@ export default function AFormItem({
     );
 
   return (
-    <Form.Item
+    <>
+    <td style={{ backgroundColor: "#f5f5f5", border: "1px solid #d9d9d9", padding: 8}}>
+         {required && <span style={{ color: "red", marginRight: 4 }}>*</span>}
+        {label}
+      </td>
+      <td style={{ border: "1px solid #d9d9d9", padding: 8 }} colSpan={colspan}>
+        <Form.Item
       name={name}
       label={label}
       rules={appliedRules}
       help={false} // 아래 help 영역 숨김
-      style={{ marginBottom: 8 }}
+      style={{ marginBottom: 0 }} 
+      noStyle
     >
-      {inputElement}
-    </Form.Item>
+        {inputElement}
+        </Form.Item>
+      </td>
+       
+    </> 
+ 
+
   );
 }

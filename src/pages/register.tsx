@@ -1,25 +1,13 @@
-import { Card, Col, Form, Row, Button, message } from "antd";
+import { Card, Form, Button, message } from "antd";
 import Title from "antd/es/typography/Title";
 import AFormItem from "@/components/AFormItem/AFormItem";
-import styles from "@/components/AFormItem/AFormItem.module.css";
 import { useRef } from "react";
 
 const errorKey = "form-error";
 
-export default function AdminForm() {
+export default function Register() {
   const [form] = Form.useForm();
   const isSubmitting = useRef(false);
-
-  const fieldsConfig = [
-    { name: "username", label: "아이디", required: true, minLength: 3, pattern: "numalpha", placeholder: "아이디 입력" },
-    { name: "password", label: "비밀번호", type: "password", required: true, minLength: 6, pattern: "numalpha", placeholder: "비밀번호 입력" },
-    { name: "email", label: "이메일", required: true, pattern: "email", placeholder: "aaa@bbb.ccc" },
-    { name: "phone", label: "연락처", pattern: "phone", placeholder: "010-1234-5678" },
-    { name: "company", label: "회사명", placeholder: "회사명 입력" },
-    { name: "department", label: "부서", placeholder: "부서 입력" },
-    { name: "position", label: "직급", placeholder: "직급 입력" },
-    { name: "remarks", label: "비고", placeholder: "비고 입력" },
-  ];
 
   const showError = (text: string) => {
     message.open({
@@ -71,30 +59,89 @@ export default function AdminForm() {
           관리자 폼
         </Title>
 
-        <Form
-          form={form}
-          layout="horizontal"
-          labelCol={{ span: 6 }}
-          wrapperCol={{ span: 18 }}
-        >
-          <div
-            className={styles["aform-layout"]}
-            style={{ "--label-width": "120px" } as React.CSSProperties}
-          >
-            <Row gutter={16}>
-              {fieldsConfig.map(field => (
-                <Col span={24} key={field.name}>
-                  <AFormItem {...field} />
-                </Col>
-              ))}
+        <Form form={form} layout="horizontal">
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <colgroup>
+              <col style={{ width: 100 }} /> {/* 첫 번째 컬럼: label */}
+              <col style={{ width: "auto" }} /> {/* 두 번째 컬럼: input */}
+              <col style={{ width: 100 }} /> {/* 첫 번째 컬럼: label */}
+              <col style={{ width: "auto" }} /> {/* 두 번째 컬럼: input */}
+            </colgroup>
+            <tbody>
+              {/* 1번째 row: 아이디 / 비밀번호 */}
+              <tr>
+                <AFormItem
+                  name="username"
+                  label="아이디"
+                  required
+                  minLength={3}
+                  pattern="numalpha"
+                />
+                <AFormItem
+                  name="password"
+                  label="비밀번호"
+                  type="password"
+                  required
+                  minLength={6}
+                  pattern="numalpha"
+                />
+              </tr>
 
-              <Col span={24} style={{ textAlign: "center", marginTop: 16 }}>
-                <Button type="primary" onClick={onSubmit}>
-                  제출
-                </Button>
-              </Col>
-            </Row>
-          </div>
+              {/* 2번째 row: 이메일 */}
+              <tr>
+                <AFormItem
+                  name="email"
+                  label="이메일"
+                  required
+                  pattern="email"
+                  colspan={3} // 한 줄 전체 차지
+                />
+              </tr>
+
+              {/* 3번째 row: 연락처 */}
+              <tr>
+                <AFormItem
+                  name="phone"
+                  label="연락처"
+                  pattern="phone"
+                  colspan={3}
+                />
+              </tr>
+
+              {/* 4번째 row: 회사명 / 부서 */}
+              <tr>
+                <AFormItem
+                  name="company"
+                  label="회사명"
+                />
+                <AFormItem
+                  name="department"
+                  label="부서"
+                />
+              </tr>
+
+              {/* 5번째 row: 직급 / 비고 */}
+              <tr>
+                <AFormItem
+                  name="position"
+                  label="직급"
+                />
+                <AFormItem
+                  name="remarks"
+                  label="비고"
+                />
+              </tr>
+
+              {/* 마지막 row: 제출 버튼 */}
+              <tr>
+                <td colSpan={4} style={{ textAlign: "center", padding: 16 }}>
+                  <Button type="primary" onClick={onSubmit}>
+                    제출
+                  </Button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </Form>
       </Card>
     </div>
