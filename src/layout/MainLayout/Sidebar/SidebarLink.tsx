@@ -1,4 +1,5 @@
-import { ListItem, ListItemButton, ListItemText } from "@mui/material";
+// SidebarLink.tsx
+import { Menu } from "antd";
 import { startTransition } from "react";
 
 interface Props {
@@ -6,22 +7,20 @@ interface Props {
   keyName: string;
 }
 
-const SidebarLink = ({ title, keyName }: Props) => {
+const SidebarLink: React.FC<Props> = ({ title, keyName }) => {
   const handleClick = () => {
     startTransition(() => {
       const event = new CustomEvent("register-tab", {
-        detail: { key: keyName, title, Component: undefined } // 동적 컴포넌트는 나중에 등록 가능
+        detail: { key: keyName, title, path: keyName, Component: undefined }, // 동적 컴포넌트는 나중에 등록 가능
       });
       window.dispatchEvent(event);
     });
   };
 
   return (
-    <ListItem disablePadding>
-      <ListItemButton onClick={handleClick}>
-        <ListItemText primary={title} />
-      </ListItemButton>
-    </ListItem>
+    <Menu.Item key={keyName} title={title} onClick={handleClick}>
+      {title}
+    </Menu.Item>
   );
 };
 

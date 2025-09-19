@@ -1,37 +1,41 @@
 import { create } from "zustand";
 
-export interface TabItem {
-  key: string;        // 라우터 path
-  title: string;      // 탭 제목
-  closable?: boolean; // 닫기 버튼 표시 여부
-}
+type TabItem = {
+  key: string;
+  title: string;
+  Component?: React.ComponentType<any>;
+  closable?: boolean;
+  loading?: boolean;
+};
 
-interface TabState {
+interface TabStore {
   tabs: TabItem[];
   activeKey: string;
   addTab: (tab: TabItem) => void;
-  setActiveKey: (key: string) => void;
   removeTab: (key: string) => void;
-  navigate: (path: string) => void; // MainLayout에서 useNavigate 연결
+  setActive: (key: string) => void;
+  setLoading: (key: string, loading: boolean) => void;
 }
 
-export const useTabStore = create<TabState>((set, get) => ({
-  tabs: [{ key: "/Dashboard", title: "Dashboard", closable: false }],
-  activeKey: "/Dashboard",
-  addTab: (tab) =>
-    set((state) => {
-      if (state.tabs.find((t) => t.key === tab.key)) return state; // 이미 있으면 그대로
-      return { tabs: [...state.tabs, tab] }; // 새 배열 생성
+export const useTabStore = create<TabStore>(set => ({
+  tabs: [{ key: "dashboard", title: "Dashboard", closable: false }],
+  activeKey: "dashboard",
+  addTab: tab =>
+    set(state => ({
+      tabs: state.tabs.find(t => t.key === tab.key) ? state.tabs : [...state.tabs, tab],
+      activeKey: tab.key
+    })),
+  removeTab: key =>
+    set(state => {
+      const newTabs = state.tabs.filter(t => t.key !== key);
+      return {
+        tabs: newTabs,
+        activeKey: state.activeKey === key ? newTabs[newTabs.length - 1]?.key || "" : state.activeKey
+      };
     }),
-  setActiveKey: (key) => set({ activeKey: key }),
-  removeTab: (key) =>
-    set((state) => {
-      const tabs = state.tabs.filter((t) => t.key !== key);
-      let activeKey = state.activeKey;
-      if (activeKey === key) {
-        activeKey = tabs.length ? tabs[tabs.length - 1].key : "/Dashboard";
-      }
-      return { tabs, activeKey };
-    }),
-  navigate: () => {}, // 초기 더미, MainLayout에서 연결
+  setActive: key => set({ activeKey: key }),
+  setLoading: (key, loading) =>
+    set(state => ({
+      tabs: state.tabs.map(t => (t.key === key ? { ...t, loading } : t))
+    }))
 }));

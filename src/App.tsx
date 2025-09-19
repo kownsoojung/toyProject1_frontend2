@@ -8,14 +8,54 @@ import { Alert, Spin } from "antd";
 export default function App() {
   const { data: menus, isLoading, error } = useMenus();
 
-  if (isLoading || !menus) return <Spin tip="로딩중..." />;
-  if (error) return  <Alert message="에러" description={(error as Error).message} type="error" />;
+  // 메뉴 데이터 로딩 중
+  if (isLoading || !menus) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Spin size="large" tip="로딩중..." />
+      </div>
+    );
+  }
+
+  // 에러 발생 시
+  if (error) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Alert
+          message="에러"
+          description={(error as Error).message}
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
 
   const router = createAppRouter(menus);
 
   return (
     <LayoutContextProvider>
-      <Suspense fallback={<div>페이지 로딩중...</div>}>
+      <Suspense
+        fallback={
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh",
+            }}
+          >
+            <Spin size="large" tip="페이지 로딩중..." />
+          </div>
+        }
+      >
         <RouterProvider router={router} />
       </Suspense>
     </LayoutContextProvider>

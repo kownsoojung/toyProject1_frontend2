@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+src/components/AFormItem/AForm.tsx
+src/components/AFormItem/AFormItem.module.css
+src/components/AFormItem/AFormInput.tsx
+src/hooks/useMessage.tsx
+src/pages/register.tsx

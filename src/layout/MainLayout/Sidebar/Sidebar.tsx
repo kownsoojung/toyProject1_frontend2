@@ -1,20 +1,17 @@
-import { Box, Divider, Drawer, List, Toolbar } from "@mui/material";
-import { useLayoutContext } from "@/contexts/LayoutContext";
-import useIsMobile from "@/hooks/useIsMobile";
-import { SIDEBAR_WIDTH } from "../constants";
-import SidebarLink from "./SidebarLink";
-import SidebarSubmenu from "./SidebarSubmenu";
+
 import { useLocation } from "react-router-dom";
 import { useMenuStore } from "@/stores/menuStore";
+import { Divider, List, Menu, MenuProps } from "antd";
+import Sider from "antd/es/layout/Sider";
 const Sidebar = () => {
-  const isMobile = useIsMobile();
-  const { sidebarOpen, setSidebarOpen } = useLayoutContext();
+  
   const menus = useMenuStore((state) => state.menus); 
   const location = useLocation();
 
-  const renderMenuTree = (parentId: number = 0) => {
-    if (!menus) return null;
+  // Antd MenuItem 타입 정의
+  type AntdMenuItem = Required<MenuProps>["items"][number];
 
+  const renderMenuTree = (parentId: number = 0): AntdMenuItem[] => {
     return menus
       .filter(menu => menu.upperId === parentId)
       .map(menu => {
@@ -23,38 +20,39 @@ const Sidebar = () => {
         const defaultOpen = hasChild && childrenMenus.some(c => c.path === location.pathname);
 
         if (hasChild) {
-          return (
-            <SidebarSubmenu key={menu.id} text={menu.name} defaultOpen={defaultOpen}>
-              {renderMenuTree(menu.id)}
-            </SidebarSubmenu>
-          );
+          return {
+            key: menu.id.toString(),
+            label: menu.name,
+            children: renderMenuTree(menu.id),
+          } as AntdMenuItem;
         }
 
         // URL 변경 없이 탭 등록만
-        return (
-          <SidebarLink
-            key={menu.id}
-            keyName={menu.path || `menu-${menu.id}`}
-            title={menu.name}
-          />
-        );
-      });
+        return {
+          key: menu.path || `menu-${menu.id}`,
+          label: menu.name,
+        } as AntdMenuItem;
+      }) || [];
   };
 
+  const defaultOpenKeys = menus
+    ?.filter(
+      (m) =>
+        m.upperId === 0 &&
+        menus.some((c) => c.upperId === m.id && c.path === location.pathname)
+    )
+   .map((m) => m.id.toString()) || [];
+
   return (
-    <Drawer
-      variant={isMobile ? "temporary" : "persistent"}
-      open={sidebarOpen}
-      onClose={() => setSidebarOpen(false)}
-      ModalProps={{ keepMounted: true }}
-      sx={{ "& .MuiDrawer-paper": { boxSizing: "border-box", width: SIDEBAR_WIDTH } }}
-    >
-      <Box>
-        <Toolbar />
-        <Divider />
-        <List>{renderMenuTree()}</List>
-      </Box>
-    </Drawer>
+    <Sider width={240}>
+      <Divider />
+      <Menu
+        mode="inline"
+        selectedKeys={[location.pathname]}
+        defaultOpenKeys={defaultOpenKeys}
+        items={renderMenuTree()}
+      />
+    </Sider>
   );
 };
 
