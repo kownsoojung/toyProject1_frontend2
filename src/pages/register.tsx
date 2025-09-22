@@ -1,9 +1,8 @@
-import { Card, Form, Button } from "antd";
-import Title from "antd/es/typography/Title";
+import { Button, Card, Form } from "antd";
 
-import AFormInput from "@/components/AFormItem/AFormInput";
+
+import { AFormInput } from "@/components/AFormItem";
 import AForm from "@/components/AFormItem/AForm";
-import { relative } from "path";
 import React from "react";
 
 export default function Register() {
@@ -20,16 +19,18 @@ export default function Register() {
   const buttons = [<Button type="primary" htmlType="submit">제출</Button>,<Button type="primary" htmlType="submit">제출2</Button>];
         
   return (
-    <Card style={{ width: 600, padding: 32, borderRadius: 8 }}>
+    <Card style={{ width: 800, padding: 32, borderRadius: 8 }}>
 
       <AForm form={form} type="register" onSubmit={onSubmit} title="회원가입" buttonTop={buttons} messageKey="registerTab" >
 
         <tr>
-          <AFormInput name="username" label="아이디" required minLength={3} />
-          <AFormInput name="password" label="비밀번호" type="password" required minLength={6} />
+          <AFormInput name="username" label="아이디" makeRule={{required:true,}} >
+            <button onClick={() => alert("클릭!")}>버튼</button>
+            </AFormInput>
+          <AFormInput name="password" label="비밀번호" type="password" makeRule={{required:true,}} />
         </tr>
         <tr>
-          <AFormInput name="email" label="이메일" required pattern="email" colspan={3} />
+          <AFormInput name="email" label="이메일" makeRule={{required:true,}} colspan={3} />
         </tr>
         
       </AForm>

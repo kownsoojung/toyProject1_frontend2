@@ -31,6 +31,10 @@ export const rules = {
     message: `${label} 유효한 이메일 형식이 아닙니다.`,
   }),
 
+  patterns: (label: string, regex: RegExp, msg?: string): RuleObject => ({
+    pattern: regex,
+    message: msg || `${label} 형식이 올바르지 않습니다`,
+  }),
   pattern: (label: string, regex: RegExp, msg?: string): RuleObject => ({
     pattern: regex,
     message: msg || `${label} 형식이 올바르지 않습니다`,
