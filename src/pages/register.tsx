@@ -19,9 +19,9 @@ export default function Register() {
   const buttons = [<Button type="primary" htmlType="submit">제출</Button>,<Button type="primary" htmlType="submit">제출2</Button>];
         
   return (
-    <Card style={{ width: 800, padding: 32, borderRadius: 8 }}>
+    <Card style={{ width: 700, padding: 0, borderRadius: 8 }}>
 
-      <AForm form={form} type="register" onSubmit={onSubmit} title="회원가입" buttonTop={buttons} messageKey="registerTab" >
+      <AForm form={form} type="search" onSubmit={onSubmit} title="회원가입" buttonTop={buttons} messageKey="registerTab" colCnt={2} >
 
         <tr>
           <AFormInput name="username" label="아이디" makeRule={{required:true,}} >
