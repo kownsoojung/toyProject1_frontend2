@@ -25,7 +25,7 @@ export default function Register() {
 
         <tr>
           <AFormInput name="username" label="아이디" makeRule={{required:true,}} >
-            <button onClick={() => alert("클릭!")}>버튼</button>
+            <Button htmlType="button" onClick={()=> alert(1)} >버튼</Button>
             </AFormInput>
           <AFormInput name="password" label="비밀번호" type="password" makeRule={{required:true,}} />
         </tr>
