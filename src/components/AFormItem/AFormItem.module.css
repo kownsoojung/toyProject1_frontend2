@@ -47,3 +47,10 @@
 .search table { width: 100%; border-collapse: collapse; }
 .search tbody tr th { padding: 8px; }
 .search tbody tr td { padding: 8px; }
+/* 모든 message notice의 애니메이션 제거 */
+.ant-message {
+  transition: none !important;
+}
+.ant-message-notice {
+  animation: none !important;
+}

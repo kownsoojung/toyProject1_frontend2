@@ -8,7 +8,7 @@ import React from "react";
 export default function Register() {
   const [form] = Form.useForm();
   const [spinning, setSpinning] = React.useState(false);
-
+  form.focusField
   const onSubmit = async (values: any) => {
     console.log("폼 제출 성공:", values);
     // API 호출 등 추가 로직
@@ -16,23 +16,23 @@ export default function Register() {
     let ptg = -10;
 
   };
-  const buttons = [<Button type="primary" htmlType="submit">제출</Button>,<Button type="primary" htmlType="submit">제출2</Button>];
+  const buttons = [<Button key="submit" type="primary" htmlType="submit">제출</Button>,<Button key="reset" danger onClick={() => form.resetFields()}>초기화</Button>];
         
   return (
     <Card style={{ width: 700, padding: 0, borderRadius: 8 }}>
 
       <AForm form={form} type="search" onSubmit={onSubmit} title="회원가입" buttonTop={buttons} messageKey="registerTab" colCnt={2} >
-
-        <tr>
-          <AFormInput name="username" label="아이디" makeRule={{required:true,}} >
-            <Button htmlType="button" onClick={()=> alert(1)} >버튼</Button>
-            </AFormInput>
-          <AFormInput name="password" label="비밀번호" type="password" makeRule={{required:true,}} />
+        <tr key="1">
+          <AFormInput key="username" name="username" label="아이디" makeRule={{required:true,}}  
+            extraContent={<Button htmlType="button" onClick={()=> alert(1)} >버튼</Button>}
+          >
+            
+          </AFormInput>
+          <AFormInput key="password" name="password" label="비밀번호" type="password" makeRule={{required:true,}} />
         </tr>
-        <tr>
-          <AFormInput name="email" label="이메일" makeRule={{required:true,}} colspan={3} />
+        <tr key="2">
+          <AFormInput key="email" name="email" label="이메일" makeRule={{required:true,}} colspan={3} />
         </tr>
-        
       </AForm>
     </Card>
   );

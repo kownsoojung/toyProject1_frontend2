@@ -2,14 +2,22 @@ import { RuleObject } from "antd/es/form";
 import { StoreValue } from "rc-field-form/lib/interface";
 
 // 미리 정의된 패턴 타입
-export type PatternType = "numalpha" | "email" | "phone";
+export type PatternType =
+  | "numalpha"
+  | "email"
+  | "phone"
+  | "korean"
+  | "url"
+  | "onlyNumber";
 
 export const patterns: Record<PatternType, { regex: RegExp; message: string }> = {
   numalpha: { regex: /^[A-Za-z0-9]+$/, message: "{label}은(는) 숫자/영문 조합만 가능합니다" },
-  email: { regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "{label} 형식이 올바르지 않습니다" },
-  phone: { regex: /^\d{2,3}-\d{3,4}-\d{4}$/, message: "{label} 형식이 올바르지 않습니다" },
+  email:    { regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "{label} 형식이 올바르지 않습니다" },
+  phone:    { regex: /^\d{2,3}-\d{3,4}-\d{4}$/, message: "{label} 형식이 올바르지 않습니다" },
+  korean:   { regex: /^[가-힣\s]+$/, message: "{label}은(는) 한글만 입력 가능합니다" },
+  url:      { regex: /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)([\/?].*)?$/, message: "{label} URL 형식이 올바르지 않습니다" },
+  onlyNumber: { regex: /^\d+$/, message: "{label}은(는) 숫자만 입력 가능합니다" },
 };
-
 export const rules = {
   required: (label: string): RuleObject => ({
     required: true,
@@ -38,7 +46,14 @@ export const rules = {
   custom: (validator: (rule: RuleObject, value: StoreValue) => Promise<void>): RuleObject => ({
     validator,
   }),
-
+  strongPassword: (label: string): RuleObject => ({
+    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-={}[\]:;"'<>,.?/]).{8,}$/,
+    message: `${label}은(는) 영문 대·소문자, 숫자, 특수문자를 포함해 8자 이상이어야 합니다.`,
+  }),
+  numberRange: (label: string, min: number, max: number): RuleObject => ({
+    type: "number", min, max,
+    message: `${label}은(는) ${min} 이상 ${max} 이하의 값이어야 합니다`,
+  }),
   /** 
    * patternType 사용: 미리 정의된 패턴 가져오기 
    * 예: rules.patternType("이메일", "email")
