@@ -2,7 +2,7 @@ import { makeRules, MakeRulesOptions } from "@/validation/makeRules";
 import Form, { FormItemProps } from "antd/es/form";
 import React from "react";
 
-export interface BaseFormItemProps extends FormItemProps {
+export interface BaseFormItemProps extends Omit<FormItemProps, "name" | "label" | "children" | "status"> {
   name: string;
   label: string;
   makeRule?: MakeRulesOptions;
@@ -14,13 +14,11 @@ export interface BaseFormItemProps extends FormItemProps {
 export const AFormBaseItem: React.FC<BaseFormItemProps> = ({
   name,
   label,
-  required,
   colspan = 1,
   children,
   makeRule,
   dependencies,
   noLabel=false,
-  ...rest
 }) => {
   if ( noLabel == true ) colspan +=1;
   return (
@@ -39,7 +37,6 @@ export const AFormBaseItem: React.FC<BaseFormItemProps> = ({
           help={false}
           noStyle
           dependencies={dependencies}
-          {...rest}
         >
           {typeof children === "function" ? children : children}
         </Form.Item>

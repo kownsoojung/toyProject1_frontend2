@@ -28,6 +28,7 @@ export const AFormTextBox: React.FC<TextBoxItemProps> = ({
       colspan={colspan}
     >
       {inputElement}
+      
     </AFormBaseItem>
   );
 };
