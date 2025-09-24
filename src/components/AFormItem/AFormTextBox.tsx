@@ -14,8 +14,6 @@ export const AFormTextBox: React.FC<TextBoxItemProps> = ({
   name,
   label,
   makeRule,
-  colspan,
-  children,
   rows=3,
   
 }) => {  
@@ -25,7 +23,6 @@ export const AFormTextBox: React.FC<TextBoxItemProps> = ({
       name={name}
       label={label}
       makeRule={makeRule}
-      colspan={colspan}
     >
       {inputElement}
       

@@ -6,27 +6,21 @@ export interface BaseFormItemProps extends Omit<FormItemProps, "name" | "label" 
   name: string;
   label: string;
   makeRule?: MakeRulesOptions;
-  colspan?: number;
   children?: React.ReactNode | ((formValues: any) => React.ReactNode);
-  noLabel?:boolean;
   validateTrigger?: FormItemProps["validateTrigger"];
   validateFirst?: boolean;
   shouldUpdate?: FormItemProps["shouldUpdate"];
   tooltip?: FormItemProps["tooltip"];
   extra?: React.ReactNode;
   hasFeedback?: boolean;
-  hidden?:boolean;  
-  extraContent?: React.ReactNode;
 }
 
 export const AFormBaseItem: React.FC<BaseFormItemProps> = ({
   name,
   label,
-  colspan = 1,
   children,
   makeRule = {},
-  dependencies,
-  noLabel=false,
+  dependencies,  
   validateTrigger="onBlur",
   validateFirst,
   shouldUpdate,
@@ -34,23 +28,10 @@ export const AFormBaseItem: React.FC<BaseFormItemProps> = ({
   extra,
   hasFeedback,
   hidden=false,
-  extraContent
 }) => {
-  if ( noLabel == true ) colspan +=1;
+  
   return (
-    <React.Fragment key={name}>
-      { !noLabel &&
-        <th>
-            {hidden == false && 
-              <>
-                {makeRule.required && <span style={{ color: "red", marginRight: 4 }}>*</span>}
-                {label}
-              </>
-            }
-        </th>
-      }
-      <td colSpan={colspan}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        //<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <Form.Item
           name={name}
           label={label}
@@ -68,9 +49,6 @@ export const AFormBaseItem: React.FC<BaseFormItemProps> = ({
         >
           {typeof children === "function" ? children : children}
         </Form.Item>
-        {typeof extraContent === "function" ? extraContent : extraContent}
-        </div>
-      </td>
-    </React.Fragment>
+        //</div>
   );
 };
