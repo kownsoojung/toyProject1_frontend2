@@ -1,18 +1,41 @@
+import { apiInstance } from "@/api/baseApi";
 import { useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
+import axios, { AxiosRequestConfig } from "axios";
 
-export function useAutoQuery<T = unknown>(
-  key: string,
-  endpoint: string, // 반드시 "/api/..." 형태
-  options?: UseQueryOptions<T, Error, T>
-): UseQueryResult<T> {
+/**
+ * 공통 useQuery 훅 타입 정의
+ */
+export interface OpenApiQueryOptions<T> {
+  queryKey: string | readonly unknown[];       // React Query Key
+  url: string;                                  // OpenAPI URL
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; // HTTP method (기본 GET)
+  params?: any;                                 // GET 쿼리 파라미터
+  data?: any;                                   // POST/PUT 요청 Body
+  config?: AxiosRequestConfig;                  // 추가 Axios 옵션
+  options?: Omit<UseQueryOptions<T, Error>, 'queryKey' | 'queryFn'>;
+  
+}
+
+export function UseAutoQuery<T>({
+  queryKey,
+  url,
+  method = 'GET',
+  params,
+  data,
+  config,
+  options={enabled:true, gcTime:0, staleTime: 0,refetchOnMount: 'always',},
+  
+}: OpenApiQueryOptions<T>): UseQueryResult<T, Error> {
+
   const fetcher = async (): Promise<T> => {
-    const res = await fetch(endpoint, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+    const response = await apiInstance.request<T>({
+      url,
+      method,
+      params: method === 'GET' ? params : undefined,
+      data: method !== 'GET' ? data : undefined,
     });
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    return res.json();
+    return response.data;
   };
 
-  return useQuery<T, Error>({ queryKey: [key], queryFn: fetcher, ...options });
+  return useQuery<T, Error>({ queryKey: [queryKey], queryFn: fetcher, ...options });
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, lazy, Suspense } from "react";
-import { Layout, Menu, Tabs, Breadcrumb } from "antd";
+import { Layout, Menu, Tabs } from "antd";
 import type { MenuProps, TabsProps } from "antd";
 import { useMenuStore } from "@/stores/menuStore";
 import { SIDEBAR_WIDTH } from "./constants";
@@ -79,7 +79,15 @@ export default function MainLayout() {
       <Header></Header>
 
       <Layout style={{ paddingTop: 64 }}>
-        <Sider width={SIDEBAR_WIDTH} style={{ background: "#fff" }}>
+        <Sider
+          width={SIDEBAR_WIDTH}
+          style={{
+            background: "#fff",
+            overflowY: "auto",
+            height: "calc(100vh - 64px)", // Header 높이만큼 제외
+            
+          }}
+        >
           <Menu
             mode="inline"
             items={renderMenuTree()}
@@ -89,7 +97,7 @@ export default function MainLayout() {
         </Sider>
 
         <Layout>
-          <Content style={{ padding: 8, background: "#f5f5f5", minHeight: "calc(100vh - 64px - 48px)" }}>
+          <Content style={{ padding: 8, background: "#f5f5f5", minHeight: "calc(100vh - 64px )" }}>
             <Tabs
               type="editable-card"
               hideAdd
@@ -100,14 +108,14 @@ export default function MainLayout() {
             >
               {tabs.map((tab) => (
                 <Tabs.TabPane key={tab.key} tab={tab.title} closable={tab.closable}>
-                  <div style={{ height: "calc(100vh - 64px - 48px - 16px - 40px)", overflowY: "auto", background: "#fff", border: "1px solid #f0f0f0", padding: 8 }}>
+                  <div style={{ height: "calc(100vh - 64px  - 16px - 40px)", overflowY: "auto", background: "#fff", border: "1px solid #f0f0f0", padding: 8 }}>
                     {tab.component}
                   </div>
                 </Tabs.TabPane>
               ))}
             </Tabs>
           </Content>
-          <Footer style={{ textAlign: "center", height: 48 }}>©2025 My App</Footer>
+          {/* <Footer style={{ textAlign: "center", height: 48 }}>©2025 My App</Footer>*/}
         </Layout>
       </Layout>
     </Layout>

@@ -2,19 +2,22 @@
   "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
   "spaces": 2,
   "generator-cli": {
-    "version": "7.14.0"
+    "version": "7.15.0"
   },
-  "generatorName": "typescript-axios",
-  "modelPackage": "src/generate/model",
-  "apiPackage": "src/generate/api",
+  "modelPackage": "models",
+  "apiPackage": "apis",
   "supportsES6": true,
-  "withNodeImports": false,
-  "useSingleRequestParameter": true,
-  "enumNameSuffix": "",
   "withSeparateModelsAndApi": true,
-
-  "axios": true,
   "npmName": "my-api-client",
   "npmVersion": "1.0.0",
-  "disallowAdditionalPropertiesIfNotPresent": false
+  "prettier": true,
+  "strictNullChecks": true,
+  "enumPropertyNaming": "UPPERCASE",
+  "generateAliasAsModel": false,
+  "useSingleRequestParameter": true,
+  "withInterfaces": true,
+  "optionalEmitDefaultValues": true,
+  "typescriptThreePlus": true,
+  "useDateTime": false,
+  "enablePostProcessFile": true
 }

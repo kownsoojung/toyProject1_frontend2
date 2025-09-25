@@ -1,7 +1,9 @@
 import { useEffect } from "react";
-import { useAutoQuery } from "./useAutoQuery";
-import { MenuAgentDTO, MenuControllerApi } from "../generate";
+
+
 import { Menu, useMenuStore } from "../stores/menuStore";
+import { MenuAgentDTO, MenuControllerApi } from "@/api/generated";
+import { apiInstance } from "@/api/baseApi";
 // DTO → 내부 모델로 변환 함수
 function mapMenu(dto: MenuAgentDTO): Menu {
   return {
@@ -19,13 +21,13 @@ function mapMenu(dto: MenuAgentDTO): Menu {
 
 export function useMenus() {
   const setMenus = useMenuStore((state) => state.setMenus);
-  const menuApi = new MenuControllerApi();
   
   useEffect(() => {
     
     const fetchMenus = async () => {
       try {
-        const res = await menuApi.getList();       // MenuControllerApi에서 getList 호출
+        const res = await apiInstance.get<MenuAgentDTO[]>("/api/menu/getList"); // OpenAPI 경로
+
         const menus = res.data.map(mapMenu);       // DTO → 내부 모델 변환
         setMenus(menus);                           // Zustand store에 저장
       } catch (err) {
