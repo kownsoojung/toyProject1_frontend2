@@ -40,13 +40,14 @@
   text-align: center;
 }
 
-.register table tbody tr th { background-color: #f5f5f5; border: 1px solid #d9d9d9; padding: 8px;}
-.register table tbody tr td { border: 1px solid #d9d9d9; padding: 8px; display:flex; gap:8px; align-items:center;}
+.register table tbody tr th { background-color: #f5f5f5; border: 1px solid #d9d9d9; padding: 5px;}
+.register table tbody tr td { border: 1px solid #d9d9d9; padding: 5px; }
+.register table tbody tr td div.contains, .search tbody tr td div.contains{ display:flex; gap:8px; align-items:center; }
 
 .search { border: 1px solid black; border-radius: 8px; overflow: hidden; background-color: #f5f5f5; }
 .search table { width: 100%; border-collapse: collapse; }
-.search tbody tr th { padding:8px;  }
-.search tbody tr td { padding:8px; display:flex; gap:8px; align-items:center; }
+.search tbody tr th { padding:5px;  }
+.search tbody tr td { padding:5px; display:flex; gap:8px; align-items:center; }
 
 /* 모든 message notice의 애니메이션 제거 */
 .ant-message {
@@ -57,3 +58,4 @@
 }
 
 .required::before { content: "*"; color: #cf1322; margin-right: 4px; font-weight: bold; }
+.txtShowCount {padding-bottom: 22px !important}

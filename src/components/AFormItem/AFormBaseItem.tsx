@@ -3,7 +3,7 @@ import Form, { FormItemProps } from "antd/es/form";
 import React from "react";
 
 export interface BaseFormItemProps extends Omit<FormItemProps, "name" | "label" | "children" | "status"> {
-  name: string;
+  name: string | number | (string | number)[];
   label: string;
   makeRule?: MakeRulesOptions;
   children?: React.ReactNode | ((formValues: any) => React.ReactNode);
