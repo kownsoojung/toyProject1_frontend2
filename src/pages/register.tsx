@@ -1,4 +1,4 @@
-import { Button, Card, Form } from "antd";
+import { Button, Card, Form, Table } from "antd";
 
 
 import { AFormInput } from "@/components/AFormItem";
@@ -19,6 +19,7 @@ export default function Register() {
   const buttons = [<Button key="submit" type="primary" htmlType="submit">제출</Button>,<Button key="reset" danger onClick={() => form.resetFields()}>초기화</Button>];
         
   return (
+    <>
     <Card style={{ width: 700, padding: 0, borderRadius: 8 }}>
 
       <AForm form={form} type="register" onSubmit={onSubmit} title="회원가입" buttonBottom={buttons} messageKey="registerTab" colCnt={2} labelSize={90} >
@@ -34,9 +35,7 @@ export default function Register() {
           <td>
             <AFormInput  name="password" label="비밀번호" type="password" makeRule={{required:true,}} />
           </td>
-          
         </tr>
-
         <tr>
           <th>이메일</th>
           <td colSpan={3}><AFormInput  name="email" label="이메일" makeRule={{required:true,}} /></td>          
@@ -49,7 +48,7 @@ export default function Register() {
           <th>체크박스</th>
           <td><AFormCheckbox name="checkbox" label="체크박스" value="Y"/></td>       
           <th>날짜</th>
-          <td><AFormDate name="checkbox" label="체크박스" showTime="min"  step={5} /></td>       
+          <td><AFormDate name="checkbox" label="체크박스" showTime="min" timeOnly step={5} /></td>       
         </tr>
         <tr>
           <th>날짜시작끝</th>
@@ -59,5 +58,23 @@ export default function Register() {
         </tr>
       </AForm>
     </Card>
+    <Card style={{ height: 300, display: 'flex', flexDirection: 'column' }}>
+      <Table 
+        dataSource={[]}
+        pagination={{
+          total: 10,
+          pageSizeOptions : ["10", "20", "50", "100"],
+          showSizeChanger: true,
+          showQuickJumper: true,
+          size: "small",
+        }}
+        scroll={{ y: 300 - 55 - 40 }} // Header + Pagination 높이 포함
+        style={{ flex: 1 }}
+        >
+        <Table.Column key="age" title="age" dataIndex="age" width={100}/>
+        <Table.Column key="name" title="name" dataIndex="name" />
+      </Table>
+    </Card>
+    </>
   );
 }
