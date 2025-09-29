@@ -20,6 +20,7 @@ import {
   Paper,
 } from "@mui/material";
 import { AFormTextField } from "@/components/AFormItem/AFormTextField";
+import { AFormDate } from "@/components/AFormItem/AFormDate";
 
 export default function RegisterTableForm() {
   const methods = useForm({
@@ -119,18 +120,7 @@ export default function RegisterTableForm() {
                   </TableCell>
                   <TableCell className="form-th">날짜</TableCell>
                   <TableCell>
-                    <AFormTextField
-                      name="date"
-                      label="날짜"
-                      type="datetime-local"
-                      size="small"
-                      slotProps={{
-                        input: {
-                          min: "2025-01-01T00:00",
-                          max: "2025-12-31T23:59",
-                        } as any, // <-- 타입 단언
-                      }}
-                    />
+                    <AFormDate label="날짜" name="day"/>
                   </TableCell>
                 </TableRow>
 
