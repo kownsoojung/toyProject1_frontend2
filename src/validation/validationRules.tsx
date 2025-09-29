@@ -1,7 +1,3 @@
-import { RuleObject } from "antd/es/form";
-import { StoreValue } from "rc-field-form/lib/interface";
-
-// 미리 정의된 패턴 타입
 export type PatternType =
   | "numalpha"
   | "email"
@@ -18,49 +14,14 @@ export const patterns: Record<PatternType, { regex: RegExp; message: string }> =
   url:      { regex: /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)([\/?].*)?$/, message: "{label} URL 형식이 올바르지 않습니다" },
   onlyNumber: { regex: /^\d+$/, message: "{label}은(는) 숫자만 입력 가능합니다" },
 };
+
 export const rules = {
-  required: (label: string): RuleObject => ({
-    required: true,
-    message: `${label}을(를) 입력해주세요`,
-  }),
-
-  minLength: (label: string, length: number): RuleObject => ({
-    min: length,
-    message: `${label}은(는) 최소 ${length}자 이상이어야 합니다`,
-  }),
-
-  maxLength: (label: string, length: number): RuleObject => ({
-    max: length,
-    message: `${label}은(는) 최대 ${length}자 이하이어야 합니다`,
-  }),
-
-  email: (label: string): RuleObject => ({
-    type: "email",
-    message: `${label} 유효한 이메일 형식이 아닙니다.`,
-  }),
-  pattern: (label: string, regex: RegExp, msg?: string): RuleObject => ({
-    pattern: regex,
-    message: msg || `${label} 형식이 올바르지 않습니다`,
-  }),
-
-  custom: (validator: (rule: RuleObject, value: StoreValue) => Promise<void>): RuleObject => ({
-    validator,
-  }),
-  strongPassword: (label: string): RuleObject => ({
-    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-={}[\]:;"'<>,.?/]).{8,}$/,
-    message: `${label}은(는) 영문 대·소문자, 숫자, 특수문자를 포함해 8자 이상이어야 합니다.`,
-  }),
-  numberRange: (label: string, min: number, max: number): RuleObject => ({
-    type: "number", min, max,
-    message: `${label}은(는) ${min} 이상 ${max} 이하의 값이어야 합니다`,
-  }),
-  /** 
-   * patternType 사용: 미리 정의된 패턴 가져오기 
-   * 예: rules.patternType("이메일", "email")
-   */
-  patternType: (label: string, type: PatternType): RuleObject => {
+  required: (label: string) => ({ required: true, message: `${label}을(를) 입력해주세요` }),
+  minLength: (label: string, length: number) => ({ min: length, message: `${label}은(는) 최소 ${length}자 이상이어야 합니다` }),
+  maxLength: (label: string, length: number) => ({ max: length, message: `${label}은(는) 최대 ${length}자 이하이어야 합니다` }),
+  patternType: (label: string, type: PatternType) => {
     const patternInfo = patterns[type];
     if (!patternInfo) throw new Error(`Pattern type "${type}"이(가) 정의되어 있지 않습니다.`);
-    return { pattern: patternInfo.regex, message: patternInfo.message.replace("{label}", label) };
+    return { value: patternInfo.regex, message: patternInfo.message.replace("{label}", label) };
   },
 };

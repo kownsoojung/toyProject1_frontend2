@@ -1,5 +1,10 @@
 import { useState, ReactNode, Fragment } from "react";
-import { Collapse, ListItemButton, ListItemText, List } from "@mui/material";
+import {
+  Collapse,
+  ListItemButton,
+  ListItemText,
+  List,
+} from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
 interface Props {
@@ -8,19 +13,28 @@ interface Props {
   defaultOpen?: boolean;
 }
 
-const SidebarSubmenu = ({ text, children, defaultOpen = false }: Props) => {
+const SidebarSubmenu: React.FC<Props> = ({ text, children, defaultOpen = false }) => {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
     <Fragment>
-      <ListItemButton onClick={() => setOpen(prev => !prev)}>
+      <ListItemButton
+        onClick={() => setOpen((prev) => !prev)}
+        sx={{
+          pl: 2,
+          "&.Mui-selected": {
+            backgroundColor: "action.selected",
+            fontWeight: 600,
+          },
+        }}
+      >
         <ListItemText primary={text} />
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
 
       <Collapse in={open} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding sx={{ pl: 2 }}>
-          {children} {/* 재귀된 하위 메뉴 */}
+        <List component="div" disablePadding sx={{ pl: 3 }}>
+          {children} {/* 재귀 하위 메뉴 */}
         </List>
       </Collapse>
     </Fragment>

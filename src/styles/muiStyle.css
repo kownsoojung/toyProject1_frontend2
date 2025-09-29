@@ -1,0 +1,12 @@
+.form-th {
+  font-weight: bold;
+  text-align: left;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.form-th.required::before {
+  content: "* ";
+  color: red;
+  font-weight: bold;
+}

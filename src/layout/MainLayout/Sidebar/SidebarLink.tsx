@@ -1,6 +1,5 @@
-// SidebarLink.tsx
-import { Menu } from "antd";
 import { startTransition } from "react";
+import { ListItemButton, ListItemText } from "@mui/material";
 
 interface Props {
   title: string;
@@ -11,16 +10,16 @@ const SidebarLink: React.FC<Props> = ({ title, keyName }) => {
   const handleClick = () => {
     startTransition(() => {
       const event = new CustomEvent("register-tab", {
-        detail: { key: keyName, title, path: keyName, Component: undefined }, // 동적 컴포넌트는 나중에 등록 가능
+        detail: { key: keyName, title, path: keyName, Component: undefined },
       });
       window.dispatchEvent(event);
     });
   };
 
   return (
-    <Menu.Item key={keyName} title={title} onClick={handleClick}>
-      {title}
-    </Menu.Item>
+    <ListItemButton key={keyName} onClick={handleClick}>
+      <ListItemText primary={title} />
+    </ListItemButton>
   );
 };
 

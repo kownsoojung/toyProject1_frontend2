@@ -15,7 +15,7 @@ interface LayoutContext {
 export const LayoutContext = createContext<LayoutContext | null>(null);
 
 export default function LayoutContextProvider({ children }: PropsWithChildren) {
-    const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
     return (
         <LayoutContext.Provider
             value={{

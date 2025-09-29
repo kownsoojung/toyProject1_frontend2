@@ -1,54 +1,56 @@
+import React, { ReactElement, ReactNode } from "react";
+import { Controller, useFormContext } from "react-hook-form";
+import { Tooltip } from "@mui/material";
 import { makeRules, MakeRulesOptions } from "@/validation/makeRules";
-import Form, { FormItemProps } from "antd/es/form";
-import React from "react";
 
-export interface BaseFormItemProps extends Omit<FormItemProps, "name" | "label" | "children" | "status"> {
-  name: string | number | (string | number)[];
+export interface AFormBaseItemProps {
+  name: string;
   label: string;
   makeRule?: MakeRulesOptions;
-  children?: React.ReactNode | ((formValues: any) => React.ReactNode);
-  validateTrigger?: FormItemProps["validateTrigger"];
-  validateFirst?: boolean;
-  shouldUpdate?: FormItemProps["shouldUpdate"];
-  tooltip?: FormItemProps["tooltip"];
-  extra?: React.ReactNode;
-  hasFeedback?: boolean;
+  children: (fieldProps: any, error?: string) => ReactElement;
+  hidden?: boolean;
 }
 
-export const AFormBaseItem: React.FC<BaseFormItemProps> = ({
+export const AFormBaseItem: React.FC<AFormBaseItemProps> = ({
   name,
   label,
-  children,
   makeRule = {},
-  dependencies,  
-  validateTrigger="onBlur",
-  validateFirst,
-  shouldUpdate,
-  tooltip,
-  extra,
-  hasFeedback,
-  hidden=false,
+  children,
+  hidden = false,
 }) => {
-  
+  const { control, formState } = useFormContext();
+  if (hidden) return null;
+
   return (
-        //<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <Form.Item
-          name={name}
-          label={label}
-          rules={makeRules(label,makeRule)}
-          help={false}
-          noStyle
-          dependencies={dependencies}
-          validateTrigger={validateTrigger}
-          validateFirst={validateFirst}
-          shouldUpdate={shouldUpdate}
-          tooltip={tooltip}
-          extra={extra}
-          hasFeedback={hasFeedback}
-          hidden={hidden}
-        >
-          {typeof children === "function" ? children : children}
-        </Form.Item>
-        //</div>
+    <Controller
+      name={name}
+      control={control}
+      rules={makeRules(label, makeRule)}
+      render={({ field, fieldState }) => {
+        const showError = formState.isSubmitted && fieldState.error;
+        const errorMessage = showError ? fieldState.error?.message : undefined;
+
+        return (
+          <Tooltip
+            title={errorMessage || ""}
+            placement="top-end"
+            arrow={false}
+            open={!!errorMessage}
+            disableInteractive
+            slotProps={{
+              popper: {
+                modifiers: [
+                  { name: "flip", enabled: false },
+                  { name: "offset", options: { offset: [0, -13] } },
+                  { name: "preventOverflow", options: { padding: 8 } },
+                ],
+              },
+            }}
+          >
+            {children(field, errorMessage)}
+          </Tooltip>
+        );
+      }}
+    />
   );
 };
