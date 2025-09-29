@@ -21,17 +21,17 @@ export const AFormDate: React.FC<AFormDateProps> = ({
   msize = 0,
   ...rest
 }) => {
-   const { control } = useFormContext();
-
+  
   return (
     <AFormBaseItem name={name} label={label} makeRule={makeRule}>
       {(field, error) => (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
           <DatePicker
             {...field}
             {...rest}
             value={field.value || null}
             onChange={(newValue) => field.onChange(newValue)}
+            format="YYYY-MM-DD"
             slotProps={{
               textField: {
                 error: !!error,
