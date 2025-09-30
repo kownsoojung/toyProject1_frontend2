@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export type PatternType =
   | "numalpha"
   | "email"
@@ -24,4 +26,19 @@ export const rules = {
     if (!patternInfo) throw new Error(`Pattern type "${type}"이(가) 정의되어 있지 않습니다.`);
     return { value: patternInfo.regex, message: patternInfo.message.replace("{label}", label) };
   },
+
+  // 날짜 범위 검증 추가
+  dateRange: (label: string, minDate?: string, maxDate?: string) => ({
+    validate: (value: any) => {
+      if (!value) return true; // 값 없으면 통과
+      const dayValue = dayjs(value);
+      if (minDate && dayValue.isBefore(dayjs(minDate))) {
+        return `${label}은(는) ${minDate} 이후여야 합니다`;
+      }
+      if (maxDate && dayValue.isAfter(dayjs(maxDate))) {
+        return `${label}은(는) ${maxDate} 이전이어야 합니다`;
+      }
+      return true;
+    },
+  }),
 };

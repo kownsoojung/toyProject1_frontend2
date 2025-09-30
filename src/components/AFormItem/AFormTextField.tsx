@@ -4,8 +4,6 @@ import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 
 // TextFieldProps 전체 상속, 단 name과 label은 제거
 interface AFormTextFieldProps extends Omit<TextFieldProps, "name" | "label">, Omit<AFormBaseItemProps, "children"> {
-  name: string;
-  label: string;
   msize?: number;
 }
 

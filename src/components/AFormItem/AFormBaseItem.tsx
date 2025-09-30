@@ -9,6 +9,7 @@ export interface AFormBaseItemProps {
   makeRule?: MakeRulesOptions;
   children: (fieldProps: any, error?: string) => ReactElement;
   hidden?: boolean;
+  disabled?:boolean;
 }
 
 export const AFormBaseItem: React.FC<AFormBaseItemProps> = ({
@@ -17,6 +18,7 @@ export const AFormBaseItem: React.FC<AFormBaseItemProps> = ({
   makeRule = {},
   children,
   hidden = false,
+  disabled=false,
 }) => {
   const { control, formState } = useFormContext();
   if (hidden) return null;
@@ -26,10 +28,11 @@ export const AFormBaseItem: React.FC<AFormBaseItemProps> = ({
       name={name}
       control={control}
       rules={makeRules(label, makeRule)}
+      
       render={({ field, fieldState }) => {
         const showError = formState.isSubmitted && fieldState.error;
         const errorMessage = showError ? fieldState.error?.message : undefined;
-
+        const fieldProps = { ...field, disabled };
         return (
           <Tooltip
             title={errorMessage || ""}
@@ -47,7 +50,7 @@ export const AFormBaseItem: React.FC<AFormBaseItemProps> = ({
               },
             }}
           >
-            {children(field, errorMessage)}
+            {children(fieldProps, errorMessage)}
           </Tooltip>
         );
       }}

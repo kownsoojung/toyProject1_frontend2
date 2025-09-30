@@ -1,5 +1,6 @@
 // src/theme.ts
 import { createTheme } from "@mui/material/styles";
+import "@mui/x-date-pickers/themeAugmentation";
 
 const theme = createTheme({
   components: {
@@ -11,7 +12,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
-            height: "auto", // multiline이면 auto
+            height: "auto",  // multiline이면 auto
             padding: 0,
             "&.MuiInputBase-multiline": {
                 height: "auto",
@@ -31,7 +32,21 @@ const theme = createTheme({
         },
       },
     },
-
+    // DatePicker input 스타일
+    MuiPickersOutlinedInput: {
+      styleOverrides: {
+        root: {
+          minHeight: 28,
+          padding: "0 8px",
+          fontSize: 13,
+          "& .MuiPickersSectionList-root": {
+            minHeight: 28,
+            fontSize: 13,
+            lineHeight: "28px",
+          },
+        },
+      },
+    },
     // Button 기본 스타일
     MuiButton: {
       defaultProps: {
@@ -85,6 +100,7 @@ const theme = createTheme({
         },
       },
     },
+    
   },
 });
 

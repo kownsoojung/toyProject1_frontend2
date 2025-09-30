@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { AFormTextField } from "@/components/AFormItem/AFormTextField";
 import { AFormDate } from "@/components/AFormItem/AFormDate";
+import { AFormDateRange } from "@/components/AFormItem/AFormDateRange";
 
 export default function RegisterTableForm() {
   const methods = useForm({
@@ -120,7 +121,7 @@ export default function RegisterTableForm() {
                   </TableCell>
                   <TableCell className="form-th">날짜</TableCell>
                   <TableCell>
-                    <AFormDate label="날짜" name="day"/>
+                    <AFormDate label="날짜" name="day" formatType="date" step={30} max="20250930" min="20250903" />
                   </TableCell>
                 </TableRow>
 
@@ -133,6 +134,17 @@ export default function RegisterTableForm() {
                       label="조회일자"
                       type="date"
                       size="small"
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="form-th">조회일자</TableCell>
+                  <TableCell colSpan={3}>
+                    <AFormDateRange
+                      name="searchDate"
+                      label="조회일자"
+                      startName="조회시작일자"
+                      endName="조회종료일자"
                     />
                   </TableCell>
                 </TableRow>

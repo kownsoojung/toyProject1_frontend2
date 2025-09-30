@@ -9,7 +9,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./styles/theme.tsx";
-
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const queryClient = new QueryClient();
 const root = ReactDOM.createRoot(document.getElementById("root")!);
@@ -19,9 +20,11 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        
-          <App />
-        
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
+         
+            <App />
+         
+        </LocalizationProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
