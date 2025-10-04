@@ -1,6 +1,6 @@
 import { Radio } from "antd";
 import { AFormBaseItem, BaseFormItemProps } from "./AFormBaseItem";
-import { MakeRulesOptions } from "@/validation/makeRules";
+import { MakeRulesOptions } from "@/validation/Validation";
 import { CodeItem, useCode } from "@/hooks/useCode";
 import { SiteCodeSearchDTO } from "@/api/generated";
 

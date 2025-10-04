@@ -10,12 +10,11 @@ interface AFormTextFieldProps extends Omit<TextFieldProps, "name" | "label">, Om
 export const AFormTextField: React.FC<AFormTextFieldProps> = ({
   name,
   label,
-  makeRule = {},
   msize = 0,
   ...rest
 }) => {
   return (
-    <AFormBaseItem name={name} label={label} makeRule={makeRule}>
+    <AFormBaseItem name={name} label={label} >
       {(field, error) => (
         <TextField
           {...field}

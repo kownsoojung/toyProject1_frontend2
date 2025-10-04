@@ -20,20 +20,49 @@ import {
   Paper,
 } from "@mui/material";
 import { AFormTextField } from "@/components/AFormItem/AFormTextField";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
 import { AFormDate } from "@/components/AFormItem/AFormDate";
-import { AFormDateRange } from "@/components/AFormItem/AFormDateRange";
-
+import { AFormTime } from "@/components/AFormItem/AFormTimeRange";
 export default function RegisterTableForm() {
+  
+
+const registerSchema = z.object({
+  username: z.string().nonempty().min(3),
+  password:  z.string().nonempty(),
+  email:  z.email(),
+  textbox: z.string(),
+  start :z.date().optional(),
+  endDate : z.date().optional(),
+  startTime: z.date().optional(),
+  endTime: z.date().optional(),
+})
+.superRefine((data, ctx) => {
+  // 날짜 범위 검증
+  validateDateRanges([
+    { fieldStart: "start", fieldEnd: "endDate", type: "m", max: 2 },
+  ])(data, ctx);
+
+  // 시간 범위 검증
+  validateTimeRanges([
+    { fieldStart: "startTime", fieldEnd: "endTime", type: "m", maxDiff: 120 },
+  ])(data, ctx);
+});
+
   const methods = useForm({
     defaultValues: {
       username: "",
       password: "",
       email: "",
       textbox: "",
-      checkbox: false,
-      date: "",
-      searchDate: "",
+      start :undefined,
+      endDate: undefined,
+      startTime:undefined,
+      endTime:undefined
+
     },
+    resolver: zodResolver(registerSchema), 
   });
 
   const { handleSubmit, reset } = methods;
@@ -60,7 +89,6 @@ export default function RegisterTableForm() {
                       <AFormTextField
                         name="username"
                         label="아이디"
-                        makeRule={{ required: true }}
                         msize={80}
                       />
                       <Button variant="outlined" size="small">
@@ -73,7 +101,6 @@ export default function RegisterTableForm() {
                     <AFormTextField
                       name="password"
                       label="비밀번호"
-                      makeRule={{ required: true }}
                       type="password"
                     />
                   </TableCell>
@@ -86,7 +113,6 @@ export default function RegisterTableForm() {
                     <AFormTextField
                       name="email"
                       label="이메일"
-                      makeRule={{ required: true }}
                     />
                   </TableCell>
                 </TableRow>
@@ -109,7 +135,7 @@ export default function RegisterTableForm() {
                   <TableCell className="form-th">체크박스</TableCell>
                   <TableCell>
                     <Controller
-                      name="checkbox"
+                      name="dd"
                       control={methods.control}
                       render={({ field }) => (
                         <FormControlLabel
@@ -119,9 +145,9 @@ export default function RegisterTableForm() {
                       )}
                     />
                   </TableCell>
-                  <TableCell className="form-th">날짜</TableCell>
+                  <TableCell className="form-th">시간</TableCell>
                   <TableCell>
-                    <AFormDate label="날짜" name="day" formatType="date" step={30} max="20250930" min="20250903" />
+                    <AFormTime label="날짜" name="startTime" formatType="hour" endName="endTime"/>
                   </TableCell>
                 </TableRow>
 
@@ -129,23 +155,7 @@ export default function RegisterTableForm() {
                 <TableRow>
                   <TableCell className="form-th">조회일자</TableCell>
                   <TableCell colSpan={3}>
-                    <AFormTextField
-                      name="searchDate"
-                      label="조회일자"
-                      type="date"
-                      size="small"
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="form-th">조회일자</TableCell>
-                  <TableCell colSpan={3}>
-                    <AFormDateRange
-                      name="searchDate"
-                      label="조회일자"
-                      startName="조회시작일자"
-                      endName="조회종료일자"
-                    />
+                    <AFormDate label="test" name="start" endName="endDate" formatType="datetime" mStep={5} />
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -166,3 +176,4 @@ export default function RegisterTableForm() {
     </FormProvider>
   );
 }
+

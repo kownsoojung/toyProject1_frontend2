@@ -1,6 +1,6 @@
 import { AFormBaseItem, BaseFormItemProps } from "./AFormBaseItem";
 import TextArea from "antd/es/input/TextArea";
-import { MakeRulesOptions } from "@/validation/makeRules";
+import { MakeRulesOptions } from "@/validation/Validation";
 import { Checkbox, CheckboxOptionType, Row } from "antd";
 import { useCode } from "@/hooks/useCode";
 

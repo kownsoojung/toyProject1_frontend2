@@ -11,10 +11,14 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "./styles/theme.tsx";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { initZodConfig } from "./validation/Validation.tsx";
 
 const queryClient = new QueryClient();
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 
+
+// Zod 글로벌 설정 한 번 적용
+initZodConfig();
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
