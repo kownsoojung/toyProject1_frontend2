@@ -69,16 +69,17 @@ export default function MainLayout() {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", minWidth:1200}}>
+    <Box
+  sx={{
+    display: "flex",
+    minHeight: 800,  // 바깥 전체 최소 높이
+    minWidth: 1200,
+    height: "100vh", // 화면보다 작으면 100vh
+  }}
+>
       {/* Header */}
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <Header />
-        </Toolbar>
-      </AppBar>
-
-      {/* Body */}
-      <Box sx={{ display: "flex", flexGrow: 1, pt: "64px" }}>
+      
+      
         {/* Sidebar */}
         <Box
           sx={{
@@ -91,91 +92,95 @@ export default function MainLayout() {
         </Box>
 
         {/* Main */}
-        <Box sx={{ flexGrow: 1,  }}>
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Box sx={{ flexShrink: 0 }}>
+            <Header />
+          </Box>
           {/* Tabs */}
-          <Tabs
-            value={activeKey}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{
-              bgcolor: "#f0f0f0", // 탭 바 배경
-              borderBottom: "1px solid #ccc",
-              minHeight: 40,
-              marginTop:0.3,
-              "& .MuiTab-root": {
-                textTransform: "none",
-                paddingX: 1,
-                minWidth: 80,
-                minHeight: 36, 
-                borderRadius: 1,
-                border: "1px solid #ccc",
-                borderBottom: "none", 
-                bgcolor: "#e0e0e0", // 기본 탭 배경
-                color: "#333",
-                "&.Mui-selected": {
-                  bgcolor: "#fff", // 선택된 탭 배경
-                  color: "#1976d2", // 선택된 글자 색
-                  fontWeight: "bold",
-                  boxShadow: "0 2px 5px rgba(0,0,0,0.1)"
-                },
-                "&:hover": {
-                  bgcolor: "#d9d9d9"
+          <Box sx={{ flexShrink: 0 }}>
+            <Tabs
+              value={activeKey}
+              onChange={handleTabChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                bgcolor: "#f0f0f0", // 탭 바 배경
+                borderBottom: "1px solid #ccc",
+                minHeight: 40,
+                marginTop:0.3,
+                "& .MuiTab-root": {
+                  textTransform: "none",
+                  paddingX: 1,
+                  minWidth: 80,
+                  minHeight: 36, 
+                  borderRadius: 1,
+                  border: "1px solid #ccc",
+                  borderBottom: "none", 
+                  bgcolor: "#e0e0e0", // 기본 탭 배경
+                  color: "#333",
+                  "&.Mui-selected": {
+                    bgcolor: "#fff", // 선택된 탭 배경
+                    color: "#1976d2", // 선택된 글자 색
+                    fontWeight: "bold",
+                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)"
+                  },
+                  "&:hover": {
+                    bgcolor: "#d9d9d9"
+                  }
                 }
-              }
-            }}
-          >
-            {tabs.map((tab) => (
-              <Tab
-                key={tab.key}
-                value={tab.key}
-                label={
-                  tab.closable ? (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        minWidth: 80,
-                      }}
-                    >
-                      <span>{tab.title}</span>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation(); // 탭 클릭 이벤트 막기
-                          handleTabClose(tab.key);
-                        }}
+              }}
+            >
+              {tabs.map((tab) => (
+                <Tab
+                  key={tab.key}
+                  value={tab.key}
+                  label={
+                    tab.closable ? (
+                      <Box
                         sx={{
-                          ml: 0.5,
-                          p: 0,
-                          width: 20,
-                          height: 20,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          minWidth: 80,
                         }}
                       >
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  ) : (
-                    tab.title
-                  )
-                }
-              />
-            ))}
-          </Tabs>
-
+                        <span>{tab.title}</span>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation(); // 탭 클릭 이벤트 막기
+                            handleTabClose(tab.key);
+                          }}
+                          sx={{
+                            ml: 0.5,
+                            p: 0,
+                            width: 20,
+                            height: 20,
+                          }}
+                        >
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    ) : (
+                      tab.title
+                    )
+                  }
+                />
+              ))}
+            </Tabs>
+          </Box>
 
           {/* Tab Content */}
           <Box
             sx={{
-              p: 2,
-              height: `calc(100vh - 64px - 50px)`, // Header(64px) + Tabs(약 48px) 제외
-              overflowY: "auto",
+              flexGrow: 1,           // 남은 공간을 차지
+              height: "calc(100vh - 64px - 48px)", // Header 64px + Tabs 48px
+              overflowY: "auto",     // 내용이 넘치면 스크롤
               bgcolor: "#fff",
+              p: 2,
             }}
           >
-            {tabs.find((t) => t.key === activeKey)?.component || <div>Page Not Found</div>}
-          </Box>
+          {tabs.find((t) => t.key === activeKey)?.component || <div>Page Not Found</div>}
         </Box>
       </Box>
     </Box>

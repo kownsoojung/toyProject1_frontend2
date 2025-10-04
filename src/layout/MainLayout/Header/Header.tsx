@@ -15,36 +15,24 @@ const Header: React.FC = () => {
   };
 
   return (
-    <AppBar
-      position="fixed"
-      elevation={1}
+        <Box
       sx={{
+        width: "100%",
         bgcolor: "#fff",
         color: "text.primary",
-        width:"100%",
-        ml:  0,
-        transition: "all 0.2s ease",
         boxShadow: "0 2px 8px #f0f1f2",
-        height: 64,
-        zIndex: (theme) => theme.zIndex.drawer + 1,
+        transition: "all 0.2s ease",
       }}
     >
       <Toolbar sx={{ minHeight: 64, px: 2 }}>
-        {/* 사이드바 토글 버튼 */}
-        <IconButton
-          edge="start"
-          onClick={handleToggle}
-          sx={{ mr: 2, fontSize: 20 }}
-        >
+        <IconButton edge="start" onClick={handleToggle} sx={{ mr: 2, fontSize: 20 }}>
           {sidebarOpen ? <MenuOpenIcon /> : <MenuIcon />}
         </IconButton>
-
-        {/* Breadcrumb */}
         <Box sx={{ flexGrow: 1 }}>
           <Breadcrumbs />
         </Box>
       </Toolbar>
-    </AppBar>
+    </Box>
   );
 };
 
