@@ -4,15 +4,14 @@ import { useFormContext } from "react-hook-form";
 import { TimePicker } from "@mui/x-date-pickers";
 import { Box } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
-import { AFormBaseItem } from "./AFormBaseItem";
+import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { roundToStep } from "@/utils/dateUtils";
 
 export type TimeFormat = "hour" | "minute" | "second";
 
-interface AFormTimeUnifiedProps {
+interface AFormTimeUnifiedProps{
   name: string;
   endName?: string; // 범위일 때
-  label: string;
   formatType?: TimeFormat;
   hStep?: number;
   mStep?: number;
@@ -32,7 +31,6 @@ const formatMap: Record<
 export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
   name,
   endName,
-  label,
   formatType = "minute",
   hStep = 1,
   mStep = 1,
@@ -74,7 +72,7 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
 
   if (!endName) {
     return (
-      <AFormBaseItem name={name} label={label}>
+      <AFormBaseItem name={name} >
         {(field, error) => renderPicker(field, error)}
       </AFormBaseItem>
     );
@@ -82,13 +80,13 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
 
   return (
     <Box display="flex" alignItems="center" gap={1}>
-      <AFormBaseItem name={name} label={label}>
+      <AFormBaseItem name={name} >
         {(field, error) => renderPicker(field, error)}
       </AFormBaseItem>
 
       <Box>~</Box>
 
-      <AFormBaseItem name={endName} label="">
+      <AFormBaseItem name={endName} >
         {(field, error) => renderPicker(field, error)}
       </AFormBaseItem>
     </Box>

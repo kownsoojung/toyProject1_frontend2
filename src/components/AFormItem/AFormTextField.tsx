@@ -3,18 +3,20 @@ import { TextField, TextFieldProps } from "@mui/material";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 
 // TextFieldProps 전체 상속, 단 name과 label은 제거
-interface AFormTextFieldProps extends Omit<TextFieldProps, "name" | "label">, Omit<AFormBaseItemProps, "children"> {
+interface AFormTextFieldProps extends Omit<TextFieldProps, "name"> {
+  name: string; // 필수로 추가
   msize?: number;
+  base?: Omit<AFormBaseItemProps, "name" | "children">; 
 }
 
 export const AFormTextField: React.FC<AFormTextFieldProps> = ({
   name,
-  label,
   msize = 0,
+  base,
   ...rest
 }) => {
   return (
-    <AFormBaseItem name={name} label={label} >
+    <AFormBaseItem name={name} {...base}>
       {(field, error) => (
         <TextField
           {...field}

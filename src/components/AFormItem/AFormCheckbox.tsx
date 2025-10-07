@@ -1,41 +1,25 @@
-import { AFormBaseItem, BaseFormItemProps } from "./AFormBaseItem";
-import TextArea from "antd/es/input/TextArea";
-import { MakeRulesOptions } from "@/validation/Validation";
-import { Checkbox, CheckboxOptionType, Row } from "antd";
-import { useCode } from "@/hooks/useCode";
+import React from "react";
+import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 
-interface ItemProps extends BaseFormItemProps {
-  name:string,
-  makeRule?: MakeRulesOptions;
-  props?: React.ComponentProps<typeof Checkbox>;
-  value:(string | number | boolean)
-  disabled?:boolean;
-}
+import { Checkbox, CheckboxProps } from "@mui/material";
 
-export const AFormCheckbox: React.FC<ItemProps> = ({
+interface AFormCheckboxProps extends Omit<CheckboxProps, "name" | "onChange" | "checked">, Omit<AFormBaseItemProps, "children"> {}
+
+export const AFormCheckbox: React.FC<AFormCheckboxProps> = ({
   name,
-  label,
-  makeRule,
-  props,
-  disabled=false,
-  value,
+  disabled = false,
   ...rest
-}) => {  
+}) => {
 
-  
   return (
-    <AFormBaseItem
-      name={name}
-      label={label}
-      makeRule={makeRule}
-      {...rest}
-    >
-    <Checkbox 
-        disabled={disabled}
-        value={value}
-    >
-        {label}
-    </Checkbox>
+    <AFormBaseItem name={name} {...rest}>
+      {(field, error) => (
+        <Checkbox
+          
+          {...rest}
+          
+        />
+      )}
     </AFormBaseItem>
   );
 };

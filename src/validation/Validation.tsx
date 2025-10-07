@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { z } from "zod";
 
 
@@ -48,57 +49,64 @@ z.config({
 });
 };
 
+const toDateSafe = (value: unknown): Date | undefined => {
+  if (!value) return undefined;
+  if (value instanceof Date) return value;
+  if (typeof value === "string") {
+    const parsed = dayjs(value, ["YYYY-MM-DD", "YYYYMMDDHHmmss", dayjs.ISO_8601], true);
+    return parsed.isValid() ? parsed.toDate() : undefined;
+  }
+  return undefined;
+};
 
 type DateType = "d" | "m" | "y";
 
-// 범용 날짜 범위 검증 함수
-export const validateDateRanges = (ranges: { fieldStart: string; fieldEnd: string;  type?:DateType ,max?: number }[]) => {
+export const validateDateRanges = (
+  ranges: { fieldStart: string; fieldEnd: string; type?: DateType; max?: number }[]
+) => {
   return (data: any, ctx: any) => {
     ranges.forEach(({ fieldStart, fieldEnd, type, max }) => {
-      const start = data[fieldStart];
-      const end = data[fieldEnd];
+      const start = toDateSafe(data[fieldStart]);
+      const end = toDateSafe(data[fieldEnd]);
 
-      if ((start != null && end == null) || (start == null && end != null)) {
-        let filed = fieldStart;
-        if (end == null) filed = fieldEnd;
-
+      if ((start && !end) || (!start && end)) {
         ctx.addIssue({
           code: "custom",
-          path: [filed],
-          message: `둘 다 입력해야 합니다.`,
+          path: [end ? fieldStart : fieldEnd],
+          message: "둘 다 입력해야 합니다.",
         });
-      }
-      // start > end 체크
-      if (start && end && start > end) {
-        ctx.addIssue({
-          code: "custom",
-          path: [fieldStart],
-          message: `${fieldStart}는 ${fieldEnd}보다 클 수 없습니다.`,
-        });
+        return;
       }
 
-      // 둘 다 있으면 최소 일수 체크
       if (start && end) {
-        let diff = 0;
-        let unitLabel = "";
+        if (start > end) {
+          ctx.addIssue({
+            code: "custom",
+            path: [fieldStart],
+            message: `${fieldStart}는 ${fieldEnd}보다 클 수 없습니다.`,
+          });
+        }
 
-        if (type) {
+        if (type && max !== undefined) {
+          let diff = 0;
+          let unitLabel = "";
+
           switch (type) {
-            case "d": // 일 단위
-              diff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+            case "d":
+              diff = dayjs(end).diff(dayjs(start), "day");
               unitLabel = "일";
               break;
-            case "m": // 월 단위
-              diff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+            case "m":
+              diff = dayjs(end).diff(dayjs(start), "month");
               unitLabel = "개월";
               break;
-            case "y": // 년 단위
-              diff = end.getFullYear() - start.getFullYear();
+            case "y":
+              diff = dayjs(end).diff(dayjs(start), "year");
               unitLabel = "년";
               break;
           }
 
-          if (diff > (max ?? 0)) {
+          if (diff > max) {
             ctx.addIssue({
               code: "custom",
               path: [fieldStart],
@@ -119,22 +127,19 @@ export const validateTimeRanges = (
 ) => {
   return (data: any, ctx: any) => {
     ranges.forEach(({ fieldStart, fieldEnd, type, maxDiff }) => {
-      const start: Date = data[fieldStart];
-      const end: Date = data[fieldEnd];
+      const start = toDateSafe(data[fieldStart]);
+      const end = toDateSafe(data[fieldEnd]);
 
-      if ((start != null && end == null) || (start == null && end != null)) {
-        let filed = fieldStart;
-        if (end == null) filed = fieldEnd;
-
+      if ((start && !end) || (!start && end)) {
         ctx.addIssue({
           code: "custom",
-          path: [filed],
-          message: `둘 다 입력해야 합니다.`,
+          path: [end ? fieldStart : fieldEnd],
+          message: "둘 다 입력해야 합니다.",
         });
+        return;
       }
 
       if (start && end) {
-        // start > end 체크
         if (start > end) {
           ctx.addIssue({
             code: "custom",
@@ -143,28 +148,27 @@ export const validateTimeRanges = (
           });
         }
 
-        // 최대 차이 체크
         if (type && maxDiff !== undefined) {
           const diffMs = end.getTime() - start.getTime();
-          let diffUnit = 0;
+          let diff = 0;
           let unitLabel = "";
 
           switch (type) {
             case "h":
-              diffUnit = diffMs / (1000 * 60 * 60);
+              diff = diffMs / (1000 * 60 * 60);
               unitLabel = "시간";
               break;
             case "m":
-              diffUnit = diffMs / (1000 * 60);
+              diff = diffMs / (1000 * 60);
               unitLabel = "분";
               break;
             case "s":
-              diffUnit = diffMs / 1000;
+              diff = diffMs / 1000;
               unitLabel = "초";
               break;
           }
 
-          if (diffUnit > maxDiff) {
+          if (diff > maxDiff) {
             ctx.addIssue({
               code: "custom",
               path: [fieldStart],

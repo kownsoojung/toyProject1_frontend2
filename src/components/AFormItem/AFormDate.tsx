@@ -56,8 +56,14 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
       : null; // 값 없으면 null로
 
     const handleChange = (val: Dayjs | null) => {
-      if (val) field.onChange(roundToStep(val, hStep, mStep, sStep).toDate());
-      else field.onChange(null);
+      if (val) {
+        const rounded = roundToStep(val, hStep, mStep, sStep);
+        // 여기서 문자열 포맷으로 변환
+        const formatted = rounded.format("YYYYMMDDHHmmss");
+        field.onChange(formatted);
+      } else {
+        field.onChange(null);
+      }
     };
 
     return (
@@ -84,7 +90,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
 
   if (!endName) {
     return (
-      <AFormBaseItem name={name} label={label}>
+      <AFormBaseItem name={name} >
         {(field, error) => renderPicker(field, error, parseMinMax(minDate), parseMinMax(maxDate))}
       </AFormBaseItem>
     );
@@ -93,7 +99,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
   if (endName) {
     return (
       <Box display="flex" alignItems="center" gap={1}>
-        <AFormBaseItem name={name} label={label}>
+        <AFormBaseItem name={name} >
           {(field, error) =>
             renderPicker(
               field,
@@ -106,7 +112,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
 
         <Box>~</Box>
 
-        <AFormBaseItem name={endName} label="">
+        <AFormBaseItem name={endName} >
           {(field, error) =>
             renderPicker(
               field,

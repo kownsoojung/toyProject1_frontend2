@@ -96,7 +96,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           padding: "4px 8px",
-          verticalAlign: "center",
+          verticalAlign: "middle",
         },
       },
     },
