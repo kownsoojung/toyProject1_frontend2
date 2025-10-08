@@ -1,41 +1,73 @@
-import { Radio } from "antd";
-import { AFormBaseItem, BaseFormItemProps } from "./AFormBaseItem";
-import { MakeRulesOptions } from "@/validation/Validation";
+import React from "react";
+import {
+  Checkbox,
+  CheckboxProps,
+  FormControlLabel,
+  FormGroup,
+  Radio,
+  RadioGroup,
+  RadioProps,
+} from "@mui/material";
+import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CodeItem, useCode } from "@/hooks/useCode";
-import { SiteCodeSearchDTO } from "@/api/generated";
 
-interface RadioItemProps extends BaseFormItemProps {
-  name: string;
-  makeRule?: MakeRulesOptions;
-  options?: CodeItem[];
+interface baseProp extends Omit<RadioProps, "name">, Omit<AFormBaseItemProps, "children"> {
   selectCode?: SiteCodeSearchDTO;
-  props?: React.ComponentProps<typeof Radio.Group>;
+  checkList?: CodeItem[] | CodeItem;
+  /** baseProp을 분리해서 별도 전달 가능 */
+  base?: Omit<AFormBaseItemProps, "name" | "children">;
+  row?: boolean;
+  label?: string;
+  isDisabledItem?: (item: CodeItem) => boolean;
 }
 
-export const AFormRadio: React.FC<RadioItemProps> = ({
+export const AFormRadio: React.FC<baseProp> = ({
   name,
-  label,
-  makeRule,
-  options,
   selectCode,
-  props,
+  checkList,
+  base,
+  row = false,
+  label,
+  isDisabledItem,
   ...rest
 }) => {
-  let radioOptions;
 
+  
+  // ✅ 선택 코드 훅으로 자동 checkList 가져오기 (있으면)
   if (selectCode) {
     const { data: codeData } = useCode(selectCode);
-    radioOptions = codeData?.map(item => ({
-      label: item.label ?? "",
-      value: item.value ?? "",
+    // codeData가 배열이면 map으로 변환
+    checkList = codeData?.map(item => ({
+      label: item.label ?? "",   // undefined일 경우 빈 문자열
+      value: item.value ?? "", // undefined일 경우 빈 문자열
+      parent: item.parent,
+      disabled:false
     })) ?? [];
-  } else {
-    radioOptions = options;
-  }
+  } 
+
+  const list: CodeItem[] = checkList ? Array.isArray(checkList) ? checkList: [checkList]: [];
 
   return (
-    <AFormBaseItem name={name} label={label} makeRule={makeRule} {...rest}>
-      <Radio.Group options={radioOptions} {...props} />
-    </AFormBaseItem>
-  );
+  <AFormBaseItem name={name} {...base}>
+    {(field, error) => {
+
+      return (
+        <RadioGroup
+          row={row}
+          value={field.value || ""}       // field.value를 그룹 value로 설정
+          onChange={(e) => field.onChange(e.target.value)}
+        >
+          {list.map((item) => (
+            <FormControlLabel
+              key={item.value}
+              value={item.value}          // RadioGroup value와 매칭
+              control={<Radio disabled={isDisabledItem?.(item) || item.disabled} {...rest} />}
+              label={item.label}
+            />
+          ))}
+        </RadioGroup>
+      );
+    }}
+  </AFormBaseItem>
+);
 };

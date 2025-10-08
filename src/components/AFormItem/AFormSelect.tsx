@@ -1,31 +1,33 @@
-import { Input, Select } from "antd";
-import { AFormBaseItem, BaseFormItemProps } from "./AFormBaseItem";
-import { MakeRulesOptions } from "@/validation/Validation";
+import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CodeItem, useCode } from "@/hooks/useCode";
 import { SiteCodeSearchDTO } from "@/api/generated";
+import { MenuItem, Select, SelectProps } from "@mui/material";
 
-interface SelectItemProps extends BaseFormItemProps{
+interface SelectItemProps extends Omit<SelectProps, "name">{
   name:string,
-  makeRule?: MakeRulesOptions;
-  props?: React.ComponentProps<typeof Select>;
-  options?:CodeItem[];
-  selectCode?: SiteCodeSearchDTO;     
-  disabled?:boolean         
+  options?: SiteCodeSearchDTO;
+  list?: CodeItem[];
+  selectCode?:SiteCodeSearchDTO;
+  base?: Omit<AFormBaseItemProps, "name" | "children">;
+  msize?:number|string
+  isDisabledItem?: (item: CodeItem) => boolean;
+  parent?: string | number; 
 }
 
 export const AFormSelect: React.FC<SelectItemProps> = ({
   name,
-  label,
-  makeRule,
   options,
+  list=[],
+  base,
   selectCode,
-  disabled=false,
-  props,
+  msize,
+  isDisabledItem,
+  parent,
   ...rest
 }) => {
   
   
-  let selectOptions;
+  let selectOptions:CodeItem[];
 
   if (selectCode) {
     const { data: codeData } = useCode(selectCode);
@@ -33,19 +35,41 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
     selectOptions = codeData?.map(item => ({
       label: item.label ?? "",   // undefined일 경우 빈 문자열
       value: item.value ?? "", // undefined일 경우 빈 문자열
+      parent: item.parent, 
+      disabled: item.disabled ?? false, 
     })) ?? [];
   } else {
-    selectOptions = options; // 기존 옵션 사용
+    selectOptions = list; // 기존 옵션 사용
+  }
+
+  if (parent) {
+    selectOptions = selectOptions.filter(
+      (item) => item.parent === parent
+    );
   }
 
   return (
-    <AFormBaseItem
-      name={name}
-      label={label}
-      makeRule={makeRule}
-      {...rest}
-    >
-      <Select options={selectOptions} disabled={disabled} {...props}/>
+    <AFormBaseItem name={name} {...base}>
+      {(field, error) => (
+        <Select
+          {...field}
+          error={!!error}
+          sx={{
+            width: typeof msize === "string" && msize.includes("%") ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
+          }}
+          {...rest} // 여기서 select, multiline, rows 등 모두 전달 가능
+        >
+          {selectOptions.map((item:CodeItem) => (
+            <MenuItem
+              key={item.value}
+              value={item.value}
+              disabled={isDisabledItem?.(item) || item.disabled}
+            >
+              {item.label}
+            </MenuItem>
+          ))}
+        </Select>
+      )}
     </AFormBaseItem>
   );
 };
