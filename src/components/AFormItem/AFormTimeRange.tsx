@@ -16,6 +16,7 @@ interface AFormTimeUnifiedProps{
   hStep?: number;
   mStep?: number;
   sStep?: number;
+  base?:AFormBaseItemProps;
 }
 
 const formatMap: Record<
@@ -35,6 +36,7 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
   hStep = 1,
   mStep = 1,
   sStep = 1,
+  base,
 }) => {
   const { watch } = useFormContext();
   const startValue = watch(name);
@@ -46,8 +48,13 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
     const value = field.value ? roundToStep(dayjs(field.value), hStep, mStep, sStep) : null;
 
     const handleChange = (val: Dayjs | null) => {
-      if (val) field.onChange(roundToStep(val, hStep, mStep, sStep).toDate());
-      else field.onChange(null);
+      if (val) {
+        const rounded = roundToStep(val, hStep, mStep, sStep);
+        const formatted = rounded.format("YYYYMMDDHHmmss");
+        field.onChange(formatted);
+      } else {
+        field.onChange(null);
+      }
     };
 
     return (
@@ -72,7 +79,7 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
 
   if (!endName) {
     return (
-      <AFormBaseItem name={name} >
+      <AFormBaseItem name={name} {...base}>
         {(field, error) => renderPicker(field, error)}
       </AFormBaseItem>
     );
@@ -80,13 +87,13 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
 
   return (
     <Box display="flex" alignItems="center" gap={1}>
-      <AFormBaseItem name={name} >
+      <AFormBaseItem name={name} {...base}>
         {(field, error) => renderPicker(field, error)}
       </AFormBaseItem>
 
       <Box>~</Box>
 
-      <AFormBaseItem name={endName} >
+      <AFormBaseItem name={endName} {...base}>
         {(field, error) => renderPicker(field, error)}
       </AFormBaseItem>
     </Box>

@@ -4,7 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
 import { Box } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
-import { AFormBaseItem } from "./AFormBaseItem";
+import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { parseMinMax, roundToStep } from "@/utils/dateUtils";
 
 export type PickerFormat = "year" | "month" | "date" | "datehour" | "dateminute" | "datetime";
@@ -19,6 +19,7 @@ interface AFormDateUnifiedProps {
   hStep?: number;
   mStep?: number;
   sStep?: number;
+  base?:AFormBaseItemProps;
 }
 
 const formatMap: Record<
@@ -44,6 +45,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
   hStep = 1,
   mStep = 1,
   sStep = 1,
+  base
 }) => {
   const { watch } = useFormContext();
   const startValue = name ? watch(name) : null;
@@ -58,7 +60,6 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
     const handleChange = (val: Dayjs | null) => {
       if (val) {
         const rounded = roundToStep(val, hStep, mStep, sStep);
-        // 여기서 문자열 포맷으로 변환
         const formatted = rounded.format("YYYYMMDDHHmmss");
         field.onChange(formatted);
       } else {
@@ -90,7 +91,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
 
   if (!endName) {
     return (
-      <AFormBaseItem name={name} >
+      <AFormBaseItem name={name} {...base}>
         {(field, error) => renderPicker(field, error, parseMinMax(minDate), parseMinMax(maxDate))}
       </AFormBaseItem>
     );
@@ -99,7 +100,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
   if (endName) {
     return (
       <Box display="flex" alignItems="center" gap={1}>
-        <AFormBaseItem name={name} >
+        <AFormBaseItem name={name} {...base}>
           {(field, error) =>
             renderPicker(
               field,
@@ -110,9 +111,9 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
           }
         </AFormBaseItem>
 
-        <Box>~</Box>
+        {base?.isShow !== false && <Box>~</Box>}
 
-        <AFormBaseItem name={endName} >
+        <AFormBaseItem name={endName} {...base}>
           {(field, error) =>
             renderPicker(
               field,
