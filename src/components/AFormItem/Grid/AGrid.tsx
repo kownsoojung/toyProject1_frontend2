@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { ColDef, GridOptions } from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { UseAutoQuery } from "@/hooks/useAutoQuery";
+
+
 
 interface AFormGridProps {
   url: string;
@@ -89,10 +90,11 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         {totalName && <div>총 {totalCount}건</div>}
 
         {/* AG Grid */}
-        <div className="ag-theme-alpine" style={{ width: "100%", height }}>
+        <div className="" style={{ width: "100%", height }}>
           <AgGridReact
             ref={gridRef as any}
             columnDefs={columnDefs}
+            defaultColDef={{flex:1}}
             pagination={false}
             overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
             overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">데이터가 없습니다.</span>'
