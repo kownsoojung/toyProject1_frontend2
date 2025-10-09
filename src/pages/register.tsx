@@ -11,6 +11,7 @@ import { AFormTime } from "@/components/AFormItem/AFormTimeRange";
 import AForm from "@/components/AFormItem/AForm";
 import { AFormCheckbox } from "@/components/AFormItem/AFormCheckbox";
 import { AFormRadio } from "@/components/AFormItem/AFormRadio";
+import { AFormGrid } from "@/components/AFormItem/Grid/AGrid";
 
 export default function RegisterTableForm() {
   const registerSchema = z.object({
@@ -118,6 +119,13 @@ export default function RegisterTableForm() {
         </TableRow>
       </AForm>
     </Card>
+
+    <AFormGrid url="" height={500} columnDefs={[
+    { field: "id", headerName: "ID" },
+    { field: "name", headerName: "Name" },
+    ]}>
+
+    </AFormGrid>
     </>
   );
 }

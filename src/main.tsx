@@ -11,11 +11,12 @@ import theme from "./styles/theme.tsx";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { initZodConfig } from "./validation/Validation.tsx";
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 
 const queryClient = new QueryClient();
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 
-
+ModuleRegistry.registerModules([AllCommunityModule]);
 // Zod 글로벌 설정 한 번 적용
 initZodConfig();
 root.render(
