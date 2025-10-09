@@ -2,6 +2,7 @@ import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CodeItem, useCode } from "@/hooks/useCode";
 import { SiteCodeSearchDTO } from "@/api/generated";
 import { MenuItem, Select, SelectProps } from "@mui/material";
+import { useFormContext, useWatch } from "react-hook-form";
 
 interface SelectItemProps extends Omit<SelectProps, "name">{
   name:string,
@@ -11,7 +12,7 @@ interface SelectItemProps extends Omit<SelectProps, "name">{
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   msize?:number|string
   isDisabledItem?: (item: CodeItem) => boolean;
-  parent?: string | number; 
+  parent?: string; 
 }
 
 export const AFormSelect: React.FC<SelectItemProps> = ({
@@ -26,7 +27,10 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
   ...rest
 }) => {
   
-  
+  const { control } = useFormContext(); 
+  const parentValue = typeof parent === "string" ? useWatch({ control, name: parent }) : parent;
+
+
   let selectOptions:CodeItem[];
 
   if (selectCode) {
@@ -42,7 +46,7 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
     selectOptions = list; // 기존 옵션 사용
   }
 
-  if (parent) {
+  if (parentValue) {
     selectOptions = selectOptions.filter(
       (item) => item.parent === parent
     );
@@ -55,7 +59,7 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
           {...field}
           error={!!error}
           sx={{
-            width: typeof msize === "string" && msize.includes("%") ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
+            width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
           }}
           {...rest} // 여기서 select, multiline, rows 등 모두 전달 가능
         >

@@ -4,8 +4,8 @@ import { SiteCodeDTO, SiteCodeSearchDTO } from "@/api/generated";
 export interface CodeItem {
   label: string;
   value: any;
-  parent:number|string;
-  disabled: boolean;
+  parent?:number|string;
+  disabled?: boolean;
 }
 
 export const useCode = (params: SiteCodeSearchDTO) => {

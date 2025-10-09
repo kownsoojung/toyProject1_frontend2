@@ -10,6 +10,7 @@ import { AFormDate } from "@/components/AFormItem/AFormDate";
 import { AFormTime } from "@/components/AFormItem/AFormTimeRange";
 import AForm from "@/components/AFormItem/AForm";
 import { AFormCheckbox } from "@/components/AFormItem/AFormCheckbox";
+import { AFormRadio } from "@/components/AFormItem/AFormRadio";
 
 export default function RegisterTableForm() {
   const registerSchema = z.object({
@@ -43,6 +44,7 @@ export default function RegisterTableForm() {
   const onSubmit = (data: any) => console.log("제출 데이터:", data);
 
   return (
+    <>
     <Card sx={{ p: 2, width: 800, borderRadius: 2 }}>
       <AForm
         title="회원 등록"
@@ -58,11 +60,11 @@ export default function RegisterTableForm() {
       >
         {/* 아이디 / 비밀번호 */}
         <TableRow>
-          <TableCell className="form-th required">아이디</TableCell>
+          <TableCell component="th" className="required">아이디</TableCell>
           <TableCell>
               <AFormTextField name="username" msize={80} />
           </TableCell>
-          <TableCell className="form-th required">비밀번호</TableCell>
+          <TableCell component="th" className="required">비밀번호</TableCell>
           <TableCell>
             <AFormTextField name="password" type="password" />
           </TableCell>
@@ -70,7 +72,7 @@ export default function RegisterTableForm() {
 
         {/* 이메일 */}
         <TableRow>
-          <TableCell className="form-th required">이메일</TableCell>
+          <TableCell component="th" className="required">이메일</TableCell>
           <TableCell colSpan={3}>
             <AFormTextField name="email"  />
           </TableCell>
@@ -78,7 +80,7 @@ export default function RegisterTableForm() {
 
         {/* 내용 */}
         <TableRow>
-          <TableCell className="form-th">내용</TableCell>
+          <TableCell component="th">내용</TableCell>
           <TableCell colSpan={3}>
             <AFormTextField name="textbox" multiline rows={4} />
           </TableCell>
@@ -86,11 +88,22 @@ export default function RegisterTableForm() {
 
         {/* 체크박스 / 시간 */}
         <TableRow>
-          <TableCell className="form-th">체크박스</TableCell>
+          <TableCell component="th">체크박스</TableCell>
           <TableCell>
-            <AFormCheckbox name="dd"  />
+            <AFormCheckbox name="dd" checkList={{label:"test10", value:"test"}} />
           </TableCell>
-          <TableCell className="form-th">시간</TableCell>
+          <TableCell component="th">시간</TableCell>
+          <TableCell>
+            <AFormTime  name="startTime" formatType="hour" endName="endTime" />
+          </TableCell>
+        </TableRow>
+
+        <TableRow>
+          <TableCell component="th">체크박스</TableCell>
+          <TableCell>
+            <AFormRadio name="dd" checkList={{label:"test10", value:"test"}} />
+          </TableCell>
+          <TableCell component="th">시간</TableCell>
           <TableCell>
             <AFormTime  name="startTime" formatType="hour" endName="endTime" />
           </TableCell>
@@ -98,12 +111,13 @@ export default function RegisterTableForm() {
 
         {/* 날짜 범위 */}
         <TableRow>
-          <TableCell className="form-th">조회일자</TableCell>
+          <TableCell component="th">조회일자</TableCell>
           <TableCell colSpan={3}>
             <AFormDate label="test" name="start" endName="endDate" formatType="datetime" mStep={5} />
           </TableCell>
         </TableRow>
       </AForm>
     </Card>
+    </>
   );
 }

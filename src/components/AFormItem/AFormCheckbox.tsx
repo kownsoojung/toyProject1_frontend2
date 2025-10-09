@@ -8,7 +8,7 @@ import {
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CodeItem, useCode } from "@/hooks/useCode";
 
-interface AFormCheckboxProps extends Omit<CheckboxProps, "name" | "onChange" | "checked">, Omit<AFormBaseItemProps, "children"> {
+interface AFormCheckboxProps extends Omit<CheckboxProps, "name" | "onChange" | "checked">{
   selectCode?: SiteCodeSearchDTO;
   checkList?: CodeItem[] | CodeItem;
   /** baseProp을 분리해서 별도 전달 가능 */
