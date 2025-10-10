@@ -9,6 +9,7 @@ import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CodeItem, useCode } from "@/hooks/useCode";
 
 interface AFormCheckboxProps{
+  name:string
   selectCode?: SiteCodeSearchDTO;
   checkList?: CodeItem[] | CodeItem;
   /** baseProp을 분리해서 별도 전달 가능 */
