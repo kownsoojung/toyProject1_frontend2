@@ -19,11 +19,12 @@ const LazyDashboard = lazy(() => import("@/pages/Dashboard"));
 
 export default function MainLayout() {
   const menus = useMenuStore((state) => state.menus);
+  const initialMenu = menus.find(menu => menu.id === 1) || menus[0];
   const { sidebarOpen } = useLayoutContext();
   const [tabs, setTabs] = useState<TabItem[]>([
-    { key: "/Dashboard", title: "Dashboard", closable: false, component: <LazyDashboard /> },
+    { key: `${initialMenu.id}-${initialMenu.path}`, title: initialMenu.name, closable: false, component: <LazyDashboard /> },
   ]);
-  const [activeKey, setActiveKey] = useState("/Dashboard");
+  const [activeKey, setActiveKey] = useState(tabs[0].key);
 
   const modules = import.meta.glob("/src/pages/**/*.tsx");
   const lazyLoad = (path: string) => {
