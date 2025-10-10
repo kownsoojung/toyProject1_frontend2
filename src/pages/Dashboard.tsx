@@ -1,13 +1,21 @@
+import { useModal } from "@/hooks/ModalProvider";
 import useHelmetTitle from "@/hooks/useHelmet";
-import { Card, CardContent, Stack, Typography } from "@mui/material";
+import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
+import About from "./About";
 
 const Dashboard = () => {
+    const { openModal } = useModal();
+
     useHelmetTitle("HOME");
+    let fnModal = () =>{
+        openModal("about-modal", "About", <About />);
+    }
     return (
         <Stack spacing={2}>
             <Typography variant="h3" component={"h1"}>
                 Dashboard
             </Typography>
+                <Button onClick={fnModal} >dd</Button>
             <Card>
                 <CardContent>
                     <Typography paragraph>

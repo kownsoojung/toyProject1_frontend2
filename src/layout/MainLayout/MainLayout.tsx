@@ -6,6 +6,7 @@ import Header from "./Header";
 import { SIDEBAR_WIDTH } from "./constants";
 import { useMenuStore } from "@/stores/menuStore";
 import { useLayoutContext } from "@/contexts/LayoutContext";
+import { ModalProvider } from "@/hooks/ModalProvider";
 
 type TabItem = {
   key: string;
@@ -38,14 +39,15 @@ export default function MainLayout() {
     return <div>Page Not Found</div>;
   };
 
-  const handleMenuClick = (path: string, name: string) => {
-    if (!tabs.find((t) => t.key === path)) {
-      setTabs((prev) => [
-        ...prev,
-        { key: path, title: name, closable: true, component: lazyLoad(path) },
-      ]);
-    }
-    setActiveKey(path);
+  const handleMenuClick = (path: string, name: string, id: number |string) => {
+     const tabKey = `${id}-${path}`; // id + path로 고유 key 생성
+      if (!tabs.find(t => t.key === tabKey)) {
+        setTabs(prev => [
+          ...prev,
+          { key: tabKey, title:name, closable: true, component: lazyLoad(path) }
+        ]);
+      }
+      setActiveKey(tabKey);
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: string) => setActiveKey(newValue);
@@ -70,13 +72,13 @@ export default function MainLayout() {
 
   return (
     <Box
-  sx={{
-    display: "flex",
-    minHeight: 800,  // 바깥 전체 최소 높이
-    minWidth: 1200,
-    height: "100vh", // 화면보다 작으면 100vh
-  }}
->
+      sx={{
+        display: "flex",
+        minHeight: 800,  // 바깥 전체 최소 높이
+        minWidth: 1200,
+        height: "100vh", // 화면보다 작으면 100vh
+      }}
+    >
       {/* Header */}
       
       
@@ -180,7 +182,10 @@ export default function MainLayout() {
               p: 2,
             }}
           >
-          {tabs.find((t) => t.key === activeKey)?.component || <div>Page Not Found</div>}
+            <ModalProvider>
+              {tabs.find((t) => t.key === activeKey)?.component || <div>Page Not Found</div>}
+            </ModalProvider>
+          
         </Box>
       </Box>
     </Box>

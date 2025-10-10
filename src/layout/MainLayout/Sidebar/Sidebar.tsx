@@ -18,7 +18,7 @@ import { SIDEBAR_WIDTH } from "../constants";
 const drawerWidth = 240;
 
 interface SidebarProps {
-  onMenuClick?: (path: string, name: string) => void;
+  onMenuClick?: (path: string, name: string, id:number) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onMenuClick }) => {
@@ -66,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuClick }) => {
             selected={location.pathname === menu.path}
             sx={{ pl: 2 + level * 2 }} // level 기반 들여쓰기
             onClick={() => {
-              if (onMenuClick && menu.path) onMenuClick(menu.path, menu.name);
+              if (onMenuClick && menu.id) onMenuClick(menu.path, menu.name, menu.id);
             }}
           >
             <ListItemText primary={menu.name} />
