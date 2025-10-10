@@ -29,6 +29,7 @@
     "openapi": "^1.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-draggable": "^4.5.0",
     "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.62.0",
     "react-router-dom": "^7.6.2",

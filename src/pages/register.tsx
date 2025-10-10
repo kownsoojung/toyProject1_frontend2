@@ -12,6 +12,7 @@ import { AFormTime } from "@/components/AFormItem/AFormTime";
 import { AFormCheckbox } from "@/components/AFormItem/AFormCheckbox";
 import { AFormRadio } from "@/components/AFormItem/AFormRadio";
 import { AFormGrid } from "@/components/AFormItem/Grid/AGrid";
+import AForm from "@/components/AFormItem/AForm";
 
 export default function RegisterTableForm() {
   const registerSchema = z.object({

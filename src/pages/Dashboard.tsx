@@ -4,11 +4,11 @@ import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import About from "./About";
 
 const Dashboard = () => {
-    const { openModal } = useModal();
+    const { openModal: openChildModal } = useModal();
 
     useHelmetTitle("HOME");
     let fnModal = () =>{
-        openModal("about-modal", "About", <About />);
+        openChildModal("about-modal", "About", "/Settings/System", {param:"1"});
     }
     return (
         <Stack spacing={2}>

@@ -6,7 +6,8 @@ import Header from "./Header";
 import { SIDEBAR_WIDTH } from "./constants";
 import { useMenuStore } from "@/stores/menuStore";
 import { useLayoutContext } from "@/contexts/LayoutContext";
-import { ModalProvider } from "@/hooks/ModalProvider";
+import { TabModalProvider } from "@/hooks/ModalProvider";
+
 
 type TabItem = {
   key: string;
@@ -76,7 +77,7 @@ export default function MainLayout() {
       sx={{
         display: "flex",
         minHeight: 800,  // 바깥 전체 최소 높이
-        minWidth: 1200,
+        minWidth: 1600,
         height: "100vh", // 화면보다 작으면 100vh
       }}
     >
@@ -180,12 +181,29 @@ export default function MainLayout() {
               height: "calc(100vh - 64px - 48px)", // Header 64px + Tabs 48px
               overflowY: "auto",     // 내용이 넘치면 스크롤
               bgcolor: "#fff",
-              p: 2,
+              
             }}
           >
-            <ModalProvider>
-              {tabs.find((t) => t.key === activeKey)?.component || <div>Page Not Found</div>}
-            </ModalProvider>
+            {tabs.map( tab =>
+               (
+                <Box
+                  role="tabpanel"
+                  hidden={activeKey !== tab.key}
+                  id={tab.key}
+                  key={tab.key}
+                  sx={{
+                    height: "100%",           // 부모 높이 100%
+                    display: activeKey === tab.key ? "block" : "none",
+                    position: "relative",     // 모달이 내부 기준으로 잡히게
+                  }}
+                >
+                  <TabModalProvider>
+                  
+                  <Box sx={{ height: "100%", overflowY: "auto" }}>{tab.component}</Box>
+                </TabModalProvider>
+                </Box>
+              )
+          )}
           
         </Box>
       </Box>
