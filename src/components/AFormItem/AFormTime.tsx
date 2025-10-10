@@ -1,7 +1,7 @@
 // AFormTimeUnified.tsx
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { TimePicker } from "@mui/x-date-pickers";
+import { TimePicker, TimePickerProps } from "@mui/x-date-pickers";
 import { Box } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
@@ -17,6 +17,8 @@ interface AFormTimeUnifiedProps{
   mStep?: number;
   sStep?: number;
   base?:AFormBaseItemProps;
+  options?:TimePickerProps
+  endOptions?:TimePickerProps
 }
 
 const formatMap: Record<
@@ -37,6 +39,7 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
   mStep = 1,
   sStep = 1,
   base,
+  options,endOptions
 }) => {
   const { watch } = useFormContext();
   const startValue = watch(name);
@@ -44,7 +47,7 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
 
   const { views, inputFormat, width } = formatMap[formatType];
 
-  const renderPicker = (field: any, error?: string) => {
+  const renderPicker = (field: any, error?: string, option?:TimePickerProps) => {
     const value = field.value ? roundToStep(dayjs(field.value), hStep, mStep, sStep) : null;
 
     const handleChange = (val: Dayjs | null) => {
@@ -73,6 +76,7 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
             sx: width ? { width } : undefined,
           },
         }}
+        {...option}
       />
     );
   };
@@ -80,7 +84,7 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
   if (!endName) {
     return (
       <AFormBaseItem name={name} {...base}>
-        {(field, error) => renderPicker(field, error)}
+        {(field, error) => renderPicker(field, error, options)}
       </AFormBaseItem>
     );
   }
@@ -88,13 +92,13 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
   return (
     <Box display="flex" alignItems="center" gap={1}>
       <AFormBaseItem name={name} {...base}>
-        {(field, error) => renderPicker(field, error)}
+        {(field, error) => renderPicker(field, error, options)}
       </AFormBaseItem>
 
       <Box>~</Box>
 
       <AFormBaseItem name={endName} {...base}>
-        {(field, error) => renderPicker(field, error)}
+        {(field, error) => renderPicker(field, error, endOptions)}
       </AFormBaseItem>
     </Box>
   );

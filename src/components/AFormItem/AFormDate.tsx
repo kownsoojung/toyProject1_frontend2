@@ -1,7 +1,7 @@
 // AFormDateUnified.tsx
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
+import { DatePicker, DatePickerProps, DateTimePicker } from "@mui/x-date-pickers";
 import { Box } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
@@ -20,6 +20,8 @@ interface AFormDateUnifiedProps {
   mStep?: number;
   sStep?: number;
   base?:AFormBaseItemProps;
+  options?:DatePickerProps
+  endOptions?:DatePickerProps
 }
 
 const formatMap: Record<
@@ -38,21 +40,22 @@ const formatMap: Record<
 export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
   name,
   endName,
-  label,
   formatType = "date",
   minDate,
   maxDate,
   hStep = 1,
   mStep = 1,
   sStep = 1,
-  base
+  base,
+  options,
+  endOptions
 }) => {
   const { watch } = useFormContext();
   const startValue = name ? watch(name) : null;
   const endValue = endName ? watch(endName) : null;
   const { views, inputFormat, component: PickerComponent, width } = formatMap[formatType];
 
-  const renderPicker = (field: any, error?: string, min?: Dayjs, max?: Dayjs) => {
+  const renderPicker = (field: any, error?: string, min?: Dayjs, max?: Dayjs, option?:DatePickerProps) => {
     const value = field.value
       ? roundToStep(dayjs(field.value), hStep, mStep, sStep)
       : null; // 값 없으면 null로
@@ -85,6 +88,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
             sx: width ? { width } : undefined,
           },
         }}
+        {...option}
       />
     );
   };
@@ -92,7 +96,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
   if (!endName) {
     return (
       <AFormBaseItem name={name} {...base}>
-        {(field, error) => renderPicker(field, error, parseMinMax(minDate), parseMinMax(maxDate))}
+        {(field, error) => renderPicker(field, error, parseMinMax(minDate), parseMinMax(maxDate), options)}
       </AFormBaseItem>
     );
   }
@@ -106,7 +110,8 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
               field,
               error,
               parseMinMax(minDate),
-              endValue ? roundToStep(dayjs(endValue), hStep, mStep, sStep) : parseMinMax(maxDate)
+              endValue ? roundToStep(dayjs(endValue), hStep, mStep, sStep) : parseMinMax(maxDate),
+              options
             )
           }
         </AFormBaseItem>
@@ -119,7 +124,8 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
               field,
               error,
               startValue ? roundToStep(dayjs(startValue), hStep, mStep, sStep) : parseMinMax(minDate),
-              parseMinMax(maxDate)
+              parseMinMax(maxDate),
+              endOptions
             )
           }
         </AFormBaseItem>

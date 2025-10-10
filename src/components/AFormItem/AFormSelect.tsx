@@ -6,13 +6,13 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 interface SelectItemProps extends Omit<SelectProps, "name">{
   name:string,
-  options?: SiteCodeSearchDTO;
   list?: CodeItem[];
   selectCode?:SiteCodeSearchDTO;
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   msize?:number|string
   isDisabledItem?: (item: CodeItem) => boolean;
   parent?: string; 
+  options?:SelectProps
 }
 
 export const AFormSelect: React.FC<SelectItemProps> = ({
@@ -61,7 +61,7 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
           sx={{
             width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
           }}
-          {...rest} // 여기서 select, multiline, rows 등 모두 전달 가능
+          {...options}
         >
           {selectOptions.map((item:CodeItem) => (
             <MenuItem

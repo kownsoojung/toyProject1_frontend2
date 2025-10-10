@@ -8,7 +8,7 @@ import {
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CodeItem, useCode } from "@/hooks/useCode";
 
-interface AFormCheckboxProps extends Omit<CheckboxProps, "name" | "onChange" | "checked">{
+interface AFormCheckboxProps{
   selectCode?: SiteCodeSearchDTO;
   checkList?: CodeItem[] | CodeItem;
   /** baseProp을 분리해서 별도 전달 가능 */
@@ -16,6 +16,7 @@ interface AFormCheckboxProps extends Omit<CheckboxProps, "name" | "onChange" | "
   row?: boolean;
   label?: string;
   isDisabledItem?: (item: CodeItem) => boolean;
+  options?:CheckboxProps
 }
 
 export const AFormCheckbox: React.FC<AFormCheckboxProps> = ({
@@ -26,7 +27,7 @@ export const AFormCheckbox: React.FC<AFormCheckboxProps> = ({
   row = false,
   label,
   isDisabledItem,
-  ...rest
+  options
 }) => {
 
   
@@ -68,7 +69,7 @@ export const AFormCheckbox: React.FC<AFormCheckboxProps> = ({
                       checked={value.includes(item.value)}
                       onChange={() => handleChange(item.value)}
                       disabled={isDisabledItem?.(item) || false}
-                      {...rest}
+                      {...options}
                     />
                   }
                   label={item.label}

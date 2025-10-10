@@ -11,7 +11,8 @@ import {
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CodeItem, useCode } from "@/hooks/useCode";
 
-interface baseProp extends Omit<RadioProps, "name">, Omit<AFormBaseItemProps, "children"> {
+interface baseProp  {
+  name:string
   selectCode?: SiteCodeSearchDTO;
   checkList?: CodeItem[] | CodeItem;
   /** baseProp을 분리해서 별도 전달 가능 */
@@ -19,6 +20,7 @@ interface baseProp extends Omit<RadioProps, "name">, Omit<AFormBaseItemProps, "c
   row?: boolean;
   label?: string;
   isDisabledItem?: (item: CodeItem) => boolean;
+  options?:RadioProps
 }
 
 export const AFormRadio: React.FC<baseProp> = ({
@@ -27,9 +29,8 @@ export const AFormRadio: React.FC<baseProp> = ({
   checkList,
   base,
   row = false,
-  label,
   isDisabledItem,
-  ...rest
+  options
 }) => {
 
   
@@ -61,7 +62,7 @@ export const AFormRadio: React.FC<baseProp> = ({
             <FormControlLabel
               key={item.value}
               value={item.value}          // RadioGroup value와 매칭
-              control={<Radio disabled={isDisabledItem?.(item) || item.disabled} {...rest} />}
+              control={<Radio disabled={isDisabledItem?.(item) || item.disabled} {...options} />}
               label={item.label}
             />
           ))}

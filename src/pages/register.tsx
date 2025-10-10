@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
 import { AFormTextField } from "@/components/AFormItem/AFormTextField";
 import { AFormDate } from "@/components/AFormItem/AFormDate";
-import { AFormTime } from "@/components/AFormItem/AFormTimeRange";
+import { AFormTime } from "@/components/AFormItem/AFormTime";
 import AForm from "@/components/AFormItem/AForm";
 import { AFormCheckbox } from "@/components/AFormItem/AFormCheckbox";
 import { AFormRadio } from "@/components/AFormItem/AFormRadio";
