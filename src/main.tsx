@@ -25,9 +25,9 @@ root.render(
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
-         
+
             <App />
-         
+
         </LocalizationProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />

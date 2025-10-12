@@ -8,13 +8,15 @@ interface AFormTextFieldProps {
   msize?: number|string;
   base?: Omit<AFormBaseItemProps, "name" | "children">; 
   options?:TextFieldProps
+  type?:string
 }
 
 export const AFormTextField: React.FC<AFormTextFieldProps> = ({
   name,
   msize = 0,
   base,
-  options
+  options,
+  type
 }) => {
   return (
     <AFormBaseItem name={name} {...base}>
@@ -26,6 +28,7 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
           sx={{
             width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
           }}
+          type={type}
           {...options} // 여기서 select, multiline, rows 등 모두 전달 가능
         />
       )}

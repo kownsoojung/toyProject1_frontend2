@@ -37,7 +37,7 @@ export default function App() {
     );
   }
 
-  const router = createAppRouter(menus);
+  const router = createAppRouter();
 
   return (
     <LayoutContextProvider>

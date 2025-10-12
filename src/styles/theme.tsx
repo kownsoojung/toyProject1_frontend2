@@ -3,9 +3,10 @@ import { createTheme } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";
 import { Box, Table } from "@mui/material";
 import "@mui/x-date-pickers/themeAugmentation";
+import { Height } from "@mui/icons-material";
 
 // ✅ Table 스타일 (기존 그대로)
-export const StyledTable = styled(Table)<{ type: "search" | "register" }>(({ type }) => ({
+export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" }>(({ type }) => ({
   tableLayout: "fixed",
   width: "100%",
   borderCollapse: "collapse",
@@ -27,7 +28,8 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" }>(({ typ
           verticalAlign: "middle",
         },
       }
-    : {
+    : type === "register"
+    ? {
         backgroundColor: "#fff",
         border: "1px solid #ddd",
         "& th, & td": {
@@ -36,7 +38,40 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" }>(({ typ
           borderBottom: "1px solid #ddd",
           textAlign: "left",
         },
-      }),
+      }
+    : type === "form"
+    ? {
+        backgroundColor: "#fdfdfd",
+        border: "1px solid #ccc",
+        "& tr": { border: "none" },
+        "& th": {
+          border: "none !important",
+          textAlign: "right",
+          verticalAlign: "middle",
+          padding: "10px 12px",
+        },
+        "& td": {
+          border: "none !important",
+          textAlign: "left",
+          verticalAlign: "middle",
+          padding: "10px 10px",
+        },
+       "& .MuiInputBase-root": {
+          height: 40, // 전체 컨테이너 높이
+          minHeight: 40,
+          "& input, & textarea, & .MuiSelect-select": {
+            height: "100%",       // 부모 높이 따라가기
+            padding: "0 8px",
+            boxSizing: "border-box",
+          },
+          "& textarea": {
+            padding: "8px",       // multiline 패딩
+          },
+          display: "flex",        // Select 중앙 정렬용
+          alignItems: "center",
+        },
+      }
+    : {}),
 }));
 
 export const FormHeader = styled(Box)(({ theme }) => ({
@@ -107,19 +142,31 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: { backgroundColor: "#fff" },
-        input: { backgroundColor: "#fff" },
+        input: {
+          height: 32,
+          padding: "0 8px",
+          fontSize: 13,
+        },
+        notchedOutline: {
+          borderColor: "#ccc",
+        },
       },
     },
     MuiTextField: {
       defaultProps: { size: "small" },
       styleOverrides: {
         root: {
-          "& .MuiOutlinedInput-root": {
-            height: "auto",
-            padding: 0,
-            "&.MuiInputBase-multiline": { height: "auto" },
-            "& input": { height: 28, lineHeight: "28px", padding: "0 8px", fontSize: 13 },
-            "& textarea": { padding: "4px 8px", lineHeight: "1.5", fontSize: 13 },
+          "& .MuiInputLabel-root": {
+            fontSize: 13,
+            transform: "translate(8px, 6px) scale(1)",
+          },
+          "& .MuiInputLabel-shrink": {
+            transform: "translate(8px, -6px) scale(0.75)",
+            fontSize: 18,
+          },
+          "& .MuiInputBase-root": {
+            height: 32,
+            fontSize: 13,
           },
         },
       },

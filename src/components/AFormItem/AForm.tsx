@@ -11,10 +11,11 @@ interface AFormProps {
   title?: string | ReactNode; // 폼 상단 제목
   labelSize?: number;
   colCnt?: number;
-  type?: "search" | "register";
+  type?: "search" | "register" | "form";
   onSubmit: SubmitHandler<any>;
   methods: UseFormReturn<any>;
   minHeight?: number; // 바깥 최소 높이
+  isLabel?:boolean
 }
 
 
@@ -25,6 +26,7 @@ export default function AForm({
   type = "search",
   onSubmit,
   methods,
+  isLabel=true,
 }: AFormProps) {
   const { handleSubmit } = methods; // ✅ methods에서 꺼냄
 
@@ -36,7 +38,7 @@ export default function AForm({
   const cols = useMemo(() => {
     const arr = [];
     for (let i = 0; i < columns; i++) {
-      arr.push(<col key={`label-${i}`} style={{ width: labelSize }} />);
+      if (isLabel) arr.push(<col key={`label-${i}`} style={{ width: labelSize }} />);
       arr.push(<col key={`input-${i}`} style={{ width: "auto" }} />);
     }
     return arr;
