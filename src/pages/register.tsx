@@ -1,7 +1,7 @@
 // src/components/RegisterTableForm.tsx
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Button, Card, Box, TableRow, TableCell } from "@mui/material";
+import { Button, Card, Box, TableRow, TableCell, ButtonGroup } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
@@ -13,6 +13,7 @@ import { AFormCheckbox } from "@/components/AFormItem/AFormCheckbox";
 import { AFormRadio } from "@/components/AFormItem/AFormRadio";
 import { AFormGrid } from "@/components/AFormItem/Grid/AGrid";
 import AForm from "@/components/AFormItem/AForm";
+import { FormButtons, FormHeader } from "@/styles/theme";
 
 export default function RegisterTableForm() {
   const registerSchema = z.object({
@@ -48,15 +49,16 @@ export default function RegisterTableForm() {
   return (
     <>
     <Card sx={{ p: 2, width: 800, borderRadius: 2 }}>
+
+    <FormHeader>
+      <Box component="span" sx={{ fontWeight: 600 }}>회원가입</Box>
+      <FormButtons>
+        <Button variant="contained" onClick={methods.handleSubmit(onSubmit)}>제출</Button>
+        <Button variant="outlined" color="error" onClick={() => methods.reset()}>초기화</Button>
+      </FormButtons>
+    </FormHeader>
       <AForm
         title="회원 등록"
-        buttonBottom={
-          <>
-            <Button type="submit" variant="contained">제출</Button>
-            <Button variant="outlined" color="error" onClick={() => methods.reset()}>초기화</Button>
-          </>
-        }
-        
         onSubmit={onSubmit}
         methods={methods}
       >

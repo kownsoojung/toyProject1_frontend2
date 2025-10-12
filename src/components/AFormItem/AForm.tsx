@@ -20,9 +20,6 @@ interface AFormProps {
 
 export default function AForm({
   children,
-  buttonTop,
-  buttonBottom,
-  title,
   labelSize = 100,
   colCnt=2,
   type = "search",
@@ -48,13 +45,7 @@ export default function AForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* 상단 영역 */}
-        {(title || buttonTop) && (
-          <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} mb={2}>
-            {title && <div style={{ fontSize: 18, fontWeight: 600 }}>{title}</div>}
-            {buttonTop && <Box display="flex" gap={1}>{buttonTop}</Box>}
-          </Box>
-        )}
+        
 
         {/* 테이블 폼 영역 */}
         <TableContainer component={Paper} sx={{ boxShadow: "none",}}>
@@ -64,12 +55,7 @@ export default function AForm({
           </StyledTable>
         </TableContainer>
 
-        {/* 하단 버튼 */}
-        {buttonBottom && (
-          <Box display="flex" mt={2} gap={1}>
-            {buttonBottom}
-          </Box>
-        )}
+        
       </form>
     </FormProvider>
   );

@@ -7,7 +7,7 @@ import { SIDEBAR_WIDTH } from "./constants";
 import { useMenuStore } from "@/stores/menuStore";
 import { useLayoutContext } from "@/contexts/LayoutContext";
 import { TabModalProvider } from "@/hooks/ModalProvider";
-
+import { useTheme } from "@mui/material/styles";
 
 type TabItem = {
   key: string;
@@ -19,6 +19,7 @@ type TabItem = {
 const LazyDashboard = lazy(() => import("@/pages/Dashboard"));
 
 export default function MainLayout() {
+  const theme = useTheme();
   const menus = useMenuStore((state) => state.menus);
   const initialMenu = menus.find(menu => menu.id === 1) || menus[0];
   const { sidebarOpen } = useLayoutContext();
@@ -92,7 +93,7 @@ export default function MainLayout() {
             flexShrink: 0,
           }}
         >
-          <Sidebar onMenuClick={handleMenuClick} />
+          <Sidebar onMenuClick={handleMenuClick} activeKey={activeKey} />
         </Box>
 
         {/* Main */}
@@ -124,7 +125,7 @@ export default function MainLayout() {
                   color: "#333",
                   "&.Mui-selected": {
                     bgcolor: "#fff", // 선택된 탭 배경
-                    color: "#1976d2", // 선택된 글자 색
+                    color: theme.palette.primary.main, // 선택된 글자 색
                     fontWeight: "bold",
                     boxShadow: "0 2px 5px rgba(0,0,0,0.1)"
                   },

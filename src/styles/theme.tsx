@@ -1,22 +1,21 @@
 // src/theme.ts
 import { createTheme } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";
-import { Table } from "@mui/material";
+import { Box, Table } from "@mui/material";
 import "@mui/x-date-pickers/themeAugmentation";
 
+// ✅ Table 스타일 (기존 그대로)
 export const StyledTable = styled(Table)<{ type: "search" | "register" }>(({ type }) => ({
   tableLayout: "fixed",
   width: "100%",
   borderCollapse: "collapse",
-  "& tr:first-of-type td": { paddingTop: 12,},
+  "& tr:first-of-type td": { paddingTop: 12 },
   "& tr:last-of-type td": { paddingBottom: 12 },
   ...(type === "search"
     ? {
         backgroundColor: "#f9fafb",
         border: "1px solid #ddd",
-        "& tr": {
-          border: "none",
-        },
+        "& tr": { border: "none" },
         "& th": {
           border: "none !important",
           textAlign: "right",
@@ -40,8 +39,71 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" }>(({ typ
       }),
 }));
 
+export const FormHeader = styled(Box)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: theme.spacing(1),
+}));
+
+export const FormButtons = styled(Box)(({ theme }) => ({
+  display: "flex",
+  gap: theme.spacing(1), // 버튼 간격
+  alignItems: "center",   // 버튼 높이 맞추기
+}));
+
+// ✅ MUI Theme 생성
 const theme = createTheme({
+  // --------------------
+  // 🎨 기본 색상 팔레트
+  // --------------------
+  palette: {
+    mode: "light", // 🔁 "dark" 로 바꾸면 자동 다크테마
+    primary: {
+      main: "#4a148c", // 기본 파란색
+      light: "#42a5f5",
+      dark: "#1565c0",
+      contrastText: "#fff",
+    },
+    secondary: {
+      main: "#9c27b0",
+      light: "#ba68c8",
+      dark: "#7b1fa2",
+      contrastText: "#fff",
+    },
+    background: {
+      default: "#f5f6fa", // 전체 배경색
+      paper: "#ffffff", // Card, Table 등
+    },
+    text: {
+      primary: "#212121",
+      secondary: "#616161",
+    },
+    divider: "#e0e0e0",
+  },
+
+  // --------------------
+  // 🧩 MUI 컴포넌트 오버라이드
+  // --------------------
   components: {
+    // 🔹 Sidebar 관련 공통 스타일 추가
+    MuiListItemButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.primary.main + "22", // 선택 시 연한 primary 배경
+            color: theme.palette.primary.main,
+            "&:hover": {
+              backgroundColor: theme.palette.primary.main + "33",
+            },
+          },
+          "&:hover": {
+            backgroundColor: theme.palette.action.hover,
+          },
+        }),
+      },
+    },
+
     MuiOutlinedInput: {
       styleOverrides: {
         root: { backgroundColor: "#fff" },
@@ -63,41 +125,39 @@ const theme = createTheme({
       },
     },
     MuiCheckbox: {
-      defaultProps: { size: 'small' },
+      defaultProps: { size: "small" },
       styleOverrides: {
         root: {
           backgroundColor: "transparent",
-          padding: 0, // 체크박스 주변 여백 최소화
+          padding: 0,
           "&.Mui-checked": { backgroundColor: "#fff" },
           "&:hover": { backgroundColor: "#fff" },
           "& svg": {
-            backgroundColor: "#fff", // 아이콘 내부 배경 흰색
-            width: 18, // 체크 아이콘 크기 조절
+            backgroundColor: "#fff",
+            width: 18,
             height: 18,
           },
         },
       },
     },
     MuiRadio: {
-      defaultProps: { size: 'small' },
+      defaultProps: { size: "small" },
       styleOverrides: {
         root: {
-          padding: 0, // 주변 여백 최소화
+          padding: 0,
           "&.Mui-checked": { backgroundColor: "#fff" },
           "&:hover": { backgroundColor: "#fff" },
           "& svg": {
-            
-            width: 18, // 라디오 아이콘 크기
+            width: 18,
             height: 18,
-            
           },
         },
       },
     },
     MuiFormControlLabel: {
       styleOverrides: {
-        label: { fontSize: 14, lineHeight: '24px' },
-        root: { margin: 0, alignItems: 'center', gap: 4 }, // 체크박스와 label 간격
+        label: { fontSize: 14, lineHeight: "24px" },
+        root: { margin: 0, alignItems: "center", gap: 4 },
       },
     },
     MuiPickersTextField: {
@@ -120,10 +180,18 @@ const theme = createTheme({
       defaultProps: { size: "small" },
       styleOverrides: { root: { minHeight: 28, fontSize: 13, padding: "0px 4px" } },
     },
-    MuiTabs: { styleOverrides: { root: { minHeight: 36 }, scroller: { minHeight: 36 } } },
-    MuiTab: { styleOverrides: { root: { minHeight: 36, textTransform: "none", fontSize: 13, padding: "0 12px" } } },
-    MuiCard: { styleOverrides: { root: { borderRadius: 8 } } },
-    MuiTableCell: { styleOverrides: { root: { padding: "4px 8px", verticalAlign: "middle" } } },
+    MuiTabs: {
+      styleOverrides: { root: { minHeight: 36 }, scroller: { minHeight: 36 } },
+    },
+    MuiTab: {
+      styleOverrides: { root: { minHeight: 36, textTransform: "none", fontSize: 13, padding: "0 12px" } },
+    },
+    MuiCard: {
+      styleOverrides: { root: { borderRadius: 8, backgroundColor: "#fff" } },
+    },
+    MuiTableCell: {
+      styleOverrides: { root: { padding: "4px 8px", verticalAlign: "middle" } },
+    },
   },
 });
 

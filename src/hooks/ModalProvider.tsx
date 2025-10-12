@@ -63,35 +63,34 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
             disablePortal
             container={() => containerRef.current!}
             sx={{ display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "auto", }}
-          ><div>
-            <Draggable handle=".draggable-handle" nodeRef={nodeRef}>
-<Box
-            ref={nodeRef}
-              sx={{
-                maxWidth: 1200,
-                maxHeight: 800,
-                bgcolor: "background.paper",
-                border: "2px solid #000",
-                boxShadow: 24,
-                borderRadius: 2,
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <Box className="draggable-handle"  sx={{ p: 1, borderBottom: "1px solid #ccc", paddingLeft:3}}>
-              <Typography variant="h6">{m.title}</Typography>
-              </Box>
-              <Box sx={{ p: 3, overflowY: "auto", flexGrow: 1 }}>
-                <Box sx={{ mt: 2 }}>{m.content(m.props)}</Box>
-              </Box>
-              <Box sx={{ p: 1, borderTop: "1px solid #ccc", textAlign:"right" }}>
-                <Button onClick={() => closeModal(m.key)} >닫기</Button>
-              </Box>
-            </Box>
-          
+          >
+            <div>
+              <Draggable handle=".draggable-handle" nodeRef={nodeRef}>
+                <Box
+                ref={nodeRef}
+                  sx={{
+                    maxWidth: 1200,
+                    maxHeight: 800,
+                    bgcolor: "background.paper",
+                    border: "2px solid #000",
+                    boxShadow: 24,
+                    borderRadius: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Box className="draggable-handle"  sx={{ p: 1, borderBottom: "1px solid #ccc", paddingLeft:3}}>
+                  <Typography variant="h6">{m.title}</Typography>
+                  </Box>
+                  <Box sx={{ p: 3, overflowY: "auto", flexGrow: 1 }}>
+                    <Box sx={{ mt: 2 }}>{m.content(m.props)}</Box>
+                  </Box>
+                  <Box sx={{ p: 1, borderTop: "1px solid #ccc", textAlign:"right" }}>
+                    <Button onClick={() => closeModal(m.key)} >닫기</Button>
+                  </Box>
+                </Box>
               </Draggable>
-          </div>
-            
+            </div>
           </Modal>
           )
         })}

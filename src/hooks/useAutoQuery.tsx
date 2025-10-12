@@ -12,6 +12,7 @@ export interface OpenApiQueryOptions<T> {
   params?: any;                                 // GET 쿼리 파라미터
   data?: any;                                   // POST/PUT 요청 Body
   config?: AxiosRequestConfig;                  // 추가 Axios 옵션
+  isAuto?:boolean;
   options?: Omit<UseQueryOptions<T, Error>, 'queryKey' | 'queryFn'>;
   
 }
@@ -23,18 +24,26 @@ export function UseAutoQuery<T>({
   params,
   data,
   config,
-  options={enabled:true, gcTime:0, staleTime: 0,refetchOnMount: 'always',},
+  isAuto=false,
+  options={enabled:isAuto , gcTime:0, staleTime: 0,refetchOnMount: 'always',},
   
 }: OpenApiQueryOptions<T>): UseQueryResult<T, Error> {
 
   const fetcher = async (): Promise<T> => {
-    const response = await apiInstance.request<T>({
-      url,
-      method,
-      params: method === 'GET' ? params : undefined,
-      data: method !== 'GET' ? data : undefined,
-    });
-    return response.data;
+    try {
+      const res = await apiInstance.request<T>({
+                    url,
+                    method,
+                    params: method === 'GET' ? params : undefined,
+                    data: method !== 'GET' ? data : undefined,
+                    ...config,
+                  });
+      return res.data;
+    } catch (error: any) {
+      
+      //handleCommonError(error);
+      throw error;
+    }
   };
 
   return useQuery<T, Error>({ queryKey: [queryKey], queryFn: fetcher, ...options });
