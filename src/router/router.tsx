@@ -16,7 +16,7 @@ export const routes: RouteObject[] = [
   },
   {
     path: "/",
-    element: localStorage.getItem("isLoggedIn") === "false" ? <MainLayout /> : <Navigate to="/login" />,
+    element: localStorage.getItem("isLoggedIn") === "true" ? <MainLayout /> : <Navigate to="/login" />,
     children: [
       { index: true, element: <DashboardPage /> }, // 기본 탭
     ],

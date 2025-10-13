@@ -1,5 +1,5 @@
 import React, { useState, lazy, Suspense } from "react";
-import { Box, Tabs, Tab, AppBar, Toolbar, IconButton } from "@mui/material";
+import { Box, Tabs, Tab, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -42,15 +42,15 @@ export default function MainLayout() {
     return <div>Page Not Found</div>;
   };
 
-  const handleMenuClick = (path: string, name: string, id: number |string) => {
-     const tabKey = `${id}-${path}`; // id + path로 고유 key 생성
-      if (!tabs.find(t => t.key === tabKey)) {
-        setTabs(prev => [
-          ...prev,
-          { key: tabKey, title:name, closable: true, component: lazyLoad(path) }
-        ]);
-      }
-      setActiveKey(tabKey);
+  const handleMenuClick = (path: string, name: string, id: number | string) => {
+    const tabKey = `${id}-${path}`;
+    if (!tabs.find(t => t.key === tabKey)) {
+      setTabs(prev => [
+        ...prev,
+        { key: tabKey, title: name, closable: true, component: lazyLoad(path) }
+      ]);
+    }
+    setActiveKey(tabKey);
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: string) => setActiveKey(newValue);
@@ -77,14 +77,21 @@ export default function MainLayout() {
     <Box
       sx={{
         display: "flex",
-        minHeight: 800,  // 바깥 전체 최소 높이
+        flexDirection: "column",
         minWidth: 1600,
-        height: "100vh", // 화면보다 작으면 100vh
+        height: "100vh",
+        maxHeight: "100vh",
+        overflowX: "auto",
+        overflowY: "hidden",
       }}
     >
-      {/* Header */}
-      
-      
+      {/* Header - 최상단 */}
+      <Box sx={{ flexShrink: 0, width: "100%" }}>
+        <Header />
+      </Box>
+
+      {/* Sidebar + Main 영역 */}
+      <Box sx={{ display: "flex", flexGrow: 1, overflow: "hidden" }}>
         {/* Sidebar */}
         <Box
           sx={{
@@ -96,11 +103,16 @@ export default function MainLayout() {
           <Sidebar onMenuClick={handleMenuClick} activeKey={activeKey} />
         </Box>
 
-        {/* Main */}
-        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          <Box sx={{ flexShrink: 0 }}>
-            <Header />
-          </Box>
+        {/* Main - Tabs + Content */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            height: "100%",
+          }}
+        >
           {/* Tabs */}
           <Box sx={{ flexShrink: 0 }}>
             <Tabs
@@ -109,23 +121,23 @@ export default function MainLayout() {
               variant="scrollable"
               scrollButtons="auto"
               sx={{
-                bgcolor: "#f0f0f0", // 탭 바 배경
+                bgcolor: "#f0f0f0",
                 borderBottom: "1px solid #ccc",
                 minHeight: 40,
-                marginTop:0.3,
+                marginTop: 0.3,
                 "& .MuiTab-root": {
                   textTransform: "none",
                   paddingX: 1,
                   minWidth: 80,
-                  minHeight: 36, 
+                  minHeight: 36,
                   borderRadius: 1,
                   border: "1px solid #ccc",
-                  borderBottom: "none", 
-                  bgcolor: "#e0e0e0", // 기본 탭 배경
+                  borderBottom: "none",
+                  bgcolor: "#e0e0e0",
                   color: "#333",
                   "&.Mui-selected": {
-                    bgcolor: "#fff", // 선택된 탭 배경
-                    color: theme.palette.primary.main, // 선택된 글자 색
+                    bgcolor: "#fff",
+                    color: theme.palette.primary.main,
                     fontWeight: "bold",
                     boxShadow: "0 2px 5px rgba(0,0,0,0.1)"
                   },
@@ -153,7 +165,7 @@ export default function MainLayout() {
                         <IconButton
                           size="small"
                           onClick={(e) => {
-                            e.stopPropagation(); // 탭 클릭 이벤트 막기
+                            e.stopPropagation();
                             handleTabClose(tab.key);
                           }}
                           sx={{
@@ -178,34 +190,30 @@ export default function MainLayout() {
           {/* Tab Content */}
           <Box
             sx={{
-              flexGrow: 1,           // 남은 공간을 차지
-              height: "calc(100vh - 64px - 48px)", // Header 64px + Tabs 48px
-              overflowY: "auto",     // 내용이 넘치면 스크롤
+              flexGrow: 1,
+              height: 0,
+              overflowY: "auto",
               bgcolor: "#fff",
-              
             }}
           >
-            {tabs.map( tab =>
-               (
+            {tabs.map((tab) => (
                 <Box
                   role="tabpanel"
                   hidden={activeKey !== tab.key}
                   id={tab.key}
                   key={tab.key}
                   sx={{
-                    height: "100%",           // 부모 높이 100%
+                    height: "100%",
                     display: activeKey === tab.key ? "block" : "none",
-                    position: "relative",     // 모달이 내부 기준으로 잡히게
+                    position: "relative",
                   }}
                 >
                   <TabModalProvider>
-                  
-                  <Box sx={{ height: "100%", overflowY: "auto" }}>{tab.component}</Box>
-                </TabModalProvider>
+                    <Box sx={{ height: "100%" }}>{tab.component}</Box>
+                  </TabModalProvider>
                 </Box>
-              )
-          )}
-          
+            ))}
+          </Box>
         </Box>
       </Box>
     </Box>

@@ -1,12 +1,29 @@
 // src/components/AFormGrid.tsx
-import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, useCallback } from "react";
 import { AgGridReact, AgGridReactProps } from "ag-grid-react";
 import { ColDef, GridApi, GridOptions } from "ag-grid-community";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { UseAutoQuery } from "@/hooks/useAutoQuery";
+import { exportToExcel as exportExcel } from "@/utils/excelExport";
+import { useQueryClient } from "@tanstack/react-query";
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Alert, 
+  Select, 
+  MenuItem, 
+  FormControl,
+  Pagination,
+  Stack,
+  Checkbox,
+  FormControlLabel,
+  FormGroup
+} from "@mui/material";
+import { apiInstance } from "@/api/baseApi";
 
 interface AFormGridProps {
-  url: string;
+  url?: string; // 로컬 데이터 모드를 위해 optional로 변경
   columnDefs: ColDef[];
   height?: number | string;
   pageSize?: number;
@@ -16,11 +33,59 @@ interface AFormGridProps {
   renderTotal?: (total: number) => React.ReactNode;
   rowSelection?: "single" | "multiple";
   isPage?: boolean;
-  props?:Partial<AgGridReactProps<any>>; 
+  props?: Partial<AgGridReactProps<any>>;
+  
+  // 새로운 props
+  rowData?: any[]; // 로컬 데이터 모드
+  autoFetch?: boolean; // 초기 자동 조회 여부
+  checkboxSelection?: boolean; // 체크박스 선택 모드
+  showQuickFilter?: boolean; // 빠른 검색 표시
+  showColumnToggle?: boolean; // 컬럼 표시/숨김 토글
+  autoHeight?: boolean; // 자동 높이 조절
+  enableRowDrag?: boolean; // 행 드래그 앤 드롭
+  enableGrouping?: boolean; // 그룹화 기능
+  
+  // 툴바 커스터마이징
+  renderToolbar?: (helpers: {
+    totalCount: number;
+    quickFilterComponent: React.ReactNode;
+    columnToggleButton: React.ReactNode;
+    defaultTotalDisplay: React.ReactNode;
+    // 액션 함수들
+    exportToExcel: (fileName?: string, exportUrl?: string) => Promise<void>;
+    exportToCsv: (fileName?: string) => void;
+    getSelectedRows: () => any[];
+    clearSelection: () => void;
+    selectAll: () => void;
+    refresh: () => void;
+  }) => React.ReactNode;
+  showToolbar?: boolean; // 툴바 표시 여부 (기본: true)
+  
+  // 이벤트 핸들러
+  onRowClicked?: (data: any) => void;
+  onRowDoubleClicked?: (data: any) => void;
+  onSelectionChanged?: (selectedRows: any[]) => void;
+  onRowDragEnd?: (data: any) => void;
+  
+  // 페이지 상태 유지 옵션
+  keepPageOnRefetch?: boolean; // refetch 시 현재 페이지 유지
 }
 
 export interface AFormGridHandle {
   refetch: (newParams?: Record<string, any>) => void;
+  getRawData: () => Record<string, any>;
+  getSelectedRows: () => any[];
+  getGridApi: () => GridApi | undefined;
+  exportToExcel: (fileName?: string, exportUrl?: string) => Promise<void>;
+  exportToCsv: (fileName?: string) => void;
+  clearSelection: () => void;
+  selectAll: () => void;
+  setQuickFilter: (text: string) => void;
+  setColumnVisible: (field: string, visible: boolean) => void;
+  addRow: (newRow?: any) => void;
+  updateRow: (rowId: any, newData: any) => void;
+  deleteRows: (rowIds: any[]) => void;
+  getAllRows: () => any[];
 }
 
 export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
@@ -36,7 +101,27 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       rowSelection = "single",
       isPage = true,
       renderTotal,
-      props
+      props,
+      rowData,
+      autoFetch = false,
+      checkboxSelection = false,
+      showQuickFilter = false,
+      showColumnToggle = false,
+      autoHeight = false,
+      enableRowDrag = false,
+      enableGrouping = false,
+      
+      // 툴바 커스터마이징
+      renderToolbar,
+      showToolbar = true,
+      
+      // 이벤트 핸들러
+      onRowClicked,
+      onRowDoubleClicked,
+      onSelectionChanged,
+      onRowDragEnd,
+      
+      keepPageOnRefetch = false,
     },
     ref
   ) => {
@@ -44,61 +129,400 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const [page, setPage] = useState<number>(1);
     const [pageSizeState, setPageSizeState] = useState<number>(pageSize);
     const [totalCount, setTotalCount] = useState<number>(0);
+    const [quickFilterText, setQuickFilterText] = useState<string>("");
+    const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
+    const [localData, setLocalData] = useState<any[]>(rowData || []);
 
     const gridRef = useRef<AgGridReact>(null);
+    const isLocalMode = !url || !!rowData;
+    const queryClient = useQueryClient();
 
-    const [shouldFetch, setShouldFetch] = useState(false);
-    // 서버 자동 조회
+    const [shouldFetch, setShouldFetch] = useState(autoFetch);
+    
+    // 서버 자동 조회 (로컬 모드가 아닐 때만)
     const { data, isLoading, error, refetch } = UseAutoQuery<Record<string, any>>({
       queryKey: ["gridData", url, params, page, pageSizeState],
-      url,
+      url: url || "",
       params: { ...params, page, pageSize: pageSizeState },
-      options: { enabled: shouldFetch },
+      options: { enabled: shouldFetch && !isLocalMode },
     });
 
+    // 컬럼 가시성 초기화
+    useEffect(() => {
+      const initialVisibility: Record<string, boolean> = {};
+      columnDefs.forEach((col) => {
+        if (col.field) {
+          initialVisibility[col.field] = col.hide !== true;
+        }
+      });
+      setVisibleColumns(initialVisibility);
+    }, [columnDefs]);
+
+    // 로컬 데이터 업데이트
+    useEffect(() => {
+      if (rowData) {
+        setLocalData(rowData);
+        setTotalCount(rowData.length);
+      }
+    }, [rowData]);
+
+    // imperative handle - 외부에서 사용할 메서드들
     useImperativeHandle(ref, () => ({
       refetch: (newParams?: Record<string, any>) => {
-        setParams(newParams || {});
-        setPage(1);
-        setShouldFetch(true);
-        refetch();
+        if (!isLocalMode) {
+          setParams(newParams || {});
+          if (!keepPageOnRefetch) {
+            setPage(1);
+          }
+          setShouldFetch(true);
+          refetch();
+        }
       },
-      getRawData: () => data || {}
+      getRawData: () => data || {},
+      getSelectedRows: () => {
+        return gridRef.current?.api?.getSelectedRows() || [];
+      },
+      getGridApi: () => gridRef.current?.api,
+      exportToExcel: async (fileName = "export.xlsx", exportUrl = "") => {
+        let dataToExport: any[] = [];
+
+        if (exportUrl) {
+          // AGrid에서 전체 데이터 조회 (QueryClient 사용)
+          try {
+            const response = await apiInstance.request({
+              url: exportUrl,
+              method: 'GET',
+              params: params,
+            });
+            
+            dataToExport = response.data[rowName] || response.data;
+          } catch (error) {
+            console.error('데이터 조회 실패:', error);
+            return;
+          }
+        } else {
+          // 현재 화면 데이터
+          gridRef.current?.api?.forEachNodeAfterFilterAndSort(node => {
+            dataToExport.push(node.data);
+          });
+        }
+        
+        // Excel 생성은 excelExport 유틸 사용
+        await exportExcel({
+          data: dataToExport,
+          columnDefs: enhancedColumnDefs,
+          fileName,
+        });
+      },
+      exportToCsv: (fileName = "export.csv") => {
+        gridRef.current?.api?.exportDataAsCsv({
+          fileName,
+        });
+      },
+      clearSelection: () => {
+        gridRef.current?.api?.deselectAll();
+      },
+      selectAll: () => {
+        gridRef.current?.api?.selectAll();
+      },
+      setQuickFilter: (text: string) => {
+        setQuickFilterText(text);
+        gridRef.current?.api?.setGridOption('quickFilterText', text);
+      },
+      setColumnVisible: (field: string, visible: boolean) => {
+        gridRef.current?.api?.setColumnsVisible([field], visible);
+      },
+      addRow: (newRow = {}) => {
+        gridRef.current?.api?.applyTransaction({ add: [newRow], addIndex: 0 });
+      },
+      updateRow: (rowId: any, newData: any) => {
+        const api = gridRef.current?.api;
+        api?.forEachNode(node => {
+          if (node.data.id === rowId) {
+            node.setData({ ...node.data, ...newData });
+          }
+        });
+      },
+      deleteRows: (rowIds: any[]) => {
+        const api = gridRef.current?.api;
+        const rowsToDelete: any[] = [];
+        api?.forEachNode(node => {
+          if (rowIds.includes(node.data.id)) {
+            rowsToDelete.push(node.data);
+          }
+        });
+        api?.applyTransaction({ remove: rowsToDelete });
+      },
+      getAllRows: () => {
+        const rows: any[] = [];
+        gridRef.current?.api?.forEachNode(node => rows.push(node.data));
+        return rows;
+      },
     }));
 
 
+    // 서버 데이터 처리
     useEffect(() => {
+      const api = gridRef.current?.api;
+      if (!api || isLocalMode) return;
+
+      if (error) {
+        api.showNoRowsOverlay?.();
+      } else if (!data?.[rowName] || data[rowName].length === 0) {
+        api.showNoRowsOverlay?.();
+      } else {
+        api.setGridOption('rowData', data[rowName] || []);
+        if (totalName) setTotalCount(data[totalName] || 0);
+        api.hideOverlay();
+      }
+    }, [data, isLoading, error, isLocalMode, rowName, totalName]);
+
+    // 로컬 데이터 처리
+    useEffect(() => {
+      const api = gridRef.current?.api;
+      if (!api || !isLocalMode) return;
+
+      if (localData.length === 0) {
+        api.showNoRowsOverlay?.();
+      } else {
+        api.setGridOption('rowData', localData);
+        api.hideOverlay();
+      }
+    }, [localData, isLocalMode]);
+
+    // 컬럼 가시성 변경 처리
+    const handleColumnToggle = useCallback((field: string) => {
       const api = gridRef.current?.api;
       if (!api) return;
 
-      else if (error || !(data?.[rowName]?.length > 0)) api.showNoRowsOverlay?.();
-      else {
-        (api as any).setRowData(data?.[rowName] || []);
-        if (totalName) setTotalCount(data?.[totalName] || 0);
+      const newVisibility = !visibleColumns[field];
+      api.setColumnsVisible([field], newVisibility);
+      setVisibleColumns((prev) => ({
+        ...prev,
+        [field]: newVisibility,
+      }));
+    }, [visibleColumns]);
+
+    // 이벤트 핸들러들
+    const handleRowClicked = useCallback((event: any) => {
+      if (onRowClicked) {
+        onRowClicked(event.data);
       }
-    }, [data, isLoading, error]);
+    }, [onRowClicked]);
+
+    const handleRowDoubleClicked = useCallback((event: any) => {
+      if (onRowDoubleClicked) {
+        onRowDoubleClicked(event.data);
+      }
+    }, [onRowDoubleClicked]);
+
+    const handleSelectionChanged = useCallback(() => {
+      if (onSelectionChanged) {
+        const selectedRows = gridRef.current?.api?.getSelectedRows() || [];
+        onSelectionChanged(selectedRows);
+      }
+    }, [onSelectionChanged]);
+
+    const handleRowDragEnd = useCallback((event: any) => {
+      if (onRowDragEnd) {
+        onRowDragEnd(event);
+      }
+    }, [onRowDragEnd]);
 
     // 페이지 계산
     const totalPages = Math.ceil(totalCount / pageSizeState);
-    const maxButtons = 10;
-    let startPage = Math.max(1, page - Math.floor(maxButtons / 2));
-    let endPage = startPage + maxButtons - 1;
-    if (endPage > totalPages) {
-      endPage = totalPages;
-      startPage = Math.max(1, endPage - maxButtons + 1);
-    }
-    const pagesToShow = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+
+    // 향상된 columnDefs (체크박스, 드래그, 그룹화 지원)
+    const enhancedColumnDefs = React.useMemo(() => {
+      return columnDefs.map((col, index) => {
+        const enhanced: ColDef = { ...col };
+        
+        if (checkboxSelection && index === 0) {
+          enhanced.checkboxSelection = true;
+          enhanced.headerCheckboxSelection = true;
+        }
+        
+        if (enableRowDrag && index === 0) {
+          enhanced.rowDrag = true;
+        }
+        
+        if (enableGrouping && col.field) {
+          enhanced.enableRowGroup = true;
+        }
+        
+        return enhanced;
+      });
+    }, [columnDefs, checkboxSelection, enableRowDrag, enableGrouping]);
+
+    // 기본 총건수 표시 컴포넌트
+    const defaultTotalDisplay = React.useMemo(() => (
+      <Box>
+        {renderTotal ? renderTotal(totalCount) : <Box>총 {totalCount}건</Box>}
+      </Box>
+    ), [totalCount, renderTotal]);
+
+    // 빠른 검색 컴포넌트
+    const quickFilterComponent = React.useMemo(() => {
+      if (!showQuickFilter) return null;
+      return (
+        <TextField
+          size="small"
+          placeholder="검색..."
+          value={quickFilterText}
+          onChange={(e) => {
+            setQuickFilterText(e.target.value);
+            gridRef.current?.api?.setGridOption('quickFilterText', e.target.value);
+          }}
+          sx={{ width: 200 }}
+        />
+      );
+    }, [showQuickFilter, quickFilterText]);
+
+    // 컬럼 토글 버튼 컴포넌트
+    const columnToggleButton = React.useMemo(() => {
+      if (!showColumnToggle) return null;
+      return (
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => {
+            // 컬럼 설정 토글
+          }}
+        >
+          컬럼 설정
+        </Button>
+      );
+    }, [showColumnToggle]);
 
     return (
-      <div>
-        {/* 총건수 */}
-        {renderTotal ? renderTotal(totalCount) : <div style={{ marginBottom: 8 }}>총 {totalCount}건</div>}
+      <Box>
+        {/* 에러 메시지 */}
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ mb: 2 }}
+            action={
+              <Button color="inherit" size="small" onClick={() => refetch()}>
+                재시도
+              </Button>
+            }
+          >
+            데이터를 불러오는 중 오류가 발생했습니다.
+          </Alert>
+        )}
+
+        {/* 상단 툴바 */}
+        {showToolbar && (
+          renderToolbar ? (
+            <Box sx={{ mb: 1 }}>
+              {renderToolbar({
+                totalCount,
+                quickFilterComponent,
+                columnToggleButton,
+                defaultTotalDisplay,
+                // 액션 함수들
+                exportToExcel: async (fileName = "export.xlsx", exportUrl = "") => {
+                  let dataToExport: any[] = [];
+
+                  if (exportUrl) {
+                    // AGrid에서 전체 데이터 조회 (QueryClient 사용)
+                    try {
+                      const result = await queryClient.fetchQuery({
+                        queryKey: ['excelExport', exportUrl],
+                        queryFn: async () => {
+                          const response = await fetch(exportUrl, {
+                            method: 'GET',
+                            headers: { 'Content-Type': 'application/json' },
+                          });
+                          
+                          if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                          }
+                          
+                          return response.json();
+                        },
+                      });
+                      dataToExport = result[rowName] || result;
+                    } catch (error) {
+                      console.error('데이터 조회 실패:', error);
+                      return;
+                    }
+                  } else {
+                    // 현재 화면 데이터
+                    gridRef.current?.api?.forEachNodeAfterFilterAndSort(node => {
+                      dataToExport.push(node.data);
+                    });
+                  }
+                  
+                  // Excel 생성은 excelExport 유틸 사용
+                  await exportExcel({
+                    data: dataToExport,
+                    columnDefs: enhancedColumnDefs,
+                    fileName,
+                  });
+                },
+                exportToCsv: (fileName = "export.csv") => {
+                  gridRef.current?.api?.exportDataAsCsv({
+                    fileName,
+                  });
+                },
+                getSelectedRows: () => gridRef.current?.api?.getSelectedRows() || [],
+                clearSelection: () => gridRef.current?.api?.deselectAll(),
+                selectAll: () => gridRef.current?.api?.selectAll(),
+                refresh: () => {
+                  if (!isLocalMode) {
+                    setShouldFetch(true);
+                    refetch();
+                  }
+                },
+              })}
+            </Box>
+          ) : (
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+              {/* 총건수 */}
+              {defaultTotalDisplay}
+
+              {/* 빠른 검색 및 액션 버튼들 */}
+              <Stack direction="row" spacing={1} alignItems="center">
+                {quickFilterComponent}
+                {columnToggleButton}
+              </Stack>
+            </Box>
+          )
+        )}
+
+        {/* 컬럼 표시/숨김 토글 (showColumnToggle이 true일 때) */}
+        {showColumnToggle && (
+          <Box sx={{ mb: 1, p: 1, border: "1px solid #ddd", borderRadius: 1, bgcolor: "#f9f9f9" }}>
+            <FormGroup row>
+              {columnDefs.filter((col) => col.field).map((col) => (
+                <FormControlLabel
+                  key={col.field}
+                  control={
+                    <Checkbox
+                      checked={visibleColumns[col.field!] ?? true}
+                      onChange={() => handleColumnToggle(col.field!)}
+                      size="small"
+                    />
+                  }
+                  label={col.headerName || col.field}
+                />
+              ))}
+            </FormGroup>
+          </Box>
+        )}
 
         {/* AG Grid */}
-        <div className="ag-theme-alpine" style={{ width: "100%", height: typeof height === "number" ? `${height}px` : height }}>
+        <div 
+          className="ag-theme-alpine" 
+          style={{ 
+            width: "100%", 
+            height: autoHeight ? "auto" : (typeof height === "number" ? `${height}px` : height) 
+          }}
+        >
           <AgGridReact
             ref={gridRef as any}
-            columnDefs={columnDefs}
+            columnDefs={enhancedColumnDefs}
             defaultColDef={{
               flex: 1,
               sortable: true,
@@ -106,62 +530,85 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
               resizable: true,
             }}
             pagination={false}
-            loadingOverlayComponentParams={{ loadingMessage: 'Loading...' }}
-            loading={isLoading && shouldFetch} 
+            loadingOverlayComponentParams={{ loadingMessage: '로딩 중...' }}
+            loading={!isLocalMode && isLoading && shouldFetch}
             overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">데이터가 없습니다.</span>'
-            rowSelection= {rowSelection}
+            rowSelection={rowSelection}
+            domLayout={autoHeight ? "autoHeight" : "normal"}
+            rowDragManaged={enableRowDrag}
+            animateRows={true}
+            
+            // 이벤트 핸들러
+            onRowClicked={handleRowClicked}
+            onRowDoubleClicked={handleRowDoubleClicked}
+            onSelectionChanged={handleSelectionChanged}
+            onRowDragEnd={handleRowDragEnd}
+            
             {...props}
             {...gridOptions}
           />
         </div>
 
         {/* 페이지네이션 */}
-        {isPage && totalPages > 0 && (
-          <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 8 }}>
+        {isPage && (
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 2 }}>
             {/* 페이지 크기 선택 */}
-            <div>
-              <select
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <Select
                 value={pageSizeState}
                 onChange={(e) => {
                   setPageSizeState(Number(e.target.value));
                   setPage(1);
                 }}
               >
-                {[10, 30, 50, 100].map((n) => (
-                  <option key={n} value={n}>
-                    {n} / 페이지
-                  </option>
+                {[10, 20, 30, 50, 100].map((n) => (
+                  <MenuItem key={n} value={n}>
+                    {n}개씩 보기
+                  </MenuItem>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </FormControl>
 
-            {/* 페이지 버튼 */}
-            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-              >
-                이전
-              </button>
-              {pagesToShow.map((p) => (
-                <button
-                  key={p}
-                  style={{ fontWeight: p === page ? "bold" : "normal" }}
-                  onClick={() => setPage(p)}
-                >
-                  {p}
-                </button>
-              ))}
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-              >
-                다음
-              </button>
-            </div>
-          </div>
+            {/* Material-UI Pagination */}
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+              color="primary"
+              showFirstButton
+              showLastButton
+              siblingCount={2}
+              boundaryCount={1}
+            />
+            
+            <Box sx={{ width: 120 }} /> {/* 균형을 위한 빈 공간 */}
+          </Box>
         )}
-      </div>
+
+        {/* 로컬 모드 페이지네이션 (클라이언트 사이드) */}
+        {isPage && isLocalMode && localData.length > pageSizeState && (
+          <Box sx={{ display: "flex", justifyContent: "center", pt: 2 }}>
+            <Pagination
+              count={Math.ceil(localData.length / pageSizeState)}
+              page={page}
+              onChange={(_, value) => {
+                setPage(value);
+                // 클라이언트 사이드 페이지네이션 구현
+                const startIdx = (value - 1) * pageSizeState;
+                const endIdx = startIdx + pageSizeState;
+                const paginatedData = localData.slice(startIdx, endIdx);
+                gridRef.current?.api?.setGridOption('rowData', paginatedData);
+              }}
+              color="primary"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
+        )}
+
+      </Box>
     );
   }
 );
+
+AFormGrid.displayName = "AFormGrid";

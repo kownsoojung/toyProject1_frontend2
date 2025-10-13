@@ -1,0 +1,46 @@
+/* 전체 창 세로 스크롤만 제거 */
+html {
+  height: 100%;
+  overflow-y: hidden !important;
+  overflow-x: auto !important;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;  /* !important 제거 - 모달 등을 위해 */
+}
+
+#root {
+  height: 100%;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+
+/* Material-UI 모달/팝업 예외 처리 */
+.MuiModal-root,
+.MuiDialog-root,
+.MuiPopover-root {
+  overflow-y: auto !important;
+}
+
+/* 스크롤바 스타일링 (선택사항) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+

@@ -9,6 +9,8 @@ interface AFormTextFieldProps {
   base?: Omit<AFormBaseItemProps, "name" | "children">; 
   options?:TextFieldProps
   type?:string
+  multiline?:boolean
+  rows?:number
 }
 
 export const AFormTextField: React.FC<AFormTextFieldProps> = ({
@@ -16,7 +18,9 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
   msize = 0,
   base,
   options,
-  type
+  type,
+  multiline=false,
+  rows=0
 }) => {
   return (
     <AFormBaseItem name={name} {...base}>
@@ -25,6 +29,8 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
           {...field}
           fullWidth={msize === 0}
           error={!!error}
+          multiline={multiline}
+          rows={rows}
           sx={{
             width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
           }}

@@ -1,21 +1,27 @@
 // src/components/RegisterTableForm.tsx
-import React from "react";
+import { useRef } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Card, Box, TableRow, TableCell, ButtonGroup } from "@mui/material";
+import { Button, Card, Box, TableRow, TableCell, Stack } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
 import { AFormTextField } from "@/components/AFormItem/AFormTextField";
 import { AFormDate } from "@/components/AFormItem/AFormDate";
 import { AFormTime } from "@/components/AFormItem/AFormTime";
-
 import { AFormCheckbox } from "@/components/AFormItem/AFormCheckbox";
 import { AFormRadio } from "@/components/AFormItem/AFormRadio";
-import { AFormGrid } from "@/components/AFormItem/Grid/AGrid";
+import { AFormGrid, AFormGridHandle } from "@/components/AFormItem/Grid/AGrid";
 import AForm from "@/components/AFormItem/AForm";
 import { FormButtons, FormHeader } from "@/styles/theme";
+import { useGridActions } from "@/hooks/useGridActions";
+import { AddButton, DeleteButton, RefreshButton, ExcelButton } from "@/components/AFormItem/common/AButton";
 
 export default function RegisterTableForm() {
+  const gridRef = useRef<AFormGridHandle>(null);
+  
+  // ✨ 액션 함수들을 간편하게 사용
+  const { getSelectedRows, refresh, exportToExcel, addRow, deleteRows } = useGridActions(gridRef);
+
   const registerSchema = z.object({
     username: z.string().nonempty().min(3),
     password: z.string().nonempty(),
@@ -45,6 +51,27 @@ export default function RegisterTableForm() {
   });
 
   const onSubmit = (data: any) => console.log("제출 데이터:", data);
+
+  // Grid 버튼 핸들러
+  const handleAdd = () => {
+    addRow({ id: Date.now(), name: "새 항목" });
+    
+  };
+
+  const handleDelete = () => {
+    const selected = getSelectedRows();
+    const ids = selected.map(row => row.id);
+    deleteRows(ids);
+    console.log("삭제된 데이터:", selected);
+  };
+
+  const handleRefresh = () => {
+    refresh();
+  };
+
+  const handleExportAll = async () => {
+    await exportToExcel("전체데이터.xlsx", "/api/users/all");
+  };
 
   return (
     <>
@@ -123,12 +150,35 @@ export default function RegisterTableForm() {
       </AForm>
     </Card>
 
-    <AFormGrid url="" height={500} columnDefs={[
-    { field: "id", headerName: "ID" },
-    { field: "name", headerName: "Name" },
-    ]}>
+    <AFormGrid
+      ref={gridRef}
+      url=""
+      height={500}
+      columnDefs={[
+        { field: "id", headerName: "ID" },
+        { field: "name", headerName: "Name" },
+      ]}
+      isPage={true}
+      showQuickFilter={true}
+      checkboxSelection={true}
+      rowSelection="multiple"
+      renderToolbar={({ quickFilterComponent, defaultTotalDisplay }) => (
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {/* 왼쪽: 총건수 */}
+          {defaultTotalDisplay}
 
-    </AFormGrid>
+          {/* 오른쪽: 검색 + 버튼들 */}
+          <Stack direction="row" spacing={1} alignItems="center">
+            {quickFilterComponent}
+            
+            <RefreshButton size="small" onClick={handleRefresh} />
+            <DeleteButton size="small" onClick={handleDelete} />
+            <AddButton size="small" onClick={handleAdd} />
+            <ExcelButton size="small" text="Excel (전체)" onClick={handleExportAll} />
+          </Stack>
+        </Box>
+      )}
+    />
     </>
   );
 }
