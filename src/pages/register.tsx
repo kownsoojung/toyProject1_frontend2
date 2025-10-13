@@ -13,12 +13,13 @@ import { AFormRadio } from "@/components/AFormItem/AFormRadio";
 import { AFormGrid, AFormGridHandle } from "@/components/AFormItem/Grid/AGrid";
 import AForm from "@/components/AFormItem/AForm";
 import { FormButtons, FormHeader } from "@/styles/theme";
-import { useGridActions } from "@/hooks/useGridActions";
+import { useGetGridApi, useGridActions } from "@/hooks/useGridActions";
 import { AddButton, DeleteButton, RefreshButton, ExcelButton } from "@/components/AFormItem/common/AButton";
 
 export default function RegisterTableForm() {
   const gridRef = useRef<AFormGridHandle>(null);
-  
+  const useGridApi = useGetGridApi(gridRef);
+
   // ✨ 액션 함수들을 간편하게 사용
   const { getSelectedRows, refresh, exportToExcel, addRow, deleteRows } = useGridActions(gridRef);
 
@@ -54,6 +55,7 @@ export default function RegisterTableForm() {
 
   // Grid 버튼 핸들러
   const handleAdd = () => {
+    
     addRow({ id: Date.now(), name: "새 항목" });
     
   };

@@ -1,10 +1,14 @@
-import { RefObject, useCallback } from 'react';
+import { RefObject, useCallback, useRef } from 'react';
 import { AFormGridHandle } from '@/components/AFormItem/Grid/AGrid';
 
 /**
  * AGrid의 액션 함수들을 간편하게 사용할 수 있게 해주는 Hook
  * gridRef.current?.method() 대신 method() 직접 호출 가능
  */
+
+export const useGetGridApi = (gridRef: RefObject<AFormGridHandle | null>) => {
+    return gridRef.current?.getGridApi();
+  };
 export const useGridActions = (gridRef: RefObject<AFormGridHandle | null>) => {
   const getSelectedRows = useCallback(() => {
     return gridRef.current?.getSelectedRows() || [];
