@@ -10,12 +10,13 @@ export const useGetGridApi = (gridRef: RefObject<AFormGridHandle | null>) => {
     return gridRef.current?.getGridApi();
   };
 export const useGridActions = (gridRef: RefObject<AFormGridHandle | null>) => {
+  const gridApi = useGetGridApi(gridRef);
   const getSelectedRows = useCallback(() => {
     return gridRef.current?.getSelectedRows() || [];
   }, [gridRef]);
 
   const clearSelection = useCallback(() => {
-    gridRef.current?.clearSelection();
+    gridApi?.deselectAll();
   }, [gridRef]);
 
   const selectAll = useCallback(() => {
