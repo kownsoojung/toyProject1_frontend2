@@ -586,9 +586,9 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
           autoHideDuration={3000}
           onClose={() => setShowError(false)}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          sx={{ mt: 8 }}
         >
           <Alert 
+            variant="filled"
             severity="error" 
             onClose={() => setShowError(false)}
           >
