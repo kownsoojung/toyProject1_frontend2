@@ -29,6 +29,7 @@ export const AFormBaseItem = forwardRef<HTMLElement, AFormBaseItemProps>(
               arrow={false}
               open={!!errorMessage}
               disableInteractive
+              
               slotProps={{
                 popper: {
                   modifiers: [

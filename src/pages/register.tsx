@@ -1,7 +1,7 @@
 // src/components/RegisterTableForm.tsx
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Card, Box, TableRow, TableCell, Stack } from "@mui/material";
+import { Button, Card, Box, TableRow, TableCell, Stack, Divider } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
@@ -13,12 +13,12 @@ import { AFormRadio } from "@/components/AFormItem/AFormRadio";
 import { AFormGrid, AFormGridHandle } from "@/components/AFormItem/Grid/AGrid";
 import AForm from "@/components/AFormItem/AForm";
 import { FormButtons, FormHeader } from "@/styles/theme";
-import { useGetGridApi, useGridActions } from "@/hooks/useGridActions";
+import { useGridApi, useGridActions } from "@/hooks/useGridActions";
 import { AddButton, DeleteButton, RefreshButton, ExcelButton } from "@/components/AFormItem/common/AButton";
 
 export default function RegisterTableForm() {
   const gridRef = useRef<AFormGridHandle>(null);
-  const useGridApi = useGetGridApi(gridRef);
+  const grdApi = useGridApi(gridRef);
 
   // ✨ 액션 함수들을 간편하게 사용
   const { getSelectedRows, refresh, exportToExcel, addRow, deleteRows } = useGridActions(gridRef);
@@ -77,20 +77,16 @@ export default function RegisterTableForm() {
 
   return (
     <>
-    <Card sx={{ p: 2, width: 800, borderRadius: 2 }}>
+  
 
-    <FormHeader>
-      <Box component="span" sx={{ fontWeight: 600 }}>회원가입</Box>
-      <FormButtons>
-        <Button variant="contained" onClick={methods.handleSubmit(onSubmit)}>제출</Button>
-        <Button variant="outlined" color="error" onClick={() => methods.reset()}>초기화</Button>
-      </FormButtons>
-    </FormHeader>
-      <AForm
-        title="회원 등록"
-        onSubmit={onSubmit}
-        methods={methods}
-      >
+      <FormHeader>
+        <Box component="span" sx={{ fontWeight: 600 }}>회원가입</Box>
+        <FormButtons>
+          <Button variant="contained" onClick={methods.handleSubmit(onSubmit)}>제출</Button>
+          <Button variant="outlined" color="error" onClick={() => methods.reset()}>초기화</Button>
+        </FormButtons>
+      </FormHeader>
+      <AForm onSubmit={onSubmit} methods={methods} > 
         {/* 아이디 / 비밀번호 */}
         <TableRow>
           <TableCell component="th" className="required">아이디</TableCell>
@@ -150,8 +146,7 @@ export default function RegisterTableForm() {
           </TableCell>
         </TableRow>
       </AForm>
-    </Card>
-
+   
     <AFormGrid
       ref={gridRef}
       url=""
@@ -162,8 +157,7 @@ export default function RegisterTableForm() {
       ]}
       isPage={true}
       showQuickFilter={true}
-      checkboxSelection={true}
-      rowSelection="multiple"
+      rowType={{type : "single"}}
       renderToolbar={({ quickFilterComponent, defaultTotalDisplay }) => (
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           {/* 왼쪽: 총건수 */}
@@ -179,6 +173,9 @@ export default function RegisterTableForm() {
             <ExcelButton size="small" text="Excel (전체)" onClick={handleExportAll} />
           </Stack>
         </Box>
+      )}
+      onRowDoubleClicked={(data) => (
+        console.log(data)
       )}
     />
     </>

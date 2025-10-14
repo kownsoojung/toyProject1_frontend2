@@ -163,6 +163,7 @@ export default function MainLayout() {
                       >
                         <span>{tab.title}</span>
                         <IconButton
+                          component="span" 
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -194,6 +195,7 @@ export default function MainLayout() {
               height: 0,
               overflowY: "auto",
               bgcolor: "#fff",
+              
             }}
           >
             {tabs.map((tab) => (
@@ -209,7 +211,7 @@ export default function MainLayout() {
                   }}
                 >
                   <TabModalProvider>
-                    <Box sx={{ height: "100%" }}>{tab.component}</Box>
+                    <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto", pb: 2 }}>{tab.component}</Box>
                   </TabModalProvider>
                 </Box>
             ))}

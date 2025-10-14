@@ -1,14 +1,11 @@
 import { StyledTable } from "@/styles/theme";
-import { Box, Paper, Table, TableBody, TableContainer } from "@mui/material";
-import { ReactNode, useMemo } from "react";
+import { Box, Paper, Table, TableBody, TableContainer, TableContainerProps } from "@mui/material";
+import React, { ReactNode, useMemo } from "react";
 import { FormProvider, UseFormReturn, SubmitHandler } from "react-hook-form";
 
 
 interface AFormProps {
   children: ReactNode;
-  buttonTop?: ReactNode;
-  buttonBottom?: ReactNode;
-  title?: string | ReactNode; // 폼 상단 제목
   labelSize?: number;
   colCnt?: number;
   type?: "search" | "register" | "form";
@@ -16,6 +13,8 @@ interface AFormProps {
   methods: UseFormReturn<any>;
   minHeight?: number; // 바깥 최소 높이
   isLabel?:boolean
+  options?:TableContainerProps
+  marginB?:string|number
 }
 
 
@@ -27,6 +26,8 @@ export default function AForm({
   onSubmit,
   methods,
   isLabel=true,
+  options,
+  marginB=2
 }: AFormProps) {
   const { handleSubmit } = methods; // ✅ methods에서 꺼냄
 
@@ -47,17 +48,13 @@ export default function AForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        
-
         {/* 테이블 폼 영역 */}
-        <TableContainer component={Paper} sx={{ boxShadow: "none",}}>
+        <TableContainer component={Paper} sx={{ boxShadow: "none", mb: marginB}} {...options} >
           <StyledTable type={type}>
             <colgroup>{cols}</colgroup>
             <TableBody>{children}</TableBody>
           </StyledTable>
         </TableContainer>
-
-        
       </form>
     </FormProvider>
   );

@@ -21,7 +21,7 @@ interface MenuState {
 export const useMenuStore = create<MenuState>((set) => ({
   menus: [{ id: 1, centerId: 1, upperId: 0, seq: 1, name: "Dashboard", path: "/Dashboard", depth: 1, useFlag: 1, isLeaf: 1 },
     { id: 3, centerId: 1, upperId: 0, seq: 3, name: "Settings", path: "", depth: 1, useFlag: 1, isLeaf: 1 },
-
+    { id: 6, centerId: 1, upperId: 0, seq: 3, name: "회원가입", path: "/register", depth: 1, useFlag: 1, isLeaf: 1 },
     // Users 하위 메뉴
     { id: 4, centerId: 1, upperId: 3, seq: 1, name: "index", path: "/Settings/index", depth: 2, useFlag: 1, isLeaf: 1 },
     { id: 5, centerId: 1, upperId: 3, seq: 2, name: "System", path: "/Settings/System", depth: 2, useFlag: 1, isLeaf: 1 },],

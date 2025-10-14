@@ -1,11 +1,12 @@
 // src/components/AFormGrid.tsx
-import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, useCallback } from "react";
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, useCallback, useMemo } from "react";
 import { AgGridReact, AgGridReactProps } from "ag-grid-react";
-import { ColDef, GridApi, GridOptions } from "ag-grid-community";
+import { ColDef, GridApi, GridOptions, RowSelectionOptions } from "ag-grid-community";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { UseAutoQuery } from "@/hooks/useAutoQuery";
 import { exportToExcel as exportExcel } from "@/utils/excelExport";
 import { useQueryClient } from "@tanstack/react-query";
+import { apiInstance } from "@/api/baseApi";
 import { 
   Box, 
   Button, 
@@ -20,10 +21,9 @@ import {
   FormControlLabel,
   FormGroup
 } from "@mui/material";
-import { apiInstance } from "@/api/baseApi";
 
 interface AFormGridProps {
-  url?: string; // 로컬 데이터 모드를 위해 optional로 변경
+  url: string;
   columnDefs: ColDef[];
   height?: number | string;
   pageSize?: number;
@@ -31,14 +31,15 @@ interface AFormGridProps {
   rowName?: string;
   totalName?: string;
   renderTotal?: (total: number) => React.ReactNode;
-  rowSelection?: "single" | "multiple";
+  rowType?: {type : "single" | "singleCheck" | "singleAutoCheck" | "multi" | "multiAutoCheck" | "multiCheck",
+             header? :boolean
+            };
+
+  rowSelection?: Partial<RowSelectionOptions>;
   isPage?: boolean;
   props?: Partial<AgGridReactProps<any>>;
   
-  // 새로운 props
-  rowData?: any[]; // 로컬 데이터 모드
   autoFetch?: boolean; // 초기 자동 조회 여부
-  checkboxSelection?: boolean; // 체크박스 선택 모드
   showQuickFilter?: boolean; // 빠른 검색 표시
   showColumnToggle?: boolean; // 컬럼 표시/숨김 토글
   autoHeight?: boolean; // 자동 높이 조절
@@ -98,13 +99,12 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       gridOptions,
       rowName = "dataList",
       totalName = "totalCnt",
-      rowSelection = "single",
+      rowType = {type : "single", header : true},
+      rowSelection,
       isPage = true,
       renderTotal,
       props,
-      rowData,
       autoFetch = false,
-      checkboxSelection = false,
       showQuickFilter = false,
       showColumnToggle = false,
       autoHeight = false,
@@ -131,20 +131,35 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const [totalCount, setTotalCount] = useState<number>(0);
     const [quickFilterText, setQuickFilterText] = useState<string>("");
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
-    const [localData, setLocalData] = useState<any[]>(rowData || []);
 
     const gridRef = useRef<AgGridReact>(null);
-    const isLocalMode = !url || !!rowData;
     const queryClient = useQueryClient();
 
     const [shouldFetch, setShouldFetch] = useState(autoFetch);
-    
-    // 서버 자동 조회 (로컬 모드가 아닐 때만)
+    const rowTypedata: RowSelectionOptions = useMemo(() => {
+      const type = rowType.type;
+      const mode: RowSelectionOptions["mode"] = type.match(/multi/) ? "multiRow" : "singleRow";
+      const enableClickSelection = type.match(/Auto/) || !type.match(/Check/) || type === "single" ? true :false;
+      const hideDisabledCheckboxes = true;
+      const enableSelectionWithoutKeys = type === "single" ? false : true;
+      const headerCheckbox = rowType.header;
+      const checkboxes = type.match(/Check/) ? true : false;
+      return {
+        mode,
+        enableClickSelection,
+        hideDisabledCheckboxes,
+        enableSelectionWithoutKeys,
+        headerCheckbox,
+        checkboxes,
+        ...(rowSelection || {}),
+      };
+    }, [rowType, rowSelection]);
+    // 서버 자동 조회
     const { data, isLoading, error, refetch } = UseAutoQuery<Record<string, any>>({
       queryKey: ["gridData", url, params, page, pageSizeState],
-      url: url || "",
+      url: url,
       params: { ...params, page, pageSize: pageSizeState },
-      options: { enabled: shouldFetch && !isLocalMode },
+      options: { enabled: shouldFetch },
     });
 
     // 컬럼 가시성 초기화
@@ -158,25 +173,15 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       setVisibleColumns(initialVisibility);
     }, [columnDefs]);
 
-    // 로컬 데이터 업데이트
-    useEffect(() => {
-      if (rowData) {
-        setLocalData(rowData);
-        setTotalCount(rowData.length);
-      }
-    }, [rowData]);
-
     // imperative handle - 외부에서 사용할 메서드들
     useImperativeHandle(ref, () => ({
       refetch: (newParams?: Record<string, any>) => {
-        if (!isLocalMode) {
-          setParams(newParams || {});
-          if (!keepPageOnRefetch) {
-            setPage(1);
-          }
-          setShouldFetch(true);
-          refetch();
+        setParams(newParams || {});
+        if (!keepPageOnRefetch) {
+          setPage(1);
         }
+        setShouldFetch(true);
+        refetch();
       },
       getRawData: () => data || {},
       getSelectedRows: () => {
@@ -264,7 +269,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     // 서버 데이터 처리
     useEffect(() => {
       const api = gridRef.current?.api;
-      if (!api || isLocalMode) return;
+      if (!api) return;
 
       if (error) {
         api.showNoRowsOverlay?.();
@@ -275,20 +280,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         if (totalName) setTotalCount(data[totalName] || 0);
         api.hideOverlay();
       }
-    }, [data, isLoading, error, isLocalMode, rowName, totalName]);
-
-    // 로컬 데이터 처리
-    useEffect(() => {
-      const api = gridRef.current?.api;
-      if (!api || !isLocalMode) return;
-
-      if (localData.length === 0) {
-        api.showNoRowsOverlay?.();
-      } else {
-        api.setGridOption('rowData', localData);
-        api.hideOverlay();
-      }
-    }, [localData, isLocalMode]);
+    }, [data, isLoading, error, rowName, totalName]);
 
     // 컬럼 가시성 변경 처리
     const handleColumnToggle = useCallback((field: string) => {
@@ -305,6 +297,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
     // 이벤트 핸들러들
     const handleRowClicked = useCallback((event: any) => {
+        
       if (onRowClicked) {
         onRowClicked(event.data);
       }
@@ -337,11 +330,6 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       return columnDefs.map((col, index) => {
         const enhanced: ColDef = { ...col };
         
-        if (checkboxSelection && index === 0) {
-          enhanced.checkboxSelection = true;
-          enhanced.headerCheckboxSelection = true;
-        }
-        
         if (enableRowDrag && index === 0) {
           enhanced.rowDrag = true;
         }
@@ -352,7 +340,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         
         return enhanced;
       });
-    }, [columnDefs, checkboxSelection, enableRowDrag, enableGrouping]);
+    }, [columnDefs, enableRowDrag, enableGrouping]);
 
     // 기본 총건수 표시 컴포넌트
     const defaultTotalDisplay = React.useMemo(() => (
@@ -395,12 +383,18 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     }, [showColumnToggle]);
 
     return (
-      <Box>
+      <Box 
+        sx={{ 
+          height: autoHeight ? "auto" : (typeof height === "number" ? `${height}px` : height),
+          display: "flex",
+          flexDirection: "column"
+        }}
+      >
         {/* 에러 메시지 */}
         {error && (
           <Alert 
             severity="error" 
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, flexShrink: 0 }}
             action={
               <Button color="inherit" size="small" onClick={() => refetch()}>
                 재시도
@@ -414,7 +408,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         {/* 상단 툴바 */}
         {showToolbar && (
           renderToolbar ? (
-            <Box sx={{ mb: 1 }}>
+            <Box sx={{ mb: 1, flexShrink: 0 }}>
               {renderToolbar({
                 totalCount,
                 quickFilterComponent,
@@ -470,16 +464,14 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
                 clearSelection: () => gridRef.current?.api?.deselectAll(),
                 selectAll: () => gridRef.current?.api?.selectAll(),
                 refresh: () => {
-                  if (!isLocalMode) {
-                    setShouldFetch(true);
-                    refetch();
-                  }
+                  setShouldFetch(true);
+                  refetch();
                 },
               })}
             </Box>
           ) : (
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-              {/* 총건수 */}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, flexShrink: 0 }}>
+        {/* 총건수 */}
               {defaultTotalDisplay}
 
               {/* 빠른 검색 및 액션 버튼들 */}
@@ -493,7 +485,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
         {/* 컬럼 표시/숨김 토글 (showColumnToggle이 true일 때) */}
         {showColumnToggle && (
-          <Box sx={{ mb: 1, p: 1, border: "1px solid #ddd", borderRadius: 1, bgcolor: "#f9f9f9" }}>
+          <Box sx={{ mb: 1, p: 1, border: "1px solid #ddd", borderRadius: 1, bgcolor: "#f9f9f9", flexShrink: 0 }}>
             <FormGroup row>
               {columnDefs.filter((col) => col.field).map((col) => (
                 <FormControlLabel
@@ -513,13 +505,14 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         )}
 
         {/* AG Grid */}
-        <div 
-          className="ag-theme-alpine" 
-          style={{ 
-            width: "100%", 
-            height: autoHeight ? "auto" : (typeof height === "number" ? `${height}px` : height) 
-          }}
-        >
+        <Box sx={{ flexGrow: 1, height: autoHeight ? "auto" : 0, width: "100%" }}>
+          <div 
+            className="ag-theme-alpine" 
+            style={{ 
+              width: "100%", 
+              height: "100%"
+            }}
+          >
           <AgGridReact
             ref={gridRef as any}
             columnDefs={enhancedColumnDefs}
@@ -529,15 +522,16 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
               filter: true,
               resizable: true,
             }}
+            
             pagination={false}
             loadingOverlayComponentParams={{ loadingMessage: '로딩 중...' }}
-            loading={!isLocalMode && isLoading && shouldFetch}
+            loading={isLoading && shouldFetch}
             overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">데이터가 없습니다.</span>'
-            rowSelection={rowSelection}
+            rowSelection={rowTypedata}
             domLayout={autoHeight ? "autoHeight" : "normal"}
             rowDragManaged={enableRowDrag}
             animateRows={true}
-            
+            suppressRowHoverHighlight={true}
             // 이벤트 핸들러
             onRowClicked={handleRowClicked}
             onRowDoubleClicked={handleRowDoubleClicked}
@@ -548,10 +542,11 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             {...gridOptions}
           />
         </div>
+        </Box>
 
         {/* 페이지네이션 */}
-        {isPage && (
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 2 }}>
+        {isPage  && (
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pt: 2, flexShrink: 0 }}>
             {/* 페이지 크기 선택 */}
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <Select
@@ -585,26 +580,6 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
           </Box>
         )}
 
-        {/* 로컬 모드 페이지네이션 (클라이언트 사이드) */}
-        {isPage && isLocalMode && localData.length > pageSizeState && (
-          <Box sx={{ display: "flex", justifyContent: "center", pt: 2 }}>
-            <Pagination
-              count={Math.ceil(localData.length / pageSizeState)}
-              page={page}
-              onChange={(_, value) => {
-                setPage(value);
-                // 클라이언트 사이드 페이지네이션 구현
-                const startIdx = (value - 1) * pageSizeState;
-                const endIdx = startIdx + pageSizeState;
-                const paginatedData = localData.slice(startIdx, endIdx);
-                gridRef.current?.api?.setGridOption('rowData', paginatedData);
-              }}
-              color="primary"
-              showFirstButton
-              showLastButton
-            />
-          </Box>
-        )}
 
       </Box>
     );
