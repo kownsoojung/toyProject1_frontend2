@@ -25,7 +25,7 @@ export function UseAutoQuery<T>({
   data,
   config,
   isAuto=false,
-  options={enabled:isAuto , gcTime:0, staleTime: 0,refetchOnMount: 'always',},
+  options={enabled:isAuto , gcTime:0, staleTime: 0,refetchOnMount: 'always',retry: false},
   
 }: OpenApiQueryOptions<T>): UseQueryResult<T, Error> {
 

@@ -19,7 +19,8 @@ import {
   Stack,
   Checkbox,
   FormControlLabel,
-  FormGroup
+  FormGroup,
+  Snackbar
 } from "@mui/material";
 
 interface AFormGridProps {
@@ -131,6 +132,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const [totalCount, setTotalCount] = useState<number>(0);
     const [quickFilterText, setQuickFilterText] = useState<string>("");
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
+    const [showError, setShowError] = useState(false);
 
     const gridRef = useRef<AgGridReact>(null);
     const queryClient = useQueryClient();
@@ -172,6 +174,19 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       });
       setVisibleColumns(initialVisibility);
     }, [columnDefs]);
+
+    useEffect(() => {
+      if (shouldFetch) {
+        refetch();
+      }
+    }, [page, pageSizeState, shouldFetch, refetch]);
+
+    // 에러 감지
+    useEffect(() => {
+      if (error) {
+        setShowError(true);
+      }
+    }, [error]);
 
     // imperative handle - 외부에서 사용할 메서드들
     useImperativeHandle(ref, () => ({
@@ -390,21 +405,6 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
           flexDirection: "column"
         }}
       >
-        {/* 에러 메시지 */}
-        {error && (
-          <Alert 
-            severity="error" 
-            sx={{ mb: 2, flexShrink: 0 }}
-            action={
-              <Button color="inherit" size="small" onClick={() => refetch()}>
-                재시도
-              </Button>
-            }
-          >
-            데이터를 불러오는 중 오류가 발생했습니다.
-          </Alert>
-        )}
-
         {/* 상단 툴바 */}
         {showToolbar && (
           renderToolbar ? (
@@ -580,6 +580,21 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
           </Box>
         )}
 
+        {/* 에러 알림 (Snackbar) */}
+        <Snackbar
+          open={showError}
+          autoHideDuration={3000}
+          onClose={() => setShowError(false)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ mt: 8 }}
+        >
+          <Alert 
+            severity="error" 
+            onClose={() => setShowError(false)}
+          >
+            데이터를 불러오는 중 오류가 발생했습니다.
+          </Alert>
+        </Snackbar>
 
       </Box>
     );

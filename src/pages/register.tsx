@@ -72,7 +72,7 @@ export default function RegisterTableForm() {
   };
 
   const handleExportAll = async () => {
-    await exportToExcel("전체데이터.xlsx", "/api/users/all");
+    await exportToExcel("전체데이터.xlsx");
   };
 
   return (
