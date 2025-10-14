@@ -195,7 +195,7 @@ export default function MainLayout() {
               height: 0,
               overflowY: "auto",
               bgcolor: "#fff",
-              minHeight: 300,
+              
             }}
           >
             {tabs.map((tab) => (
@@ -205,13 +205,15 @@ export default function MainLayout() {
                   id={tab.key}
                   key={tab.key}
                   sx={{
-                    
-                    display: activeKey === tab.key ? "block" : "none",
-                    position: "relative",
+                        display: activeKey === tab.key ? "flex" : "none",
+                        flexDirection: "column",
+                        flex: 1,        // 부모 높이를 다 채움
+                        minHeight: 800, // 최소 높이
+                        overflow: "hidden",
                   }}
                 >
                   <TabModalProvider>
-                    <Box sx={{ pb: 2,  }}>{tab.component}</Box>
+                    <Box sx={{ pb: 2, flex: 1, overflowY: "auto"  }}>{tab.component}</Box>
                   </TabModalProvider>
                 </Box>
             ))}

@@ -77,7 +77,13 @@ export default function RegisterTableForm() {
 
   return (
     <>
-  
+  <Box
+  sx={{
+    display: "flex",
+    flexDirection: "column",
+    height: "100vh",  // 부모 높이를 100%로
+  }}
+>
 
       <FormHeader>
         <Box component="span" sx={{ fontWeight: 600 }}>회원가입</Box>
@@ -146,11 +152,11 @@ export default function RegisterTableForm() {
           </TableCell>
         </TableRow>
       </AForm>
-   
+   <Box sx={{ flex: 1, minHeight: 300, display: "flex", flexDirection: "column" }}>
     <AFormGrid
       ref={gridRef}
       url=""
-      height="calc(100vh - 452px)"
+      height="100%"
       minHeight={300}
       columnDefs={[
         { field: "id", headerName: "ID" },
@@ -179,6 +185,8 @@ export default function RegisterTableForm() {
         console.log(data)
       )}
     />
+    </Box>
+    </Box>
     </>
   );
 }
