@@ -27,6 +27,7 @@ interface AFormGridProps {
   url: string;
   columnDefs: ColDef[];
   height?: number | string;
+  minHeight?: number | string;
   pageSize?: number;
   gridOptions?: Partial<GridOptions>;
   rowName?: string;
@@ -96,6 +97,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       url,
       columnDefs,
       height = "400px",
+      minHeight = "300px",
       pageSize = 10,
       gridOptions,
       rowName = "dataList",
@@ -401,10 +403,12 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       <Box 
         sx={{ 
           height: autoHeight ? "auto" : (typeof height === "number" ? `${height}px` : height),
+          minHeight: typeof minHeight === "number" ? `${minHeight}px` : minHeight,
           display: "flex",
           flexDirection: "column"
         }}
       >
+        
         {/* 상단 툴바 */}
         {showToolbar && (
           renderToolbar ? (
@@ -471,9 +475,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             </Box>
           ) : (
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, flexShrink: 0 }}>
-        {/* 총건수 */}
               {defaultTotalDisplay}
-
               {/* 빠른 검색 및 액션 버튼들 */}
               <Stack direction="row" spacing={1} alignItems="center">
                 {quickFilterComponent}
@@ -505,7 +507,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         )}
 
         {/* AG Grid */}
-        <Box sx={{ flexGrow: 1, height: autoHeight ? "auto" : 0, width: "100%" }}>
+        <Box sx={{ flexGrow: 1, minHeight: 0, width: "100%" }}>
           <div 
             className="ag-theme-alpine" 
             style={{ 

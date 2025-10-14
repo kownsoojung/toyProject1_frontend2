@@ -150,13 +150,14 @@ export default function RegisterTableForm() {
     <AFormGrid
       ref={gridRef}
       url=""
-      height={500}
+      height="calc(100vh - 452px)"
+      minHeight={300}
       columnDefs={[
         { field: "id", headerName: "ID" },
         { field: "name", headerName: "Name" },
       ]}
       isPage={true}
-      showQuickFilter={true}
+      showQuickFilter={false}
       rowType={{type : "single"}}
       renderToolbar={({ quickFilterComponent, defaultTotalDisplay }) => (
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

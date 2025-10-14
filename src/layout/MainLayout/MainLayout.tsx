@@ -195,7 +195,7 @@ export default function MainLayout() {
               height: 0,
               overflowY: "auto",
               bgcolor: "#fff",
-              
+              minHeight: 300,
             }}
           >
             {tabs.map((tab) => (
@@ -205,13 +205,13 @@ export default function MainLayout() {
                   id={tab.key}
                   key={tab.key}
                   sx={{
-                    height: "100%",
+                    
                     display: activeKey === tab.key ? "block" : "none",
                     position: "relative",
                   }}
                 >
                   <TabModalProvider>
-                    <Box sx={{ flexGrow: 1, minHeight: 0, overflowY: "auto", pb: 2 }}>{tab.component}</Box>
+                    <Box sx={{ pb: 2,  }}>{tab.component}</Box>
                   </TabModalProvider>
                 </Box>
             ))}
