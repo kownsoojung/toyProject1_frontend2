@@ -145,7 +145,7 @@ const theme = createTheme({
       styleOverrides: {
         root: { backgroundColor: "#fff" },
         input: {
-          height: 32,
+          height: 28,
           padding: "0 8px",
           fontSize: 13,
         },
@@ -169,7 +169,7 @@ const theme = createTheme({
           "& .MuiInputBase-root": {
             fontSize: 13,
             "&:not(.MuiInputBase-multiline)": {
-              height: 32, // multiline이 아닐 때만 고정 높이
+              height: 28, // multiline이 아닐 때만 고정 높이
             },
           },
         },
