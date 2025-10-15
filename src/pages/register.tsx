@@ -15,6 +15,7 @@ import AForm from "@/components/AFormItem/AForm";
 import { FormButtons, FormHeader } from "@/styles/theme";
 import { useGridApi, useGridActions } from "@/hooks/useGridActions";
 import { AddButton, DeleteButton, RefreshButton, ExcelButton } from "@/components/AFormItem/common/AButton";
+import { AutoBox, MainFormBox } from "@/components/AFormItem/common/ABox";
 
 export default function RegisterTableForm() {
   const gridRef = useRef<AFormGridHandle>(null);
@@ -76,18 +77,7 @@ export default function RegisterTableForm() {
   };
 
   return (
-    <>
-  <Box
-  sx={{
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",  // 부모 높이를 100%로
-    position: "absolute",
-    padding: "16px 16px 0 16px",
-    minHeight: 800,
-  }}
->
-
+  <MainFormBox>
       <FormHeader>
         <Box component="span" sx={{ fontWeight: 600 }}>회원가입</Box>
         <FormButtons>
@@ -155,41 +145,40 @@ export default function RegisterTableForm() {
           </TableCell>
         </TableRow>
       </AForm>
-   <Box sx={{ flex: 1, minHeight: 300, display: "flex", flexDirection: "column" }}>
-    <AFormGrid
-      ref={gridRef}
-      url=""
-      height="100%"
-      minHeight={300}
-      columnDefs={[
-        { field: "id", headerName: "ID" },
-        { field: "name", headerName: "Name" },
-      ]}
-      isPage={true}
-      showQuickFilter={false}
-      rowType={{type : "single"}}
-      renderToolbar={({ quickFilterComponent, defaultTotalDisplay }) => (
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          {/* 왼쪽: 총건수 */}
-          {defaultTotalDisplay}
+      <AutoBox>
+        <AFormGrid
+          ref={gridRef}
+          url=""
+          height="100%"
+          minHeight={300}
+          columnDefs={[
+            { field: "id", headerName: "ID" },
+            { field: "name", headerName: "Name" },
+          ]}
+          isPage={true}
+          showQuickFilter={false}
+          rowType={{type : "single"}}
+          renderToolbar={({ quickFilterComponent, defaultTotalDisplay }) => (
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              {/* 왼쪽: 총건수 */}
+              {defaultTotalDisplay}
 
-          {/* 오른쪽: 검색 + 버튼들 */}
-          <Stack direction="row" spacing={1} alignItems="center">
-            {quickFilterComponent}
-            
-            <RefreshButton size="small" onClick={handleRefresh} />
-            <DeleteButton size="small" onClick={handleDelete} />
-            <AddButton size="small" onClick={handleAdd} />
-            <ExcelButton size="small" text="Excel (전체)" onClick={handleExportAll} />
-          </Stack>
-        </Box>
-      )}
-      onRowDoubleClicked={(data) => (
-        console.log(data)
-      )}
-    />
-    </Box>
-    </Box>
-    </>
+              {/* 오른쪽: 검색 + 버튼들 */}
+              <Stack direction="row" spacing={1} alignItems="center">
+                {quickFilterComponent}
+                
+                <RefreshButton size="small" onClick={handleRefresh} />
+                <DeleteButton size="small" onClick={handleDelete} />
+                <AddButton size="small" onClick={handleAdd} />
+                <ExcelButton size="small" text="Excel (전체)" onClick={handleExportAll} />
+              </Stack>
+            </Box>
+          )}
+          onRowDoubleClicked={(data) => (
+            console.log(data)
+          )}
+        />
+      </AutoBox>
+    </MainFormBox>
   );
 }

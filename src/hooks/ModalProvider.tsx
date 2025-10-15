@@ -6,6 +6,7 @@ type ModalItem = {
   title: string;
   content: (props?: any) => ReactNode;
   props?: any;
+  onClose?: (result?: any) => void;
 };
 
 type ModalContextType = {
@@ -23,7 +24,7 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
   // 페이지 lazy import
   const modules = import.meta.glob("/src/pages/**/*.tsx");
 
-  const openModal = (key: string, title: string, pagePath: string, props?: any) => {
+  const openModal = (key: string, title: string, pagePath: string, props?: any, onClose?: (result?: any) => void) => {
     const modalKey = `${key}-${Date.now()}`;
     let renderContent: (props?: any) => ReactNode;
 
@@ -53,11 +54,15 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
       renderContent = () => <div>Page Not Found</div>;
     }
 
-    setModals(prev => [...prev, { key: modalKey, title, content: renderContent, props }]);
+    setModals(prev => [...prev, { key: modalKey, title, content: renderContent, props, onClose  }]);
   };
 
-  const closeModal = (key: string) => {
-    setModals(prev => prev.filter(m => m.key !== key));
+  const closeModal = (key: string, result?: any) => {
+    setModals((prev) => {
+      const modal = prev.find((m) => m.key === key);
+      if (modal?.onClose) modal.onClose(result); 
+      return prev.filter((m) => m.key !== key);
+    });
   };
 
   return (
