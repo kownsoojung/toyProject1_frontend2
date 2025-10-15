@@ -48,8 +48,8 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
-      <Box ref={containerRef} sx={{ width: "100%", height: "100%", transform: 'translateZ(0)', p: 2, 
-    position: "absolute"}}>
+      <Box ref={containerRef} sx={{ width: "100%", height: "100%", transform: 'translateZ(0)', 
+    }}>
         {children}
 
         {modals.map(m => {

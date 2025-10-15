@@ -195,6 +195,7 @@ export default function MainLayout() {
               height: 0,
               overflowY: "auto",
               bgcolor: "#fff",
+              paddingBottom: 2,
               
             }}
           >
@@ -208,7 +209,7 @@ export default function MainLayout() {
                         display: activeKey === tab.key ? "flex" : "none",
                         flexDirection: "column",
                         flex: 1,        // 부모 높이를 다 채움
-                        minHeight: 600, // 최소 높이
+                       
                         overflow: "hidden",
                         position: "relative",
                         height: "100%",

@@ -82,7 +82,9 @@ export default function RegisterTableForm() {
     display: "flex",
     flexDirection: "column",
     height: "100%",  // 부모 높이를 100%로
-    position: "relative",
+    position: "absolute",
+    padding: 2,
+    minHeight: 600,
   }}
 >
 
