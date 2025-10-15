@@ -81,7 +81,8 @@ export default function RegisterTableForm() {
   sx={{
     display: "flex",
     flexDirection: "column",
-    height: "100vh",  // 부모 높이를 100%로
+    height: "100%",  // 부모 높이를 100%로
+    position: "relative",
   }}
 >
 

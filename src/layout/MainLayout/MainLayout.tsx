@@ -208,12 +208,14 @@ export default function MainLayout() {
                         display: activeKey === tab.key ? "flex" : "none",
                         flexDirection: "column",
                         flex: 1,        // 부모 높이를 다 채움
-                        minHeight: 800, // 최소 높이
+                        minHeight: 600, // 최소 높이
                         overflow: "hidden",
+                        position: "relative",
+                        height: "100%",
                   }}
                 >
                   <TabModalProvider>
-                    <Box sx={{ pb: 2, flex: 1, overflowY: "auto"  }}>{tab.component}</Box>
+                    <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%" }}>{tab.component}</Box>
                   </TabModalProvider>
                 </Box>
             ))}
