@@ -28,7 +28,7 @@ export const AFormRadio: React.FC<baseProp> = ({
   selectCode,
   checkList,
   base,
-  row = false,
+  row = true,
   isDisabledItem,
   options
 }) => {

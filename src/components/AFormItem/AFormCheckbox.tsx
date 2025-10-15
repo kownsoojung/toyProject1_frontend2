@@ -25,7 +25,7 @@ export const AFormCheckbox: React.FC<AFormCheckboxProps> = ({
   selectCode,
   checkList={label:"", value:""},
   base,
-  row = false,
+  row = true,
   label,
   isDisabledItem,
   options

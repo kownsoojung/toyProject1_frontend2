@@ -83,8 +83,8 @@ export default function RegisterTableForm() {
     flexDirection: "column",
     height: "100%",  // 부모 높이를 100%로
     position: "absolute",
-    padding: 2,
-    minHeight: 600,
+    padding: "16px 16px 0 16px",
+    minHeight: 800,
   }}
 >
 
@@ -139,7 +139,7 @@ export default function RegisterTableForm() {
         <TableRow>
           <TableCell component="th">체크박스</TableCell>
           <TableCell>
-            <AFormRadio name="dd" checkList={{label:"test10", value:"test"}} />
+            <AFormRadio name="dd" checkList={[{label:"test10", value:"test"}, {label:"test11", value:"test11"}]} />
           </TableCell>
           <TableCell component="th">시간</TableCell>
           <TableCell>

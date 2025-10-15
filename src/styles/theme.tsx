@@ -3,7 +3,6 @@ import { createTheme } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";
 import { Box, Table } from "@mui/material";
 import "@mui/x-date-pickers/themeAugmentation";
-import { Height } from "@mui/icons-material";
 
 // ✅ Table 스타일 (기존 그대로)
 export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" }>(({ type }) => ({
@@ -57,17 +56,20 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
           padding: "10px 10px",
         },
        "& .MuiInputBase-root": {
-          height: 40, // 전체 컨테이너 높이
           minHeight: 40,
-          "& input, & textarea, & .MuiSelect-select": {
-            height: "100%",       // 부모 높이 따라가기
+          "&:not(.MuiInputBase-multiline)": {
+            height: 40, // multiline이 아닐 때만 고정 높이
+          },
+          "& input, & .MuiSelect-select": {
+            height: "100%",
             padding: "0 8px",
             boxSizing: "border-box",
           },
           "& textarea": {
-            padding: "8px",       // multiline 패딩
+            padding: "8px",
+            height: "auto !important", // textarea는 자동 높이
           },
-          display: "flex",        // Select 중앙 정렬용
+          display: "flex",
           alignItems: "center",
         },
       }
@@ -165,8 +167,10 @@ const theme = createTheme({
             fontSize: 18,
           },
           "& .MuiInputBase-root": {
-            height: 32,
             fontSize: 13,
+            "&:not(.MuiInputBase-multiline)": {
+              height: 32, // multiline이 아닐 때만 고정 높이
+            },
           },
         },
       },

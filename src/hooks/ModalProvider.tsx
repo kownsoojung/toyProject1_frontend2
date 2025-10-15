@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useRef } from "react";
-import { Box, Button, Modal, Typography } from "@mui/material";
+import { Box, Button, Modal, Typography, CircularProgress } from "@mui/material";
 import Draggable from "react-draggable";
 type ModalItem = {
   key: string;
@@ -31,7 +31,21 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (modules[importKey]) {
       const Component = React.lazy(modules[importKey] as any);
       renderContent = (p?: any) => (
-        <React.Suspense fallback={<div>Loading...</div>}>
+        <React.Suspense fallback={
+          <Box 
+            sx={{ 
+              display: "flex", 
+              justifyContent: "center", 
+              alignItems: "center", 
+              minHeight: 200,
+              flexDirection: "column",
+              gap: 2
+            }}
+          >
+            <CircularProgress size={50} thickness={4} />
+            <Box sx={{ color: "text.secondary", fontSize: 14 }}>로딩 중...</Box>
+          </Box>
+        }>
           <Component {...p} />
         </React.Suspense>
       );
@@ -48,8 +62,7 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
-      <Box ref={containerRef} sx={{ width: "100%", height: "100%", transform: 'translateZ(0)', 
-    }}>
+      <Box ref={containerRef} sx={{ width: "100%", height: "100%", transform: 'translateZ(0)', position: "absolute"}}>
         {children}
 
         {modals.map(m => {
@@ -83,7 +96,7 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
                   <Box className="draggable-handle"  sx={{ p: 1, borderBottom: "1px solid #ccc", paddingLeft:3}}>
                   <Typography variant="h6">{m.title}</Typography>
                   </Box>
-                  <Box sx={{ p: 3, overflowY: "auto", flexGrow: 1 }}>
+                  <Box sx={{ overflowY: "auto", flexGrow: 1 }}>
                     <Box sx={{ mt: 2 }}>{m.content(m.props)}</Box>
                   </Box>
                   <Box sx={{ p: 1, borderTop: "1px solid #ccc", textAlign:"right" }}>

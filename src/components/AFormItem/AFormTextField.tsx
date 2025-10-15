@@ -20,7 +20,7 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
   options,
   type,
   multiline=false,
-  rows=0
+  rows=4
 }) => {
   return (
     <AFormBaseItem name={name} {...base}>
@@ -30,7 +30,8 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
           fullWidth={msize === 0}
           error={!!error}
           multiline={multiline}
-          rows={rows}
+          minRows={multiline ? rows : undefined}
+          maxRows={multiline ? 10 : undefined}
           sx={{
             width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
           }}

@@ -1,5 +1,5 @@
 import React, { useState, lazy, Suspense } from "react";
-import { Box, Tabs, Tab, IconButton } from "@mui/material";
+import { Box, Tabs, Tab, IconButton, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -34,7 +34,21 @@ export default function MainLayout() {
     if (modules[importKey]) {
       const Component = lazy(modules[importKey] as any);
       return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={
+          <Box 
+            sx={{ 
+              display: "flex", 
+              justifyContent: "center", 
+              alignItems: "center", 
+              height: "100%",
+              flexDirection: "column",
+              gap: 2
+            }}
+          >
+            <CircularProgress size={60} thickness={4} />
+            <Box sx={{ color: "text.secondary", fontSize: 14 }}>로딩 중...</Box>
+          </Box>
+        }>
           <Component />
         </Suspense>
       );
