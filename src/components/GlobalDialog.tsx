@@ -7,7 +7,6 @@ import {
   DialogActions,
   Button,
   Alert,
-  AlertTitle,
 } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { closeDialog } from '@/store/slices/dialogSlice';
@@ -52,43 +51,76 @@ export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container }) => {
       sx={container ? {
         position: 'absolute',
       } : undefined}
+      PaperProps={{
+        sx: {
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          borderRadius: 3,
+          minWidth: 400,
+        }
+      }}
     >
       {currentDialog.title && (
-        <DialogTitle>{currentDialog.title}</DialogTitle>
+        <DialogTitle sx={{ 
+          fontSize: '1.5rem', 
+          fontWeight: 600,
+          pb: 1,
+        }}>
+          {currentDialog.title}
+        </DialogTitle>
       )}
-      <DialogContent>
+      <DialogContent sx={{ pt: 2, pb: 3 }}>
         {currentDialog.type !== 'confirm' ? (
-          <Alert severity={getSeverity()}>
-            {currentDialog.title && currentDialog.type !== 'info' && (
-              <AlertTitle>{currentDialog.title}</AlertTitle>
-            )}
+          <Alert 
+            severity={getSeverity()}
+            variant="filled"
+            sx={{
+              fontSize: '1.1rem',
+              padding: '16px 20px',
+              '& .MuiAlert-message': {
+                fontSize: '1.1rem',
+                fontWeight: 500,
+              },
+              '& .MuiAlert-icon': {
+                fontSize: 32,
+              }
+            }}
+          >
             {currentDialog.message}
           </Alert>
         ) : (
-          <DialogContentText>{currentDialog.message}</DialogContentText>
+          <DialogContentText sx={{ 
+            fontSize: '1.1rem',
+            color: 'text.primary',
+            lineHeight: 1.6,
+            fontWeight: 500,
+          }}>
+            {currentDialog.message}
+          </DialogContentText>
         )}
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ p: 2, pt: 1 }}>
         {isConfirm ? (
           <>
             <Button
               onClick={() => {
                 handleClose(currentDialog.id);
-                // onCancel 콜백이 있으면 실행
                 currentDialog.onCancel?.();
               }}
               color="inherit"
+              size="large"
+              sx={{ minWidth: 100, fontSize: '1rem' }}
             >
               {currentDialog.cancelText || '취소'}
             </Button>
             <Button
               onClick={() => {
                 handleClose(currentDialog.id);
-                // onConfirm 콜백이 있으면 실행
                 currentDialog.onConfirm?.();
               }}
               variant="contained"
               autoFocus
+              size="large"
+              sx={{ minWidth: 100, fontSize: '1rem' }}
             >
               {currentDialog.confirmText || '확인'}
             </Button>
@@ -98,6 +130,8 @@ export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container }) => {
             onClick={() => handleClose(currentDialog.id)}
             variant="contained"
             autoFocus
+            size="large"
+            sx={{ minWidth: 120, fontSize: '1rem' }}
           >
             {currentDialog.confirmText || '확인'}
           </Button>

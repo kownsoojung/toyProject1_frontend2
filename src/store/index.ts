@@ -17,8 +17,8 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // TabItem에 React.ComponentType이 있어서 직렬화 체크 무시
-        ignoredActions: ['tab/addTab'],
-        ignoredPaths: ['tab.tabs'],
+        ignoredActions: ['tab/addTab', 'dialog/showConfirm'],
+        ignoredPaths: ['tab.tabs', 'dialog.dialogs'],
       },
     }),
 });

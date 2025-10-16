@@ -6,9 +6,11 @@ import React from 'react';
 import { Button, Stack, Paper, Box, Typography } from '@mui/material';
 import { useLoading } from '@/hooks/useLoading';
 import { useAutoMutation } from '@/hooks/useAutoMutation';
+import { useDialog } from '@/hooks/useDialog';
 
 export const LoadingExample: React.FC = () => {
   const { startLoading, stopLoading, withLoading } = useLoading();
+  const dialog = useDialog();
 
   // 예제 1: 수동으로 로딩 제어
   const handleManualLoading = async () => {
@@ -18,7 +20,7 @@ export const LoadingExample: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     stopLoading();
-    alert('저장 완료!');
+    dialog.success('저장 완료!');
   };
 
   // 예제 2: withLoading 사용 (자동으로 로딩 제어)
@@ -26,8 +28,9 @@ export const LoadingExample: React.FC = () => {
     await withLoading(async () => {
       // 가짜 API 호출 (2초 대기)
       await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('처리 완료!');
     }, '처리 중...');
+    
+    dialog.success('처리 완료!');
   };
 
   // 예제 3: Mutation과 함께 사용
@@ -37,11 +40,11 @@ export const LoadingExample: React.FC = () => {
     },
     onSuccess: () => {
       stopLoading();
-      alert('저장 성공!');
+      dialog.success('저장 성공!');
     },
     onError: () => {
       stopLoading();
-      alert('저장 실패!');
+      dialog.error('저장 실패!');
     },
   });
 
@@ -62,10 +65,10 @@ export const LoadingExample: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       stopLoading();
-      alert('모든 단계 완료!');
+      dialog.success('모든 단계 완료!');
     } catch (error) {
       stopLoading();
-      alert('오류 발생!');
+      dialog.error('오류 발생!');
     }
   };
 

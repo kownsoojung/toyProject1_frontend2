@@ -10,7 +10,6 @@ import { TabModalProvider } from "@/hooks/ModalProvider";
 import { useTheme } from "@mui/material/styles";
 import { GlobalDialog } from "@/components/GlobalDialog";
 import { GlobalToast } from "@/components/GlobalToast";
-import { GlobalLoading } from "@/components/GlobalLoading";
 
 type TabItem = {
   key: string;

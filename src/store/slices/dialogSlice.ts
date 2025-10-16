@@ -51,8 +51,8 @@ const dialogSlice = createSlice({
         message: action.payload.message,
         confirmText: action.payload.confirmText || '확인',
         cancelText: action.payload.cancelText || '취소',
-        // 주의: 함수는 Redux state에 저장하면 안되지만, 
-        // 여기서는 임시로 저장. 실제로는 콜백 ID를 저장하고 별도 관리 필요
+        onConfirm: action.payload.onConfirm,  // 콜백 함수 저장
+        onCancel: action.payload.onCancel,    // 콜백 함수 저장
       });
     },
     closeDialog: (state, action: PayloadAction<string>) => {

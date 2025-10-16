@@ -287,7 +287,7 @@ function UserManagement() {
   const handleDelete = async () => {
     const selected = gridRef.current?.getSelectedRows();
     if (!selected?.length) {
-      alert('삭제할 항목을 선택하세요');
+      dialog.warning('삭제할 항목을 선택하세요');
       return;
     }
     

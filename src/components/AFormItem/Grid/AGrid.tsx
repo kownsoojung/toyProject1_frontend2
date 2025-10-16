@@ -11,7 +11,6 @@ import {
   Box, 
   Button, 
   TextField, 
-  Alert, 
   Select, 
   MenuItem, 
   FormControl,
@@ -20,8 +19,8 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Snackbar
 } from "@mui/material";
+import { useDialog } from "@/hooks/useDialog";
 
 interface AFormGridProps {
   url: string;
@@ -134,9 +133,9 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const [totalCount, setTotalCount] = useState<number>(0);
     const [quickFilterText, setQuickFilterText] = useState<string>("");
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
-    const [showError, setShowError] = useState(false);
 
     const gridRef = useRef<AgGridReact>(null);
+    const dialog = useDialog();
     const queryClient = useQueryClient();
 
     const [shouldFetch, setShouldFetch] = useState(autoFetch);
@@ -186,9 +185,9 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     // 에러 감지
     useEffect(() => {
       if (error) {
-        setShowError(true);
+        dialog.error('데이터를 불러오는 중 오류가 발생했습니다.');
       }
-    }, [error]);
+    }, [error, dialog]);
 
     // imperative handle - 외부에서 사용할 메서드들
     useImperativeHandle(ref, () => ({
@@ -581,22 +580,6 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             <Box sx={{ width: 120 }} /> {/* 균형을 위한 빈 공간 */}
           </Box>
         )}
-
-        {/* 에러 알림 (Snackbar) */}
-        <Snackbar
-          open={showError}
-          autoHideDuration={3000}
-          onClose={() => setShowError(false)}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        >
-          <Alert 
-            variant="filled"
-            severity="error" 
-            onClose={() => setShowError(false)}
-          >
-            데이터를 불러오는 중 오류가 발생했습니다.
-          </Alert>
-        </Snackbar>
 
       </Box>
     );

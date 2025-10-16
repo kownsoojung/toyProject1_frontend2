@@ -17,10 +17,12 @@ import { useGridActions } from "@/hooks/useGridActions";
 import { AddButton, DeleteButton, RefreshButton, ExcelButton } from "@/components/AFormItem/common/AButton";
 import { AutoBox, MainFormBox, RatioBox } from "@/components/AFormItem/common/ABox";
 import { useLoading } from "@/hooks/useLoading";
+import { useDialog } from "@/hooks/useDialog";
 
 export default function RegisterTableForm() {
   const gridRef = useRef<AFormGridHandle>(null);
   const { withLoading } = useLoading();
+  const dialog = useDialog();
 
   // ✨ 액션 함수들을 간편하게 사용
   const { getSelectedRows, refresh, exportToExcel, addRow, deleteRows } = useGridActions(gridRef);
@@ -58,8 +60,10 @@ export default function RegisterTableForm() {
       // 임시로 3초 대기 (실제로는 API 호출)
       await new Promise(resolve => setTimeout(resolve, 3000));
       console.log("제출 데이터:", data);
-      alert('저장 완료!');
     }, 'save');
+    
+    // 저장 완료 후 토스트 알림
+    dialog.success('저장 완료!');
   };
 
   // Grid 버튼 핸들러
@@ -68,16 +72,31 @@ export default function RegisterTableForm() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       addRow({ id: Date.now(), name: "새 항목" });
     }, 'save');
+    
+    dialog.success('항목이 추가되었습니다!');
   };
 
   const handleDelete = async () => {
+    const selected = getSelectedRows();
+    
+    if (selected.length === 0) {
+      deleteRows(selected);
+      dialog.warning('삭제할 항목을 선택하세요.');
+      return;
+    }
+    // 삭제 확인
+    const confirmed = await dialog.confirm(`선택한 ${selected.length}개 항목을 삭제하시겠습니까?`);
+    
+    if (!confirmed) { return;}
+    
     await withLoading(async () => {
-      const selected = getSelectedRows();
       const ids = selected.map(row => row.id);
       await new Promise(resolve => setTimeout(resolve, 1500));
       deleteRows(ids);
       console.log("삭제된 데이터:", selected);
     }, 'delete');
+    
+    dialog.success('삭제되었습니다!');
   };
 
   const handleRefresh = async () => {
@@ -85,12 +104,15 @@ export default function RegisterTableForm() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       refresh();
     }, 'search');
+    
   };
 
   const handleExportAll = async () => {
     await withLoading(async () => {
       await exportToExcel("전체데이터.xlsx");
     }, 'Excel 다운로드 중...');
+    
+    dialog.success('Excel 파일이 다운로드되었습니다!');
   };
 
   return (
