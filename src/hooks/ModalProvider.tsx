@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useRef } from "react";
 import { Box, Button, Modal, Typography, CircularProgress } from "@mui/material";
 import Draggable from "react-draggable";
+import { GlobalLoading } from "@/components/GlobalLoading";
 type ModalItem = {
   key: string;
   title: string;
@@ -15,7 +16,19 @@ type ModalContextType = {
 };
 
 const ModalContext = createContext<ModalContextType | null>(null);
-export const useModal = () => useContext(ModalContext)!;
+
+export const useModal = () => {
+  const context = useContext(ModalContext);
+  if (!context) {
+    console.error('❌ useModal must be used within TabModalProvider');
+    // 기본 fallback 반환
+    return {
+      openModal: () => console.warn('useModal called outside TabModalProvider'),
+      closeModal: () => console.warn('useModal called outside TabModalProvider'),
+    };
+  }
+  return context;
+};
 
 export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [modals, setModals] = useState<ModalItem[]>([]);
@@ -69,9 +82,13 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
     <ModalContext.Provider value={{ openModal, closeModal }}>
       <Box ref={containerRef} sx={{ width: "100%", height: "100%", transform: 'translateZ(0)', position: "absolute"}}>
         {children}
+        
+        {/* 탭 영역 로딩 */}
+        <GlobalLoading />
 
         {modals.map(m => {
           const nodeRef = React.createRef<HTMLDivElement>();
+          const modalContentRef = React.createRef<HTMLDivElement>();
 
           return (
              
@@ -96,12 +113,21 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
                     borderRadius: 2,
                     display: "flex",
                     flexDirection: "column",
+                    position: "relative",
                   }}
                 >
                   <Box className="draggable-handle"  sx={{ p: 1, borderBottom: "1px solid #ccc", paddingLeft:3}}>
                   <Typography variant="h6">{m.title}</Typography>
                   </Box>
-                  <Box sx={{ overflowY: "auto", flexGrow: 1 }}>
+                  <Box 
+                    ref={modalContentRef}
+                    sx={{ 
+                      overflowY: "auto", 
+                      flexGrow: 1,
+                      position: "relative",
+                      transform: 'translateZ(0)',
+                    }}
+                  >
                     <Box sx={{ mt: 2 }}>{m.content(m.props)}</Box>
                   </Box>
                   <Box sx={{ p: 1, borderTop: "1px solid #ccc", textAlign:"right" }}>

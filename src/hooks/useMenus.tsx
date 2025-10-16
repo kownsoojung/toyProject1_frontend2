@@ -32,6 +32,7 @@ export function useMenus() {
         const res = await apiInstance.get<MenuAgentDTO[]>("/api/common/menu/getList"); // OpenAPI 경로
 
         const menusData = res.data.map(mapMenu);       // DTO → 내부 모델 변환
+        console.log("📋 조회된 메뉴 데이터:", menusData); // 디버깅용
         dispatch(setMenus(menusData));                 // Redux store에 저장
       } catch (err) {
         console.error("Menu API error:", err);

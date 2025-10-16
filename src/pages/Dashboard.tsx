@@ -1,15 +1,14 @@
 import { useModal } from "@/hooks/ModalProvider";
 import useHelmetTitle from "@/hooks/useHelmet";
 import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
-import About from "./About";
 
 const Dashboard = () => {
     const { openModal: openChildModal } = useModal();
 
     useHelmetTitle("HOME");
-    let fnModal = () =>{
+    const fnModal = () => {
         openChildModal("about-modal", "About", "/Settings/System", {param:"1"});
-    }
+    };
     return (
         <Stack spacing={2}>
             <Typography variant="h3" component={"h1"}>

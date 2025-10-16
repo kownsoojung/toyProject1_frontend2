@@ -1,7 +1,7 @@
 // src/components/RegisterTableForm.tsx
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Card, Box, TableRow, TableCell, Stack, Divider } from "@mui/material";
+import { Button, Box, TableRow, TableCell, Stack } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
@@ -13,13 +13,14 @@ import { AFormRadio } from "@/components/AFormItem/AFormRadio";
 import { AFormGrid, AFormGridHandle } from "@/components/AFormItem/Grid/AGrid";
 import AForm from "@/components/AFormItem/AForm";
 import { FormButtons, FormHeader } from "@/styles/theme";
-import { useGridApi, useGridActions } from "@/hooks/useGridActions";
+import { useGridActions } from "@/hooks/useGridActions";
 import { AddButton, DeleteButton, RefreshButton, ExcelButton } from "@/components/AFormItem/common/AButton";
-import { AutoBox, MainFormBox } from "@/components/AFormItem/common/ABox";
+import { AutoBox, MainFormBox, RatioBox } from "@/components/AFormItem/common/ABox";
+import { useLoading } from "@/hooks/useLoading";
 
 export default function RegisterTableForm() {
   const gridRef = useRef<AFormGridHandle>(null);
-  const grdApi = useGridApi(gridRef);
+  const { withLoading } = useLoading();
 
   // ✨ 액션 함수들을 간편하게 사용
   const { getSelectedRows, refresh, exportToExcel, addRow, deleteRows } = useGridActions(gridRef);
@@ -52,28 +53,44 @@ export default function RegisterTableForm() {
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (data: any) => console.log("제출 데이터:", data);
+  const onSubmit = async (data: any) => {
+    await withLoading(async () => {
+      // 임시로 3초 대기 (실제로는 API 호출)
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      console.log("제출 데이터:", data);
+      alert('저장 완료!');
+    }, 'save');
+  };
 
   // Grid 버튼 핸들러
-  const handleAdd = () => {
-    
-    addRow({ id: Date.now(), name: "새 항목" });
-    
+  const handleAdd = async () => {
+    await withLoading(async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      addRow({ id: Date.now(), name: "새 항목" });
+    }, 'save');
   };
 
-  const handleDelete = () => {
-    const selected = getSelectedRows();
-    const ids = selected.map(row => row.id);
-    deleteRows(ids);
-    console.log("삭제된 데이터:", selected);
+  const handleDelete = async () => {
+    await withLoading(async () => {
+      const selected = getSelectedRows();
+      const ids = selected.map(row => row.id);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      deleteRows(ids);
+      console.log("삭제된 데이터:", selected);
+    }, 'delete');
   };
 
-  const handleRefresh = () => {
-    refresh();
+  const handleRefresh = async () => {
+    await withLoading(async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      refresh();
+    }, 'search');
   };
 
   const handleExportAll = async () => {
-    await exportToExcel("전체데이터.xlsx");
+    await withLoading(async () => {
+      await exportToExcel("전체데이터.xlsx");
+    }, 'Excel 다운로드 중...');
   };
 
   return (
@@ -146,11 +163,13 @@ export default function RegisterTableForm() {
         </TableRow>
       </AForm>
       <AutoBox>
+      <RatioBox ratios={[1, 1]} direction="row" gap={2} sxProps={{ flex: 1, minHeight: 400 }}>
+      {/* 왼쪽 그리드 영역 */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <AFormGrid
           ref={gridRef}
           url=""
-          height="100%"
-          minHeight={300}
+          minHeight={400}
           columnDefs={[
             { field: "id", headerName: "ID" },
             { field: "name", headerName: "Name" },
@@ -178,6 +197,20 @@ export default function RegisterTableForm() {
             console.log(data)
           )}
         />
+      </Box>
+      
+      {/* 오른쪽 영역 */}
+      <Box sx={{ 
+        bgcolor: 'background.paper', 
+        p: 2, 
+        borderRadius: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'auto'
+      }}>
+        영역2
+      </Box>
+      </RatioBox>
       </AutoBox>
     </MainFormBox>
   );

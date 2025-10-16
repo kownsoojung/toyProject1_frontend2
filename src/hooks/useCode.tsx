@@ -1,4 +1,4 @@
-import { UseAutoQuery } from "./useAutoQuery";
+import { useAutoQuery } from "./useAutoQuery";
 import { SiteCodeDTO, SiteCodeSearchDTO } from "@/api/generated";
 
 export interface CodeItem {
@@ -8,11 +8,14 @@ export interface CodeItem {
   disabled?: boolean;
 }
 
+/**
+ * 공통 코드 조회 Hook
+ * 컴포넌트 마운트 시 자동으로 코드 데이터를 조회합니다.
+ */
 export const useCode = (params: SiteCodeSearchDTO) => {
-  return UseAutoQuery<SiteCodeDTO[]>({
-    queryKey: ["code", params.codeName, params],   // 고유 key
-    url: `/api/common/code/getList`,           // 코드 조회 API 엔드포인트
+  return useAutoQuery<SiteCodeDTO[]>({
+    queryKey: ["code", params.codeName, params],
+    url: `/api/common/code/getList`,
     params,
-    isAuto:true,
   });
 };

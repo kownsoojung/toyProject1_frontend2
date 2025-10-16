@@ -3,6 +3,7 @@ import menuReducer from './slices/menuSlice';
 import tabReducer from './slices/tabSlice';
 import dialogReducer from './slices/dialogSlice';
 import toastReducer from './slices/toastSlice';
+import loadingReducer from './slices/loadingSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     tab: tabReducer,
     dialog: dialogReducer,
     toast: toastReducer,
+    loading: loadingReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

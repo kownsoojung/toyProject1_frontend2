@@ -10,6 +10,7 @@ import { TabModalProvider } from "@/hooks/ModalProvider";
 import { useTheme } from "@mui/material/styles";
 import { GlobalDialog } from "@/components/GlobalDialog";
 import { GlobalToast } from "@/components/GlobalToast";
+import { GlobalLoading } from "@/components/GlobalLoading";
 
 type TabItem = {
   key: string;
@@ -49,7 +50,12 @@ export default function MainLayout() {
 
   const modules = import.meta.glob("/src/pages/**/*.tsx");
   const lazyLoad = (path: string) => {
-    const importKey = `/src/pages${path}.tsx`;
+    // path 정규화: 앞에 /가 없으면 추가
+    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    const importKey = `/src/pages${normalizedPath}.tsx`;
+    console.log("🔍 Lazy Load 시도:", { 원본path: path, 정규화된path: normalizedPath, importKey }); // 디버깅용
+    console.log("📦 사용 가능한 모듈들:", Object.keys(modules)); // 디버깅용
+    
     if (modules[importKey]) {
       const Component = lazy(modules[importKey] as any);
       return (
@@ -72,10 +78,11 @@ export default function MainLayout() {
         </Suspense>
       );
     }
-    return <div>Page Not Found</div>;
+    return <div>Page Not Found: {importKey}</div>;
   };
 
   const handleMenuClick = (path: string, name: string, id: number | string) => {
+    console.log("🖱️ 메뉴 클릭:", { path, name, id }); // 디버깅용
     const tabKey = `${id}-${path}`;
     if (!tabs.find(t => t.key === tabKey)) {
       setTabs(prev => [
@@ -275,7 +282,9 @@ export default function MainLayout() {
                   }}
                 >
                   <TabModalProvider>
-                    <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%" }}>{tab.component}</Box>
+                    <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%" }}>
+                      {tab.component}
+                    </Box>
                   </TabModalProvider>
                 </Box>
             ))}
