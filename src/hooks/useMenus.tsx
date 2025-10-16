@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 
 
-import { Menu, useMenuStore } from "../stores/menuStore";
-import { MenuAgentDTO, MenuControllerApi } from "@/api/generated";
+import { Menu } from "../store/slices/menuSlice";
+import { setMenus } from "../store/slices/menuSlice";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { MenuAgentDTO } from "@/api/generated";
 import { apiInstance } from "@/api/baseApi";
 // DTO → 내부 모델로 변환 함수
 function mapMenu(dto: MenuAgentDTO): Menu {
@@ -20,25 +22,25 @@ function mapMenu(dto: MenuAgentDTO): Menu {
 }
 
 export function useMenus() {
-  const setMenus = useMenuStore((state) => state.setMenus);
+  const dispatch = useAppDispatch();
+  const menus = useAppSelector((state) => state.menu.menus);
   
   useEffect(() => {
     
     const fetchMenus = async () => {
       try {
-        const res = await apiInstance.get<MenuAgentDTO[]>("/api/menu/getList"); // OpenAPI 경로
+        const res = await apiInstance.get<MenuAgentDTO[]>("/api/common/menu/getList"); // OpenAPI 경로
 
-        const menus = res.data.map(mapMenu);       // DTO → 내부 모델 변환
-        setMenus(menus);                           // Zustand store에 저장
+        const menusData = res.data.map(mapMenu);       // DTO → 내부 모델 변환
+        dispatch(setMenus(menusData));                 // Redux store에 저장
       } catch (err) {
         console.error("Menu API error:", err);
       }
     };
 
     fetchMenus();
-  }, [setMenus]);
+  }, [dispatch]);
 
 
-  const menus = useMenuStore((state) => state.menus);
   return { data: menus, isLoading: false, error: null };
 }

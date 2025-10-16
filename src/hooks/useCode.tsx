@@ -11,7 +11,7 @@ export interface CodeItem {
 export const useCode = (params: SiteCodeSearchDTO) => {
   return UseAutoQuery<SiteCodeDTO[]>({
     queryKey: ["code", params.codeName, params],   // 고유 key
-    url: `/api/sitecode/getList`,           // 코드 조회 API 엔드포인트
+    url: `/api/common/code/getList`,           // 코드 조회 API 엔드포인트
     params,
     isAuto:true,
   });

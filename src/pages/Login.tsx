@@ -8,6 +8,9 @@ import { useAutoMutation } from "@/hooks/useAutoMutation";
 import { useNavigate } from "react-router-dom";
 import AForm from "@/components/AFormItem/AForm";
 import { AFormTextField } from "@/components/AFormItem/AFormTextField";
+import { useAppDispatch } from "@/store/hooks";
+import { showAlert } from "@/store/slices/dialogSlice";
+import { showToast } from "@/store/slices/toastSlice";
 
 const loginSchema = z.object({
   username: z.string().min(3, "아이디를 입력하세요"),
@@ -18,6 +21,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const methods = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -30,10 +34,15 @@ export default function LoginPage() {
     onSuccess: (data) => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("isLoggedIn", "true");
+      dispatch(showToast({ message: "로그인 성공!", severity: "success" }));
       navigate("/"); // 로그인 성공 후 메인 화면으로
     },
     onError: (err: any) => {
-      alert(err.message || "로그인 실패");
+      dispatch(showAlert({ 
+        message: err.message || "로그인 실패", 
+        type: "error",
+        title: "로그인 오류"
+      }));
     },
   });
 

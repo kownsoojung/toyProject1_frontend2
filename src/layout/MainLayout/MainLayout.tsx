@@ -1,13 +1,15 @@
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState, lazy, Suspense, useRef } from "react";
 import { Box, Tabs, Tab, IconButton, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { SIDEBAR_WIDTH } from "./constants";
-import { useMenuStore } from "@/stores/menuStore";
+import { useAppSelector } from "@/store/hooks";
 import { useLayoutContext } from "@/contexts/LayoutContext";
 import { TabModalProvider } from "@/hooks/ModalProvider";
 import { useTheme } from "@mui/material/styles";
+import { GlobalDialog } from "@/components/GlobalDialog";
+import { GlobalToast } from "@/components/GlobalToast";
 
 type TabItem = {
   key: string;
@@ -20,13 +22,30 @@ const LazyDashboard = lazy(() => import("@/pages/Dashboard"));
 
 export default function MainLayout() {
   const theme = useTheme();
-  const menus = useMenuStore((state) => state.menus);
-  const initialMenu = menus.find(menu => menu.id === 1) || menus[0];
+  const menus = useAppSelector((state) => state.menu.menus);
   const { sidebarOpen } = useLayoutContext();
-  const [tabs, setTabs] = useState<TabItem[]>([
-    { key: `${initialMenu.id}-${initialMenu.path}`, title: initialMenu.name, closable: false, component: <LazyDashboard /> },
-  ]);
-  const [activeKey, setActiveKey] = useState(tabs[0].key);
+  const [tabs, setTabs] = useState<TabItem[]>([]);
+  const [activeKey, setActiveKey] = useState("");
+  const dialogContainerRef = useRef<HTMLDivElement>(null);
+  const [initialized, setInitialized] = React.useState(false);
+
+  // 메뉴가 로드되면 초기 탭 설정
+  React.useEffect(() => {
+    if (menus.length > 0 && !initialized) {
+      const initialMenu = menus.find(menu => menu.id === 1) || menus[0];
+      if (initialMenu) {
+        const initialTab = {
+          key: `${initialMenu.id}-${initialMenu.path}`,
+          title: initialMenu.name,
+          closable: false,
+          component: <LazyDashboard />
+        };
+        setTabs([initialTab]);
+        setActiveKey(initialTab.key);
+        setInitialized(true);
+      }
+    }
+  }, [menus, initialized]);
 
   const modules = import.meta.glob("/src/pages/**/*.tsx");
   const lazyLoad = (path: string) => {
@@ -72,20 +91,44 @@ export default function MainLayout() {
   const handleTabClose = (targetKey: string) => {
     setTabs((prev) => {
       const newTabs = prev.filter((t) => t.key !== targetKey);
-      if (activeKey === targetKey) {
-        const next = newTabs[newTabs.length - 1] || {
-          key: "/Dashboard",
-          title: "Dashboard",
-          closable: false,
-          component: lazyLoad("/Dashboard"),
-        };
+      if (activeKey === targetKey && newTabs.length > 0) {
+        const next = newTabs[newTabs.length - 1];
         setActiveKey(next.key);
       }
-      return newTabs.length
-        ? newTabs
-        : [{ key: "/Dashboard", title: "Dashboard", closable: false, component: lazyLoad("/Dashboard") }];
+      // 최소 1개 탭은 유지
+      if (newTabs.length === 0 && menus.length > 0) {
+        const initialMenu = menus.find(menu => menu.id === 1) || menus[0];
+        const fallbackTab = {
+          key: `${initialMenu.id}-${initialMenu.path}`,
+          title: initialMenu.name,
+          closable: false,
+          component: <LazyDashboard />
+        };
+        setActiveKey(fallbackTab.key);
+        return [fallbackTab];
+      }
+      return newTabs;
     });
   };
+
+  // 메뉴가 아직 로드되지 않았으면 로딩 표시
+  if (menus.length === 0 || tabs.length === 0) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <CircularProgress size={60} thickness={4} />
+        <Box sx={{ color: "text.secondary", fontSize: 14 }}>메뉴 로딩 중...</Box>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -204,13 +247,15 @@ export default function MainLayout() {
 
           {/* Tab Content */}
           <Box
+            ref={dialogContainerRef}
             sx={{
               flexGrow: 1,
               height: 0,
               overflowY: "auto",
               bgcolor: "#fff",
               paddingBottom: 2,
-              
+              position: "relative",
+              transform: 'translateZ(0)',
             }}
           >
             {tabs.map((tab) => (
@@ -234,6 +279,10 @@ export default function MainLayout() {
                   </TabModalProvider>
                 </Box>
             ))}
+            
+            {/* Alert/Confirm/Toast - 탭 영역 내에서만 표시 */}
+            <GlobalDialog container={dialogContainerRef.current} />
+            <GlobalToast container={dialogContainerRef.current} />
           </Box>
         </Box>
       </Box>

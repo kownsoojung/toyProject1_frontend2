@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { useMenuStore } from "@/stores/menuStore";
+import { useAppSelector } from "@/store/hooks";
 import {
   Box,
   Divider,
@@ -20,7 +20,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onMenuClick, activeKey }) => {
-  const menus = useMenuStore((state) => state.menus);
+  const menus = useAppSelector((state) => state.menu.menus);
   const location = useLocation();
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const { sidebarOpen } = useLayoutContext();

@@ -6,13 +6,14 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import 'dayjs/locale/ko';
 import CssBaseline from '@mui/material/CssBaseline';
 import './index.css';
-import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./styles/theme.tsx";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { initZodConfig } from "./validation/Validation.tsx";
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 const queryClient = new QueryClient();
 const root = ReactDOM.createRoot(document.getElementById("root")!);
@@ -22,16 +23,18 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 initZodConfig();
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
 
-            <App />
+              <App />
 
-        </LocalizationProvider>
-      </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+          </LocalizationProvider>
+        </ThemeProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </Provider>
   </React.StrictMode>
 );
