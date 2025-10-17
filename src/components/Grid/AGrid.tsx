@@ -328,8 +328,13 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
       if (error) {
         api.showNoRowsOverlay?.();
-      } else if (!data?.[rowName] || data[rowName].length === 0) {
+      } else if (isLoading) {
+        // 로딩 중일 때 기존 데이터 비우기
+        api.setGridOption('rowData', []);
+      }
+      else if (!data?.[rowName] || data[rowName].length === 0) {
         api.showNoRowsOverlay?.();
+        api.setGridOption('rowData', []);
       } else {
         api.setGridOption('rowData', data[rowName] || []);
         if (totalName) setTotalCount(data[totalName] || 0);
@@ -566,7 +571,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             pagination={false}
             loadingOverlayComponentParams={{ loadingMessage: '로딩 중...' }}
             loading={isLoading && shouldFetch}
-            overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">데이터가 없습니다.</span>'
+            noRowsOverlayComponent='<span class="ag-overlay-no-rows-center">데이터가 없습니다.</span>'
             rowSelection={rowTypedata}
             domLayout={autoHeight ? "autoHeight" : "normal"}
             rowDragManaged={enableRowDrag}
