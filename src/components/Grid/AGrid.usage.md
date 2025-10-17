@@ -9,7 +9,7 @@ AGrid는 AG Grid를 기반으로 한 고급 데이터 그리드 컴포넌트입�
 ### 1. 서버 데이터 모드 (기본)
 
 ```tsx
-import { AFormGrid, AFormGridHandle } from '@/components/AFormItem/Grid/AGrid';
+import { AFormGrid, AFormGridHandle } from '@/components/Grid';
 import { useRef } from 'react';
 
 function MyComponent() {

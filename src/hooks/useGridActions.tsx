@@ -1,5 +1,5 @@
 import { RefObject, useCallback } from 'react';
-import { AFormGridHandle } from '@/components/AFormItem/Grid/AGrid';
+import { AFormGridHandle } from '@/components/Grid';
 
 export const useGridApi = (gridRef: RefObject<AFormGridHandle | null>) => {
   return gridRef.current?.getGridApi();

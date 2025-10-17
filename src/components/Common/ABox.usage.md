@@ -37,7 +37,7 @@
 ### **비율 사용 (1:2:3)**
 
 ```tsx
-import { RatioBox } from '@/components/AFormItem/common/ABox';
+import { RatioBox } from '@/components/Common';
 
 // 가로로 1:2:3 비율
 <RatioBox ratios={[1, 2, 3]} direction="row" gap={2}>
@@ -84,7 +84,7 @@ import { RatioBox } from '@/components/AFormItem/common/ABox';
 ## 🎨 FlexBox - 간단한 Flex 컨테이너
 
 ```tsx
-import { FlexBox } from '@/components/AFormItem/common/ABox';
+import { FlexBox } from '@/components/Common';
 
 // 가로 정렬
 <FlexBox direction="row" gap={2}>

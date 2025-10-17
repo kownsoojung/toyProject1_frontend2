@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, us
 import { AgGridReact, AgGridReactProps } from "ag-grid-react";
 import { ColDef, GridApi, GridOptions, RowSelectionOptions } from "ag-grid-community";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { UseAutoQuery } from "@/hooks/useAutoQuery";
+import { useAutoQuery, UseAutoQuery } from "@/hooks/useAutoQuery";
 import { exportToExcel as exportExcel } from "@/utils/excelExport";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "@/api/baseApi";
@@ -158,7 +158,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       };
     }, [rowType, rowSelection]);
     // 서버 자동 조회
-    const { data, isLoading, error, refetch } = UseAutoQuery<Record<string, any>>({
+    const { data, isLoading, error, refetch } = useAutoQuery<Record<string, any>>({
       queryKey: ["gridData", url, params, page, pageSizeState],
       url: url,
       params: { ...params, page, pageSize: pageSizeState },
@@ -223,6 +223,12 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
           }
         } else {
           // 현재 화면 데이터
+
+          if (gridRef.current?.api?.getDisplayedRowCount() == 0) {
+            dialog.warning('데이터가 없습니다.');
+            return;
+          }
+          
           gridRef.current?.api?.forEachNodeAfterFilterAndSort(node => {
             dataToExport.push(node.data);
           });
@@ -587,3 +593,4 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 );
 
 AFormGrid.displayName = "AFormGrid";
+

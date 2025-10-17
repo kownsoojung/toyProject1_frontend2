@@ -12,7 +12,7 @@ export type PickerFormat = "year" | "month" | "date" | "datehour" | "dateminute"
 interface AFormDateUnifiedProps {
   name: string;
   endName?: string;
-  label: string;
+  label?: string;
   formatType?: PickerFormat;
   minDate?: string;
   maxDate?: string;
@@ -135,3 +135,4 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
 
   return null;
 };
+

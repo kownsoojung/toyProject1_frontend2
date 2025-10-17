@@ -5,17 +5,11 @@ import { Button, Box, TableRow, TableCell, Stack } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
-import { AFormTextField } from "@/components/AFormItem/AFormTextField";
-import { AFormDate } from "@/components/AFormItem/AFormDate";
-import { AFormTime } from "@/components/AFormItem/AFormTime";
-import { AFormCheckbox } from "@/components/AFormItem/AFormCheckbox";
-import { AFormRadio } from "@/components/AFormItem/AFormRadio";
-import { AFormGrid, AFormGridHandle } from "@/components/AFormItem/Grid/AGrid";
-import AForm from "@/components/AFormItem/AForm";
+import { AFormTextField, AFormDate, AFormTime, AFormCheckbox, AFormRadio, AForm } from "@/components/Form";
+import { AFormGrid, AFormGridHandle } from "@/components/Grid";
 import { FormButtons, FormHeader } from "@/styles/theme";
 import { useGridActions } from "@/hooks/useGridActions";
-import { AddButton, DeleteButton, RefreshButton, ExcelButton } from "@/components/AFormItem/common/AButton";
-import { AutoBox, MainFormBox, RatioBox } from "@/components/AFormItem/common/ABox";
+import { AddButton, DeleteButton, RefreshButton, ExcelButton, AutoBox, MainFormBox, RatioBox } from "@/components/Common";
 import { useLoading } from "@/hooks/useLoading";
 import { useDialog } from "@/hooks/useDialog";
 
@@ -108,11 +102,8 @@ export default function RegisterTableForm() {
   };
 
   const handleExportAll = async () => {
-    await withLoading(async () => {
-      await exportToExcel("전체데이터.xlsx");
-    }, 'Excel 다운로드 중...');
+    await exportToExcel("전체데이터.xlsx");
     
-    dialog.success('Excel 파일이 다운로드되었습니다!');
   };
 
   return (

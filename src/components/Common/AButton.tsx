@@ -87,3 +87,4 @@ export const CloseButton = ({ onClick, text = "닫기", ...props }: CommonButton
     {text}
   </Button>
 );
+
