@@ -70,27 +70,33 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
       }
     };
 
-    return (
-      <PickerComponent
-        {...field}
-        value={value} // null이면 빈값
-        onChange={handleChange}
-        minDate={min}
-        maxDate={max}
-        views={views}
-        ampm={false}
-        format={inputFormat}
-        timeSteps={{ hours: hStep, minutes: mStep, seconds: sStep }}
-        slotProps={{
-          textField: {
-            size: "small",
-            error: !!error,
-            sx: width ? { width } : undefined,
-          },
-        }}
-        {...option}
-      />
-    );
+    // DateTimePicker에만 ampm prop 전달
+    const isTimePicker = formatType.includes('hour') || formatType.includes('minute') || formatType === 'datetime';
+    const pickerProps: any = {
+      ...field,
+      value,
+      onChange: handleChange,
+      minDate: min,
+      maxDate: max,
+      views,
+      format: inputFormat,
+      timeSteps: { hours: hStep, minutes: mStep, seconds: sStep },
+      slotProps: {
+        textField: {
+          size: "small",
+          error: !!error,
+          sx: width ? { width } : undefined,
+        },
+      },
+      ...option,
+    };
+
+    // 시간 선택기에만 ampm 추가
+    if (isTimePicker) {
+      pickerProps.ampm = false;
+    }
+
+    return <PickerComponent {...pickerProps} />;
   };
 
   if (!endName) {

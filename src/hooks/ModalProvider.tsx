@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useRef } from "react";
 import { Box, Button, Modal, Typography, CircularProgress } from "@mui/material";
 import Draggable from "react-draggable";
-import { GlobalLoading } from "@/components/GlobalLoading";
+import { GlobalLoading } from "@/components";
 type ModalItem = {
   key: string;
   title: string;

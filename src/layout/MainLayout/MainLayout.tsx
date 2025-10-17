@@ -8,8 +8,8 @@ import { useAppSelector } from "@/store/hooks";
 import { useLayoutContext } from "@/contexts/LayoutContext";
 import { TabModalProvider } from "@/hooks/ModalProvider";
 import { useTheme } from "@mui/material/styles";
-import { GlobalDialog } from "@/components/GlobalDialog";
-import { GlobalToast } from "@/components/GlobalToast";
+import { GlobalDialog, GlobalToast } from "@/components";
+
 
 type TabItem = {
   key: string;

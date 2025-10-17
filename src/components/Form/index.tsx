@@ -7,5 +7,3 @@ export { AFormSwitch } from "./AFormSwitch";
 export { AFormSelect } from "./AFormSelect";
 export { AFormDate } from "./AFormDate";
 export { AFormTime } from "./AFormTime";
-export { AFormChainSelect } from "./AFormChainSelect";
-

@@ -34,7 +34,7 @@ const menuSlice = createSlice({
   initialState,
   reducers: {
     setMenus: (state, action: PayloadAction<Menu[]>) => {
-      //state.menus = action.payload;
+      state.menus = action.payload;
     },
     clearMenus: (state) => {
       state.menus = [];

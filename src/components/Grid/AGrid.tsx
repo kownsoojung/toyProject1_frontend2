@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, us
 import { AgGridReact, AgGridReactProps } from "ag-grid-react";
 import { ColDef, GridApi, GridOptions, RowSelectionOptions } from "ag-grid-community";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { useAutoQuery, UseAutoQuery } from "@/hooks/useAutoQuery";
+import { useApiQuery, useAutoQuery } from "@/hooks/useAutoQuery";
 import { exportToExcel as exportExcel } from "@/utils/excelExport";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "@/api/baseApi";
@@ -24,7 +24,8 @@ import { useDialog } from "@/hooks/useDialog";
 
 interface AFormGridProps {
   url: string;
-  columnDefs: ColDef[];
+  columnDefs?: ColDef[]; // children으로 컬럼을 정의할 수 있으므로 optional
+  children?: React.ReactNode; // AFormGridColumn 컴포넌트들
   height?: number | string;
   minHeight?: number | string;
   pageSize?: number;
@@ -39,6 +40,7 @@ interface AFormGridProps {
   rowSelection?: Partial<RowSelectionOptions>;
   isPage?: boolean;
   props?: Partial<AgGridReactProps<any>>;
+  params?: Record<string, any>; // API 호출 시 전달할 파라미터
   
   autoFetch?: boolean; // 초기 자동 조회 여부
   showQuickFilter?: boolean; // 빠른 검색 표시
@@ -94,8 +96,9 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
   (
     {
       url,
-      columnDefs,
-      height = "400px",
+      columnDefs: propColumnDefs,
+      children,
+      height = "100%",
       minHeight = "300px",
       pageSize = 10,
       gridOptions,
@@ -106,6 +109,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       isPage = true,
       renderTotal,
       props,
+      params: initialParams = {},
       autoFetch = false,
       showQuickFilter = false,
       showColumnToggle = false,
@@ -127,7 +131,31 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     },
     ref
   ) => {
-    const [params, setParams] = useState<Record<string, any>>({});
+    // children으로부터 columnDefs 추출
+    const columnDefs = useMemo(() => {
+      if (propColumnDefs) {
+        return propColumnDefs;
+      }
+      
+      // children에서 AFormGridColumn 컴포넌트의 props 추출
+      const columns: ColDef[] = [];
+      React.Children.forEach(children, (child) => {
+        if (React.isValidElement(child)) {
+          const props = child.props as any;
+          // name prop을 field로 변환
+          const colDef: ColDef = {
+            ...props,
+            field: props.field || props.name, // name을 field로 변환
+          };
+          delete (colDef as any).name; // name 속성 제거
+          columns.push(colDef);
+        }
+      });
+      
+      return columns;
+    }, [propColumnDefs, children]);
+
+    const [params, setParams] = useState<Record<string, any>>(initialParams);
     const [page, setPage] = useState<number>(1);
     const [pageSizeState, setPageSizeState] = useState<number>(pageSize);
     const [totalCount, setTotalCount] = useState<number>(0);
@@ -137,6 +165,11 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const gridRef = useRef<AgGridReact>(null);
     const dialog = useDialog();
     const queryClient = useQueryClient();
+    
+    // initialParams가 변경되면 params도 업데이트
+    useEffect(() => {
+      setParams(initialParams);
+    }, [initialParams]);
 
     const [shouldFetch, setShouldFetch] = useState(autoFetch);
     const rowTypedata: RowSelectionOptions = useMemo(() => {
@@ -158,7 +191,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       };
     }, [rowType, rowSelection]);
     // 서버 자동 조회
-    const { data, isLoading, error, refetch } = useAutoQuery<Record<string, any>>({
+    const { data, isLoading, error, refetch } = useApiQuery<Record<string, any>>({
       queryKey: ["gridData", url, params, page, pageSizeState],
       url: url,
       params: { ...params, page, pageSize: pageSizeState },
