@@ -571,9 +571,10 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             pagination={false}
             loadingOverlayComponentParams={{ loadingMessage: '로딩 중...' }}
             loading={isLoading && shouldFetch}
-            noRowsOverlayComponent='<span class="ag-overlay-no-rows-center">데이터가 없습니다.</span>'
+            overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">데이터가 없습니다.</span>'
             rowSelection={rowTypedata}
             domLayout={autoHeight ? "autoHeight" : "normal"}
+            suppressHorizontalScroll={false}
             rowDragManaged={enableRowDrag}
             animateRows={true}
             suppressRowHoverHighlight={true}

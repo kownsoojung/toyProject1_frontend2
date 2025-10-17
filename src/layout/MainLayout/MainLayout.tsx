@@ -258,6 +258,7 @@ export default function MainLayout() {
               flexGrow: 1,
               height: 0,
               overflowY: "auto",
+              overflowX: "hidden",
               bgcolor: "#fff",
               paddingBottom: 2,
               position: "relative",
@@ -281,7 +282,7 @@ export default function MainLayout() {
                   }}
                 >
                   <TabModalProvider>
-                    <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%" }}>
+                    <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%", overflowX: 'hidden', }}>
                       {tab.component}
                     </Box>
                   </TabModalProvider>
