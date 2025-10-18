@@ -70,7 +70,6 @@ export default function LoginPage() {
         )}
 
         <AForm
-          title="회원 등록"
           onSubmit={onSubmit}
           methods={methods}
           type="form"
@@ -95,8 +94,6 @@ export default function LoginPage() {
               <AFormTextField name="email" options={{label:"이메일"}} />
             </TableCell>
           </TableRow>
-
-          
         </AForm>
       </Card>
     </Box>
