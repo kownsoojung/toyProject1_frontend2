@@ -83,7 +83,7 @@ export interface AFormGridHandle {
   selectAll: () => void;
   setQuickFilter: (text: string) => void;
   setColumnVisible: (field: string, visible: boolean) => void;
-  addRow: (newRow?: any) => void;
+  addRow: (newRow?: any, index?:number) => void;
   updateRow: (rowId: any, newData: any) => void;
   deleteRows: (rowIds: any[]) => void;
   getAllRows: () => any[];
@@ -285,8 +285,13 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       setColumnVisible: (field: string, visible: boolean) => {
         gridRef.current?.api?.setColumnsVisible([field], visible);
       },
-      addRow: (newRow = {}) => {
-        gridRef.current?.api?.applyTransaction({ add: [newRow], addIndex: 0 });
+      addRow: (newRow = {}, index) => {
+
+        if (index) {
+          gridRef.current?.api?.applyTransaction({ add: [newRow], addIndex: index });
+        }
+        else gridRef.current?.api?.applyTransaction({ add: [newRow] });
+        
       },
       updateRow: (rowId: any, newData: any) => {
         const api = gridRef.current?.api;
@@ -556,8 +561,9 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
               sortable: true,
               filter: true,
               resizable: true,
+              singleClickEdit: true, 
             }}
-            
+            rowHeight={40}
             pagination={false}
             loadingOverlayComponentParams={{ loadingMessage: '로딩 중...' }}
             loading={isLoading && shouldFetch}
