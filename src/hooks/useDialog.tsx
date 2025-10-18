@@ -6,6 +6,10 @@ import { showToast } from '@/store/slices/toastSlice';
 /**
  * 전역 Dialog/Toast를 쉽게 사용하기 위한 커스텀 Hook
  */
+interface SuccessOptions {
+  message?: string;
+  type: "insert" | "update" | "delete" | "save";
+}
 export const useDialog = () => {
   const dispatch = useAppDispatch();
 
@@ -35,7 +39,30 @@ export const useDialog = () => {
     alert,
     confirm,
     toast,
-    success: (message: string) => toast(message, 'success'),
+    success: ({ message, type }: SuccessOptions) => {
+      if (!message && !type) {
+        toast("no message", "error");
+        return;
+      }
+     if (type) {
+      switch (type) {
+        case "insert":
+          toast(`등록되었습니다.`, "success");
+          break;
+        case "update":
+          toast(`수정되었습니다.`, "success");
+          break;
+        case "delete":
+          toast(`삭제되었습니다.`, "success");
+          break;
+        case "save":
+          toast(`저장되었습니다.`, "success");
+          break;
+      }
+      return;
+     }
+     toast(message|| "", "success");
+    },
     error: (message: string) => toast(message, 'error'),
     warning: (message: string) => toast(message, 'warning'),
     info: (message: string) => toast(message, 'info'),

@@ -57,7 +57,7 @@ export default function RegisterTableForm() {
     }, 'save');
     
     // 저장 완료 후 토스트 알림
-    dialog.success('저장 완료!');
+    dialog.success({type:"save"});
   };
 
   // Grid 버튼 핸들러
@@ -66,21 +66,19 @@ export default function RegisterTableForm() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       addRow({ id: Date.now(), name: "새 항목" });
     }, 'save');
-    
-    dialog.success('항목이 추가되었습니다!');
   };
 
   const handleDelete = async () => {
     const selected = getSelectedRows();
     
     if (selected.length === 0) {
-      deleteRows(selected);
-      dialog.warning('삭제할 항목을 선택하세요.');
+      
+      dialog.warning('삭제할 항목을 선택하세요.');      
       return;
     }
     // 삭제 확인
     const confirmed = await dialog.confirm(`선택한 ${selected.length}개 항목을 삭제하시겠습니까?`);
-    
+    deleteRows(selected);
     if (!confirmed) { return;}
     
     await withLoading(async () => {
@@ -90,7 +88,7 @@ export default function RegisterTableForm() {
       console.log("삭제된 데이터:", selected);
     }, 'delete');
     
-    dialog.success('삭제되었습니다!');
+    dialog.success({type : "delete"});
   };
 
   const handleRefresh = async () => {
