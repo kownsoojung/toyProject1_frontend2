@@ -49,7 +49,7 @@ export const useGridActions = (gridRef: RefObject<AFormGridHandle | null>) => {
     return gridRef.current?.getRawData() || {};
   }, [gridRef]);
 
-  const addRow = useCallback((newRow = {}, number:number) => {
+  const addRow = useCallback((newRow = {}, number?:number) => {
     gridRef.current?.addRow(newRow, number);
   }, [gridRef]);
 
