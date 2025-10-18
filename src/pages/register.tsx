@@ -177,8 +177,7 @@ export default function RegisterTableForm() {
       </AForm>
       <AutoBox>
       <RatioBox ratios={[1, 1]} direction="row" gap={2} sxProps={{ flex: 1, minHeight: 400 }}>
-      {/* 왼쪽 그리드 영역 */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* 왼쪽 그리드 영역 */}
         <AFormGrid
           ref={gridRef}
           url=""
@@ -210,7 +209,7 @@ export default function RegisterTableForm() {
             console.log(data)
           )}
         />
-      </Box>
+      
       
       {/* 오른쪽 영역 */}
       <Box sx={{ 

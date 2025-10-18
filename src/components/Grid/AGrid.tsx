@@ -166,10 +166,6 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const dialog = useDialog();
     const queryClient = useQueryClient();
     
-    // initialParams가 변경되면 params도 업데이트
-    useEffect(() => {
-      setParams(initialParams);
-    }, [initialParams]);
 
     const [shouldFetch, setShouldFetch] = useState(autoFetch);
     const rowTypedata: RowSelectionOptions = useMemo(() => {
@@ -195,7 +191,6 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       queryKey: ["gridData", url, params, page, pageSizeState],
       url: url,
       params: { ...params, page, pageSize: pageSizeState },
-      options: { enabled: shouldFetch },
     });
 
     // 컬럼 가시성 초기화
@@ -213,7 +208,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       if (shouldFetch) {
         refetch();
       }
-    }, [page, pageSizeState, shouldFetch, refetch]);
+    }, [page, pageSizeState]);
 
     // 에러 감지
     useEffect(() => {
@@ -340,7 +335,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         if (totalName) setTotalCount(data[totalName] || 0);
         api.hideOverlay();
       }
-    }, [data, isLoading, error, rowName, totalName]);
+    }, [data, isLoading, error]);
 
     // 컬럼 가시성 변경 처리
     const handleColumnToggle = useCallback((field: string) => {
