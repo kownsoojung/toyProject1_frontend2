@@ -8,7 +8,7 @@ import { showToast } from '@/store/slices/toastSlice';
  */
 interface SuccessOptions {
   message?: string;
-  type: "insert" | "update" | "delete" | "save";
+  type?: "insert" | "update" | "delete" | "save";
 }
 export const useDialog = () => {
   const dispatch = useAppDispatch();

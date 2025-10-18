@@ -70,9 +70,6 @@ interface AFormGridProps {
   onRowDoubleClicked?: (data: any) => void;
   onSelectionChanged?: (selectedRows: any[]) => void;
   onRowDragEnd?: (data: any) => void;
-  
-  // 페이지 상태 유지 옵션
-  keepPageOnRefetch?: boolean; // refetch 시 현재 페이지 유지
 }
 
 export interface AFormGridHandle {
@@ -127,7 +124,6 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       onSelectionChanged,
       onRowDragEnd,
       
-      keepPageOnRefetch = false,
     },
     ref
   ) => {
@@ -206,9 +202,10 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
     useEffect(() => {
       if (shouldFetch) {
+        gridRef.current?.api?.setGridOption('rowData', []);
         refetch();
       }
-    }, [page, pageSizeState]);
+    }, [page, pageSizeState, params]);
 
     // 에러 감지
     useEffect(() => {
@@ -220,8 +217,9 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     // imperative handle - 외부에서 사용할 메서드들
     useImperativeHandle(ref, () => ({
       refetch: (newParams?: Record<string, any>) => {
+        setShouldFetch(false);
         setParams(newParams || {});
-        if (!keepPageOnRefetch) {
+        if (isPage) {
           setPage(1);
         }
         setShouldFetch(true);
@@ -323,10 +321,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
       if (error) {
         api.showNoRowsOverlay?.();
-      } else if (isLoading) {
-        // 로딩 중일 때 기존 데이터 비우기
-        api.setGridOption('rowData', []);
-      }
+      } 
       else if (!data?.[rowName] || data[rowName].length === 0) {
         api.showNoRowsOverlay?.();
         api.setGridOption('rowData', []);
@@ -335,7 +330,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         if (totalName) setTotalCount(data[totalName] || 0);
         api.hideOverlay();
       }
-    }, [data, isLoading, error]);
+    }, [data, error]);
 
     // 컬럼 가시성 변경 처리
     const handleColumnToggle = useCallback((field: string) => {
