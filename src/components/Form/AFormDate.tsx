@@ -21,7 +21,8 @@ interface AFormDateUnifiedProps {
   sStep?: number;
   base?:AFormBaseItemProps;
   options?:DatePickerProps
-  endOptions?:DatePickerProps
+  endOptions?:DatePickerProps;
+  isString?:boolean;
 }
 
 const formatMap: Record<
@@ -48,7 +49,8 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
   sStep = 1,
   base,
   options,
-  endOptions
+  endOptions,
+  isString=false
 }) => {
   const { watch } = useFormContext();
   const startValue = name ? watch(name) : null;
@@ -63,7 +65,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
     const handleChange = (val: Dayjs | null) => {
       if (val) {
         const rounded = roundToStep(val, hStep, mStep, sStep);
-        const formatted = rounded.format("YYYYMMDDHHmmss");
+        const formatted = rounded.format(isString? inputFormat.replace(/[-:\s]/g, "") : "YYYY-MM-DDTHH:mm:ss");
         field.onChange(formatted);
       } else {
         field.onChange(null);

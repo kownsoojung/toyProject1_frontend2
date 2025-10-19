@@ -171,7 +171,7 @@ export default function RegisterTableForm() {
         <TableRow>
           <TableCell component="th">조회일자</TableCell>
           <TableCell colSpan={3}>
-            <AFormDate label="test" name="start" endName="endDate" formatType="datetime" mStep={5} />
+            <AFormDate label="test" name="start" endName="endDate" formatType="year" mStep={5} isString={true}/>
           </TableCell>
         </TableRow>
       </AForm>

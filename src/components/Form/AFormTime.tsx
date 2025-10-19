@@ -5,7 +5,7 @@ import { TimePicker, TimePickerProps } from "@mui/x-date-pickers";
 import { Box } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { roundToStep } from "@/utils/dateUtils";
+import { roundTime, roundToStep } from "@/utils/dateUtils";
 
 export type TimeFormat = "hour" | "minute" | "second";
 
@@ -19,6 +19,7 @@ interface AFormTimeUnifiedProps{
   base?:AFormBaseItemProps;
   options?:TimePickerProps
   endOptions?:TimePickerProps
+  isString?:boolean;
 }
 
 const formatMap: Record<
@@ -39,7 +40,9 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
   mStep = 1,
   sStep = 1,
   base,
-  options,endOptions
+  options,
+  endOptions,
+  isString=false
 }) => {
   const { watch } = useFormContext();
   const startValue = watch(name);
@@ -48,12 +51,12 @@ export const AFormTime: React.FC<AFormTimeUnifiedProps> = ({
   const { views, inputFormat, width } = formatMap[formatType];
 
   const renderPicker = (field: any, error?: string, option?:TimePickerProps) => {
-    const value = field.value ? roundToStep(dayjs(field.value), hStep, mStep, sStep) : null;
+    const value = field.value ? roundToStep(dayjs(field.value, "HH:mm:ss"), hStep, mStep, sStep) : null;
 
     const handleChange = (val: Dayjs | null) => {
       if (val) {
-        const rounded = roundToStep(val, hStep, mStep, sStep);
-        const formatted = rounded.format("YYYYMMDDHHmmss");
+        const rounded = roundTime(val, hStep, mStep, sStep);
+        const formatted = rounded.format(isString?inputFormat.replace(/[-:\s]/g, "") :"HH:mm:ss");
         field.onChange(formatted);
       } else {
         field.onChange(null);
