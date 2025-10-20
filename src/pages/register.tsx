@@ -12,7 +12,7 @@ import { useGridActions } from "@/hooks/useGridActions";
 import { AddButton, DeleteButton, RefreshButton, ExcelButton, AutoBox, MainFormBox, RatioBox } from "@/components/Common";
 import { useLoading } from "@/hooks/useLoading";
 import { useDialog } from "@/hooks/useDialog";
-import { AGridTextEditor, AGridTextView } from "@/components/Grid/AGridCellComponent";
+import { AGridCellTextEditor, AGridCellTextView } from "@/components/Grid/AGridCellComponent";
 import { ICellEditorParams, ICellRendererParams } from "ag-grid-community";
 
 export default function RegisterTableForm() {
@@ -183,9 +183,9 @@ export default function RegisterTableForm() {
           url=""
           minHeight={400}
           columnDefs={[
-            { field: "id", headerName: "ID" , editable:true, cellEditor: AGridTextEditor , cellRenderer: (params: ICellEditorParams) => {
+            { field: "id", headerName: "ID" , editable:true, cellEditor: AGridCellTextEditor , cellRenderer: (params: ICellEditorParams) => {
               if (params.value ==1760801787449) return <>{params.value}</>;
-              else return <AGridTextView params={params} />;
+              else return <AGridCellTextView params={params} />;
             }},
             { field: "name", headerName: "Name" },
           ]}

@@ -1,12 +1,7 @@
 import { useAutoQuery } from "./useAutoQuery";
 import { SiteCodeDTO, SiteCodeSearchDTO } from "@/api/generated";
 
-export interface CodeItem {
-  label: string;
-  value: any;
-  parent?:number|string;
-  disabled?: boolean;
-}
+
 
 /**
  * 공통 코드 조회 Hook

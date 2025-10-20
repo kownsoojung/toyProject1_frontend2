@@ -1,16 +1,16 @@
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { CodeItem, useCode } from "@/hooks/useCode";
-import { SiteCodeSearchDTO } from "@/api/generated";
+import { useCode } from "@/hooks/useCode";
+import { SiteCodeDTO, SiteCodeSearchDTO } from "@/api/generated";
 import { MenuItem, Select, SelectProps } from "@mui/material";
 import { useFormContext, useWatch } from "react-hook-form";
 
 interface SelectItemProps extends Omit<SelectProps, "name">{
   name:string,
-  list?: CodeItem[];
+  list?: SiteCodeDTO[];
   selectCode?:SiteCodeSearchDTO;
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   msize?:number|string
-  isDisabledItem?: (item: CodeItem) => boolean;
+  isDisabledItem?: (item: SiteCodeDTO) => boolean;
   parent?: string; 
   options?:SelectProps
 }
@@ -24,31 +24,25 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
   msize,
   isDisabledItem,
   parent,
-  ...rest
 }) => {
   
   const { control } = useFormContext(); 
   const parentValue = typeof parent === "string" ? useWatch({ control, name: parent }) : parent;
 
 
-  let selectOptions:CodeItem[];
+  let selectOptions:SiteCodeDTO[];
 
   if (selectCode) {
     const { data: codeData } = useCode(selectCode);
     // codeData가 배열이면 map으로 변환
-    selectOptions = codeData?.map(item => ({
-      label: item.label ?? "",   // undefined일 경우 빈 문자열
-      value: item.value ?? "", // undefined일 경우 빈 문자열
-      parent: item.parent, 
-      disabled: item.disabled ?? false, 
-    })) ?? [];
+    selectOptions = codeData ?? [];
   } else {
     selectOptions = list; // 기존 옵션 사용
   }
 
   if (parentValue) {
     selectOptions = selectOptions.filter(
-      (item) => item.parent === parent
+      (item) => item.parentCodeNumber === parent
     );
   }
 
@@ -63,10 +57,10 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
           }}
           {...options}
         >
-          {selectOptions.map((item:CodeItem) => (
+          {selectOptions.map((item:SiteCodeDTO) => (
             <MenuItem
-              key={item.value}
-              value={item.value}
+              key={item.codeNumber}
+              value={item.codeValue}
               disabled={isDisabledItem?.(item) || item.disabled}
             >
               {item.label}

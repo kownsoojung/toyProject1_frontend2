@@ -65,7 +65,7 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
     const handleChange = (val: Dayjs | null) => {
       if (val) {
         const rounded = roundToStep(val, hStep, mStep, sStep);
-        const formatted = rounded.format(isString? inputFormat.replace(/[-:\s]/g, "") : "YYYY-MM-DDTHH:mm:ss");
+        const formatted = rounded.format(isString? inputFormat.replace(/[-:\s]/g, "") : inputFormat === "YYYY-MM-DD"? "YYYY-MM-DD" : "YYYY-MM-DDTHH:mm:ss");
         field.onChange(formatted);
       } else {
         field.onChange(null);

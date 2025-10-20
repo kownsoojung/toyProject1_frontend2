@@ -1,17 +1,21 @@
 // src/components/Grid/AGridTextComponents.tsx
-import { TextField, TextFieldProps } from "@mui/material";
+import { MenuItem, Select, SelectProps, TextField, TextFieldProps } from "@mui/material";
 import React, { useState, forwardRef, useImperativeHandle } from "react";
 import { ICellRendererParams, ICellEditorParams } from "ag-grid-community";
+import { useCode } from "@/hooks/useCode";
+import { SiteCodeDTO, SiteCodeSearchDTO } from "@/api/generated";
 
 // ====================
 // 1️⃣ 셀 컴포넌트 (렌더링 전용)
 // ====================
-export const AGridTextView = ({ params, props }: {params:ICellEditorParams, props?:TextFieldProps}) => {
+export const AGridCellTextView = ({ params, props }: {params:ICellEditorParams, props?:TextFieldProps}) => {
   return (
     <TextField
+      className="ag-mui-cell-editor"
       value={params.value}
       fullWidth
-      sx={{ height: "100%" }}
+      
+      sx={{ height: "100%", ...props?.sx  }}
       {...props}
     />
   );
@@ -20,43 +24,88 @@ export const AGridTextView = ({ params, props }: {params:ICellEditorParams, prop
 // ====================
 // 2️⃣ 셀 에디터 (편집용)
 // ====================
-export const AGridTextEditor = forwardRef(
-  ({ props, initialValue }: { props?: TextFieldProps; initialValue?: string }, ref) => {
-    const [value, setValue] = useState(initialValue || "");
+export const AGridCellTextEditor = forwardRef((params: any, ref) => {
+  const [value, setValue] = useState(params.value || "");
 
-    // AG Grid가 셀 에디터에서 호출하는 메서드들
-    useImperativeHandle(ref, () => ({
-      getValue: () => value, // 편집 완료 시 반환할 값
-      isCancelAfterEnd: () => false, // 편집 취소 여부
-      // 필요하면 아래 메서드도 구현 가능
-      // afterGuiAttached: () => { ... },
-      // focusIn: () => { ... },
-    }));
+  useImperativeHandle(ref, () => ({
+    getValue: () => value,
+    isCancelAfterEnd: () => false,
+  }));
 
-    return (
-      <TextField
-      className="ag-grid-text-editor"
+  return (
+    <TextField
+      className="ag-mui-cell-editor"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      autoFocus
+      fullWidth
+      {...params.props}
+      sx={{ height: "100%", ...params?.props?.sx }}
+    />
+  );
+});
 
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        autoFocus
-        fullWidth
-        {...props}
-        sx={{ height: "100%" }}
-      />
-    );
+
+export const AGridCellSelectView = ({ params, props, codename, codeItems }: { params: ICellRendererParams; props?: SelectProps; codename?:SiteCodeSearchDTO, codeItems?:SiteCodeDTO[] }) => {
+  
+
+  let selectOptions:SiteCodeDTO[] = codeItems ?? [];
+  
+  if (codename) {
+    const { data: codeData } = useCode(codename ?? "");
+    selectOptions= codeData ?? [];
   }
-);
 
-// ====================
-// 3️⃣ 사용 예시 (columnDefs)
-// ====================
-// const columnDefs = [
-//   {
-//     field: "name",
-//     headerName: "Name",
-//     editable: true,
-//     cellRenderer: AGridTextCell, // 기본 표시용
-//     cellEditor: AGridTextEditor, // 편집용
-//   },
-// ];
+  const display = selectOptions.find(o => o.codeNumber === params.value)?.label ?? params.value ?? "";
+
+  return (
+    <Select
+      className="ag-mui-cell-editor"
+      value={params.value ?? ""}
+      fullWidth
+      readOnly
+      sx={{ height: "100%", ...props?.sx }}
+      {...props}
+      renderValue={() => display}
+    >
+      {selectOptions.map(opt => (
+         <MenuItem key={opt.codeNumber} value={opt.codeNumber}>{opt.codeValue}</MenuItem>
+      ))}
+    </Select>
+  );
+};
+
+// 편집용 에디터
+export const AGridCellSelectEditor = forwardRef((params: any, ref) => {
+  const [value, setValue] = useState(params.value ?? "");
+  const props: SelectProps & { options?: SiteCodeDTO[] } = params.props ?? {};
+  const codename = params.codename ?? undefined;
+  let selectOptions:SiteCodeDTO[] = props.options ?? [];
+  
+  if (codename) {
+    const { data: codeData } = useCode(codename);
+    selectOptions= codeData ?? [];
+  }
+
+  useImperativeHandle(ref, () => ({
+    getValue: () => value,
+    isCancelAfterEnd: () => false,
+  }));
+
+  
+  return (
+    <Select
+      className="ag-mui-cell-editor"
+      value={value}
+      onChange={(e) => setValue((e.target as HTMLInputElement).value)}
+      autoFocus
+      fullWidth
+      sx={{ height: "100%", ...props.sx }}
+      {...props}
+    >
+      {selectOptions.map(opt => (
+        <MenuItem key={opt.codeNumber} value={opt.codeNumber}>{opt.codeValue}</MenuItem>
+      ))}
+    </Select>
+  );
+});

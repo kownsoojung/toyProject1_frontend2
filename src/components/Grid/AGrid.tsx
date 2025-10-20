@@ -30,8 +30,8 @@ interface AFormGridProps {
   minHeight?: number | string;
   pageSize?: number;
   gridOptions?: Partial<GridOptions>;
-  rowName?: string;
-  totalName?: string;
+  rowName?: any;
+  totalName?: any;
   renderTotal?: (total: number) => React.ReactNode;
   rowType?: {type : "single" | "singleCheck" | "singleAutoCheck" | "multi" | "multiAutoCheck" | "multiCheck",
              header? :boolean
@@ -99,8 +99,8 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       minHeight = "300px",
       pageSize = 10,
       gridOptions,
-      rowName = "dataList",
-      totalName = "totalCnt",
+      rowName = "content",
+      totalName = "totalElements",
       rowType = {type : "single", header : true},
       rowSelection,
       isPage = true,
@@ -202,10 +202,9 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
     useEffect(() => {
       if (shouldFetch) {
-        gridRef.current?.api?.setGridOption('rowData', []);
         refetch();
       }
-    }, [page, pageSizeState, params]);
+    }, [page, pageSizeState, params, shouldFetch]);
 
     // 에러 감지
     useEffect(() => {
@@ -223,7 +222,6 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
           setPage(1);
         }
         setShouldFetch(true);
-        refetch();
       },
       getRawData: () => data || {},
       getSelectedRows: () => {
@@ -327,15 +325,20 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       if (error) {
         api.showNoRowsOverlay?.();
       } 
+      else if (isLoading) {
+        api.setGridOption('rowData', []);
+      }
       else if (!data?.[rowName] || data[rowName].length === 0) {
         api.showNoRowsOverlay?.();
         api.setGridOption('rowData', []);
       } else {
         api.setGridOption('rowData', data[rowName] || []);
-        if (totalName) setTotalCount(data[totalName] || 0);
+        if (totalName) {
+          setTotalCount(data[totalName] || 0);
+        }
         api.hideOverlay();
       }
-    }, [data, error]);
+    }, [data, error, isLoading]);
 
     // 컬럼 가시성 변경 처리
     const handleColumnToggle = useCallback((field: string) => {
@@ -377,8 +380,8 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       }
     }, [onRowDragEnd]);
 
-    // 페이지 계산
-    const totalPages = Math.ceil(totalCount / pageSizeState);
+    // 페이지 계산 - 빈 페이지 방지
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSizeState));
 
     // 향상된 columnDefs (체크박스, 드래그, 그룹화 지원)
     const enhancedColumnDefs = React.useMemo(() => {
@@ -609,8 +612,11 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             {/* Material-UI Pagination */}
             <Pagination
               count={totalPages}
-              page={page}
-              onChange={(_, value) => setPage(value)}
+              page={Math.min(page, totalPages)}
+              onChange={(_, value) => {
+                const validPage = Math.min(Math.max(1, value), totalPages);
+                setPage(validPage);
+              }}
               color="primary"
               showFirstButton
               showLastButton

@@ -49,7 +49,7 @@ body {
     padding-right: calc(var(--ag-cell-horizontal-padding) - 1px);
 }
 
-.ag-theme-alpine .ag-cell-not-inline-editing .MuiInputBase-root, .ag-theme-alpine .ag-grid-text-editor .MuiInputBase-root {
+.ag-theme-alpine .ag-mui-cell-editor .MuiInputBase-root {
   height: 100% !important;
   margin: 3px 0 !important;
   box-sizing: border-box;
