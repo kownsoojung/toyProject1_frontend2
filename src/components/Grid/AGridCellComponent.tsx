@@ -37,26 +37,25 @@ export const AGridCellTextEditor = forwardRef((params: any, ref) => {
       className="ag-mui-cell-editor"
       value={value}
       onChange={(e) => setValue(e.target.value)}
-      autoFocus
       fullWidth
       {...params.props}
+      autoFocus
       sx={{ height: "100%", ...params?.props?.sx }}
     />
   );
 });
 
 
-export const AGridCellSelectView = ({ params, props, codename, codeItems }: { params: ICellRendererParams; props?: SelectProps; codename?:SiteCodeSearchDTO, codeItems?:SiteCodeDTO[] }) => {
+export const AGridCellSelectView = ({ params, props, parentColumn, codeItems }: { params: ICellRendererParams; props?: SelectProps; parentColumn?:any, codeItems?:SiteCodeDTO[] }) => {
   
 
-  let selectOptions:SiteCodeDTO[] = codeItems ?? [];
-  
-  if (codename) {
-    const { data: codeData } = useCode(codename ?? "");
-    selectOptions= codeData ?? [];
+  let selectOptions:SiteCodeDTO[] = codeItems || [];
+
+  if (parentColumn) {
+    selectOptions = parentColumn.data[parentColumn.colId]?.map((item:any) => item.codeNumber) ?? [];
   }
 
-  const display = selectOptions.find(o => o.codeNumber === params.value)?.label ?? params.value ?? "";
+  const display = selectOptions.find(o => o.codeNumber === params.value)?.codeValue ?? params.value ?? "";
 
   return (
     <Select
@@ -78,13 +77,12 @@ export const AGridCellSelectView = ({ params, props, codename, codeItems }: { pa
 // 편집용 에디터
 export const AGridCellSelectEditor = forwardRef((params: any, ref) => {
   const [value, setValue] = useState(params.value ?? "");
-  const props: SelectProps & { options?: SiteCodeDTO[] } = params.props ?? {};
-  const codename = params.codename ?? undefined;
-  let selectOptions:SiteCodeDTO[] = props.options ?? [];
+  const props: SelectProps = params.props ?? {};
+  const [open, setOpen] = useState(true);
+  let selectOptions:SiteCodeDTO[] = params.codeItems ?? [];
   
-  if (codename) {
-    const { data: codeData } = useCode(codename);
-    selectOptions= codeData ?? [];
+  if (params.parentColumn) {
+    selectOptions = params.parentColumn?.data[params.parentColumn?.colId]?.map((item:any) => item.codeNumber) ?? [];
   }
 
   useImperativeHandle(ref, () => ({
@@ -97,8 +95,14 @@ export const AGridCellSelectEditor = forwardRef((params: any, ref) => {
     <Select
       className="ag-mui-cell-editor"
       value={value}
-      onChange={(e) => setValue((e.target as HTMLInputElement).value)}
       autoFocus
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
+      onChange={(e) => {
+        setValue(e.target.value);  // 타입 캐스팅 제거
+        setOpen(false); // 선택 후 닫기
+      }}
       fullWidth
       sx={{ height: "100%", ...props.sx }}
       {...props}

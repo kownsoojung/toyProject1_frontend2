@@ -57,14 +57,21 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
   const endValue = endName ? watch(endName) : null;
   const { views, inputFormat, component: PickerComponent, width } = formatMap[formatType];
 
-  const renderPicker = (field: any, error?: string, min?: Dayjs, max?: Dayjs, option?:DatePickerProps) => {
+  const renderPicker = (field: any, error?: string, min?: Dayjs, max?: Dayjs, option?:DatePickerProps, isEndDate?: boolean) => {
     const value = field.value
       ? roundToStep(dayjs(field.value), hStep, mStep, sStep)
       : null; // 값 없으면 null로
 
     const handleChange = (val: Dayjs | null) => {
       if (val) {
-        const rounded = roundToStep(val, hStep, mStep, sStep);
+        let rounded = roundToStep(val, hStep, mStep, sStep);
+
+        if (isEndDate && isString === false && ["year", "month", "date"].includes(formatType)) {
+          rounded = rounded.hour(23).minute(59).second(59);
+          const formatted = rounded.format("YYYY-MM-DDT23:59:59");
+          field.onChange(formatted);
+        }
+
         const formatted = rounded.format(isString? inputFormat.replace(/[-:\s]/g, "") : inputFormat === "YYYY-MM-DD"? "YYYY-MM-DD" : "YYYY-MM-DDTHH:mm:ss");
         field.onChange(formatted);
       } else {
@@ -119,7 +126,8 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
               error,
               parseMinMax(minDate),
               endValue ? roundToStep(dayjs(endValue), hStep, mStep, sStep) : parseMinMax(maxDate),
-              options
+              options,
+              
             )
           }
         </AFormBaseItem>
@@ -133,7 +141,8 @@ export const AFormDate: React.FC<AFormDateUnifiedProps> = ({
               error,
               startValue ? roundToStep(dayjs(startValue), hStep, mStep, sStep) : parseMinMax(minDate),
               parseMinMax(maxDate),
-              endOptions
+              endOptions,
+              true
             )
           }
         </AFormBaseItem>

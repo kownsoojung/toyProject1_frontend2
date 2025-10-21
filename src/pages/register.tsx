@@ -6,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
 import { AFormTextField, AFormDate, AFormTime, AFormCheckbox, AFormRadio, AForm } from "@/components/Form";
-import { AFormGrid, AFormGridHandle } from "@/components/Grid";
+import { AGrid, AFormGridHandle } from "@/components/Grid";
 import { FormButtons, FormHeader } from "@/styles/theme";
 import { useGridActions } from "@/hooks/useGridActions";
 import { AddButton, DeleteButton, RefreshButton, ExcelButton, AutoBox, MainFormBox, RatioBox } from "@/components/Common";
@@ -178,7 +178,7 @@ export default function RegisterTableForm() {
       <AutoBox>
       <RatioBox ratios={[1, 1]} direction="row" gap={2} sxProps={{ flex: 1, minHeight: 400 }}>
         {/* 왼쪽 그리드 영역 */}
-        <AFormGrid
+        <AGrid
           ref={gridRef}
           url=""
           minHeight={400}

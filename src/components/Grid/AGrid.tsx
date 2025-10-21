@@ -21,6 +21,7 @@ import {
   FormGroup,
 } from "@mui/material";
 import { useDialog } from "@/hooks/useDialog";
+import { is } from "zod/v4/locales";
 
 interface AFormGridProps {
   url: string;
@@ -89,7 +90,7 @@ export interface AFormGridHandle {
   getAllRows: () => any[];
 }
 
-export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
+export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
   (
     {
       url,
@@ -157,13 +158,18 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const [totalCount, setTotalCount] = useState<number>(0);
     const [quickFilterText, setQuickFilterText] = useState<string>("");
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
+    const [refreshKey, setRefreshKey] = useState<number>(0);
 
     const gridRef = useRef<AgGridReact>(null);
     const dialog = useDialog();
     const queryClient = useQueryClient();
-    
+   
 
     const [shouldFetch, setShouldFetch] = useState(autoFetch);
+    const [sort, setSort] = useState<{sortOrder: string, sortColumn: string}>({sortOrder: "", sortColumn: ""});
+    
+
+
     const rowTypedata: RowSelectionOptions = useMemo(() => {
       const type = rowType.type;
       const mode: RowSelectionOptions["mode"] = type.match(/multi/) ? "multiRow" : "singleRow";
@@ -183,10 +189,11 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       };
     }, [rowType, rowSelection]);
     // 서버 자동 조회
-    const { data, isLoading, error, refetch } = useApiQuery<Record<string, any>>({
-      queryKey: ["gridData", url, params, page, pageSizeState],
+    let { data, isLoading, error, refetch } = useApiQuery<Record<string, any>>({
+      queryKey: ["gridData", url, params, page, pageSizeState, refreshKey],
       url: url,
-      params: { ...params, page, pageSize: pageSizeState },
+      params: { ...params, page, pageSize: pageSizeState, sortOrder: sort.sortOrder, sortColumn: sort.sortColumn },
+      
     });
 
     // 컬럼 가시성 초기화
@@ -202,9 +209,11 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
     useEffect(() => {
       if (shouldFetch) {
+        gridRef.current?.api?.setGridOption('rowData', []);
+        
         refetch();
       }
-    }, [page, pageSizeState, params, shouldFetch]);
+    }, [page, pageSizeState, params, shouldFetch, sort]);
 
     // 에러 감지
     useEffect(() => {
@@ -218,6 +227,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       refetch: (newParams?: Record<string, any>) => {
         setShouldFetch(false);
         setParams(newParams || {});
+        setRefreshKey(prev => prev + 1);
         if (isPage) {
           setPage(1);
         }
@@ -321,12 +331,12 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     useEffect(() => {
       const api = gridRef.current?.api;
       if (!api) return;
-
+      
       if (error) {
         api.showNoRowsOverlay?.();
       } 
       else if (isLoading) {
-        api.setGridOption('rowData', []);
+        
       }
       else if (!data?.[rowName] || data[rowName].length === 0) {
         api.showNoRowsOverlay?.();
@@ -338,7 +348,7 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         }
         api.hideOverlay();
       }
-    }, [data, error, isLoading]);
+    }, [data, error, isLoading, shouldFetch]);
 
     // 컬럼 가시성 변경 처리
     const handleColumnToggle = useCallback((field: string) => {
@@ -562,11 +572,15 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             defaultColDef={{
               flex: 1,
               sortable: true,
-              filter: true,
+              filter: false,
               resizable: true,
               singleClickEdit: true, 
+              comparator: () => 0, 
+              cellStyle: { fontSize: "13px" },
             }}
-            rowHeight={40}
+            rowHeight={36}
+            headerHeight={36}
+            
             pagination={false}
             loadingOverlayComponentParams={{ loadingMessage: '로딩 중...' }}
             loading={isLoading && shouldFetch}
@@ -577,6 +591,12 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             rowDragManaged={enableRowDrag}
             animateRows={true}
             suppressRowHoverHighlight={true}
+            onSortChanged={(e)=> {
+              if (e.columns) {
+                setRefreshKey(prev => prev + 1);
+                setSort({sortOrder: e.columns[0].getSort() ?? "", sortColumn: e.columns[0].getColId() ?? ""});
+              }
+            }}
             // 이벤트 핸들러
             onRowClicked={handleRowClicked}
             onRowDoubleClicked={handleRowDoubleClicked}
@@ -633,5 +653,5 @@ export const AFormGrid = forwardRef<AFormGridHandle, AFormGridProps>(
   }
 );
 
-AFormGrid.displayName = "AFormGrid";
+AGrid.displayName = "AGrid";
 

@@ -49,11 +49,34 @@ body {
     padding-right: calc(var(--ag-cell-horizontal-padding) - 1px);
 }
 
-.ag-theme-alpine .ag-mui-cell-editor .MuiInputBase-root {
-  height: 100% !important;
+.ag-mui-cell-editor .MuiInputBase-root, .ag-mui-cell-editor.MuiSelect-root {
+  height: 28px !important;
   margin: 3px 0 !important;
   box-sizing: border-box;
 }
+
+/* Select 내부 요소 스타일링 */
+.ag-mui-cell-editor .MuiSelect-select {
+  padding: 8px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Select 아이콘 위치 조정 */
+.ag-mui-cell-editor .MuiSelect-icon {
+  top: calc(50% - 12px) !important;
+}
+
+/* Select 포커스 시 스타일 */
+.ag-mui-cell-editor .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(0, 0, 0, 0.23) !important;
+}
+
+.ag-mui-cell-editor .Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2 !important;
+  border-width: 2px !important;
+}
+
 
 .ag-theme-quartz {
     /*--ag-foreground-color: rgb(126, 46, 132);

@@ -20,6 +20,7 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
           border: "none !important",
           textAlign: "right",
           verticalAlign: "middle",
+          fontSize: 13,
         },
         "& td": {
           border: "none !important",
@@ -207,7 +208,7 @@ const theme = createTheme({
     },
     MuiFormControlLabel: {
       styleOverrides: {
-        label: { fontSize: 14, lineHeight: "24px" },
+        label: { fontSize: 13, lineHeight: "24px" },
         root: { margin: 0, alignItems: "center", gap: 4 },
       },
     },
