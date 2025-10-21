@@ -226,11 +226,15 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     useImperativeHandle(ref, () => ({
       refetch: (newParams?: Record<string, any>) => {
         setShouldFetch(false);
-        setParams(newParams || {});
-        setRefreshKey(prev => prev + 1);
-        if (isPage) {
-          setPage(1);
+        if(newParams) {
+          setParams(newParams);
+          if (isPage) {
+            setPage(1);
+          }
         }
+        
+        setRefreshKey(prev => prev + 1);
+        
         setShouldFetch(true);
       },
       getRawData: () => data || {},

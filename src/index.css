@@ -76,7 +76,9 @@ body {
   border-color: #1976d2 !important;
   border-width: 2px !important;
 }
-
+.ag-cell .M{
+  font-size: 13px;
+}
 
 .ag-theme-quartz {
     /*--ag-foreground-color: rgb(126, 46, 132);
