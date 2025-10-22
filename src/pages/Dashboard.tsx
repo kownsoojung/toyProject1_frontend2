@@ -7,7 +7,7 @@ const Dashboard = () => {
 
     useHelmetTitle("HOME");
     const fnModal = () => {
-        openChildModal("about-modal", "About", "/Settings/System", {param:"1"});
+        openChildModal({key: "about-modal", title: "About", pagePath: "/Settings/System", props: {param:"1"}, width: 1000, height: 600});
     };
     return (
         <Stack spacing={2}>

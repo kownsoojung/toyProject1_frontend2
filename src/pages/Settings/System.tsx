@@ -9,7 +9,7 @@ const System = () => {
     const { openModal: openChildModal } = useModal();
 
     const fnModal = () => {
-      openChildModal("about-modal1", "About", "/Dashboard");
+      openChildModal({key: "about-modal1", title: "About", pagePath: "/Dashboard", width: 1000, height: 600});
     };
     return (
         <Stack spacing={2}>

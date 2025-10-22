@@ -1,9 +1,11 @@
 // router.ts
 import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 import LoginPage from "@/pages/Login";
-import RegisterPage from "@/pages/register";
+
 import MainLayout from "@/layout/MainLayout/MainLayout";
 import DashboardPage from "@/pages/DashboardPage";
+import RegisterPage from "@/pages/register";
+
 
 export const routes: RouteObject[] = [
   {
@@ -12,7 +14,7 @@ export const routes: RouteObject[] = [
   },
   {
     path: "/register",
-    element: <RegisterPage />,
+    element: <RegisterPage/>,
   },
   {
     path: "/",

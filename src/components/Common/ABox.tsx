@@ -7,6 +7,7 @@ interface CommonBoxProps extends Omit<BoxProps, 'sx'> {
   minHeight?: number | string;
   height?: number | string;
   mb?:number
+  props?: BoxProps
 }
 
 interface FlexBoxProps extends Omit<BoxProps, 'sx'> {
@@ -115,4 +116,10 @@ export const RatioBox = ({
   );
 };
   
-
+export const AGridToolBarBox = ({ children, sxProps, props }: CommonBoxProps) => {
+  return (
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", ...sxProps }} {...props}>
+      {children}
+    </Box>
+  );
+};

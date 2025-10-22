@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, us
 import { AgGridReact, AgGridReactProps } from "ag-grid-react";
 import { ColDef, GridApi, GridOptions, RowSelectionOptions } from "ag-grid-community";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { useApiQuery, useAutoQuery } from "@/hooks/useAutoQuery";
+import { useApiQuery } from "@/hooks/useAutoQuery";
 import { exportToExcel as exportExcel } from "@/utils/excelExport";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiInstance } from "@/api/baseApi";
@@ -21,10 +21,9 @@ import {
   FormGroup,
 } from "@mui/material";
 import { useDialog } from "@/hooks/useDialog";
-import { is } from "zod/v4/locales";
 
 interface AFormGridProps {
-  url: string;
+  url?: string;
   columnDefs?: ColDef[]; // children으로 컬럼을 정의할 수 있으므로 optional
   children?: React.ReactNode; // AFormGridColumn 컴포넌트들
   height?: number | string;
@@ -33,7 +32,6 @@ interface AFormGridProps {
   gridOptions?: Partial<GridOptions>;
   rowName?: any;
   totalName?: any;
-  renderTotal?: (total: number) => React.ReactNode;
   rowType?: {type : "single" | "singleCheck" | "singleAutoCheck" | "multi" | "multiAutoCheck" | "multiCheck",
              header? :boolean
             };
@@ -106,7 +104,6 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       rowType = {type : "single", header : true},
       rowSelection,
       isPage = true,
-      renderTotal,
       props,
       params: initialParams = {},
       autoFetch = false,
@@ -192,7 +189,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     // 서버 자동 조회
     let { data, isLoading, error, refetch } = useApiQuery<Record<string, any>>({
       queryKey: ["gridData", url, params, page, pageSizeState],
-      url: url,
+      url: url ?? "",
       params: { ...params, page, pageSize: pageSizeState, sortOrder: sort.sortOrder, sortColumn: sort.sortColumn },
       
     });
@@ -202,7 +199,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     }, []);
 
     useEffect(() => {
-      if (shouldFetch) {
+      if (shouldFetch && url) {
         if(onBeforeRefetch) {
           onBeforeRefetch();
         }
@@ -422,10 +419,10 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
     // 기본 총건수 표시 컴포넌트
     const defaultTotalDisplay = React.useMemo(() => (
-      <Box>
-        {renderTotal ? renderTotal(totalCount) : <Box>총 {totalCount}건</Box>}
+      <Box sx={{fontSize: "13px"}}>
+        총 {totalCount}건
       </Box>
-    ), [totalCount, renderTotal]);
+    ), [totalCount]);
 
     // 빠른 검색 컴포넌트
     const quickFilterComponent = React.useMemo(() => {
@@ -641,6 +638,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             </FormControl>
 
             {/* Material-UI Pagination */}
+            
             <Pagination
               count={totalPages}
               page={Math.min(page, totalPages)}
@@ -655,8 +653,6 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
               siblingCount={2}
               boundaryCount={1}
             />
-            
-            <Box sx={{ width: 120 }} /> {/* 균형을 위한 빈 공간 */}
           </Box>
         )}
 

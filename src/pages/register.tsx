@@ -1,22 +1,23 @@
 // src/components/RegisterTableForm.tsx
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Box, TableRow, TableCell, Stack } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
 import { AFormTextField, AFormDate, AFormTime, AFormCheckbox, AFormRadio, AForm } from "@/components/Form";
-import { AGrid, AFormGridHandle } from "@/components/Grid";
+import { AGrid, AFormGridHandle, AFormGridColumn } from "@/components/Grid";
 import { FormButtons, FormHeader } from "@/styles/theme";
 import { useGridActions } from "@/hooks/useGridActions";
-import { AddButton, DeleteButton, RefreshButton, ExcelButton, AutoBox, MainFormBox, RatioBox } from "@/components/Common";
+import { AddButton, DeleteButton, RefreshButton, ExcelButton, AutoBox, MainFormBox, RatioBox, EditButton, SaveButton, CancelButton } from "@/components/Common";
 import { useLoading } from "@/hooks/useLoading";
 import { useDialog } from "@/hooks/useDialog";
 import { AGridCellTextEditor, AGridCellTextView } from "@/components/Grid/AGridCellComponent";
-import { ICellEditorParams, ICellRendererParams } from "ag-grid-community";
+import { ICellEditorParams } from "ag-grid-community";
 
-export default function RegisterTableForm() {
+export default function RegisterPage() {
   const gridRef = useRef<AFormGridHandle>(null);
+  const [editingRowId, setEditingRowId] = useState<{id: string | null, data: any} | null>(null);
   const { withLoading } = useLoading();
   const dialog = useDialog();
 
@@ -103,7 +104,32 @@ export default function RegisterTableForm() {
 
   const handleExportAll = async () => {
     await exportToExcel("전체데이터.xlsx");
+  };
+
+  // 행 수정 핸들러
+  const handleEdit = (rowId: any, rowData: any) => {
+    setEditingRowId({id: rowId, data: rowData});
+  };
+
+  const handleSave = async (rowData: any) => {
+    const api = gridRef.current?.getGridApi();
+    api?.stopEditing(false);
     
+    await withLoading(async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log("저장 데이터:", rowData);
+      // 실제로는 여기서 API 호출
+      setEditingRowId({id: null, data: null});
+    }, 'save');
+    
+    dialog.success({type: "save"});
+  };
+
+  const handleCancelEdit = () => {
+    const api = gridRef.current?.getGridApi();
+    api?.stopEditing(true);
+    gridRef.current?.updateRow(editingRowId?.id, editingRowId?.data);
+    setEditingRowId({id: null, data: null});
   };
 
   return (
@@ -182,16 +208,14 @@ export default function RegisterTableForm() {
           ref={gridRef}
           url=""
           minHeight={400}
-          columnDefs={[
-            { field: "id", headerName: "ID" , editable:true, cellEditor: AGridCellTextEditor , cellRenderer: (params: ICellEditorParams) => {
-              if (params.value ==1760801787449) return <>{params.value}</>;
-              else return <AGridCellTextView params={params} />;
-            }},
-            { field: "name", headerName: "Name" },
-          ]}
           isPage={true}
           showQuickFilter={false}
           rowType={{type : "single"}}
+          onBeforeRefetch={() => setEditingRowId({id: null, data: null})}
+          gridOptions={{
+            onPaginationChanged: () => setEditingRowId({id: null, data: null}),
+            onSortChanged: () => setEditingRowId({id: null, data: null}),
+          }}
           renderToolbar={({ quickFilterComponent, defaultTotalDisplay }) => (
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               {/* 왼쪽: 총건수 */}
@@ -208,10 +232,55 @@ export default function RegisterTableForm() {
               </Stack>
             </Box>
           )}
-          onRowDoubleClicked={(data) => (
-            console.log(data)
-          )}
-        />
+          onRowDoubleClicked={(data) => console.log(data)}
+        >
+          <AFormGridColumn 
+            name="id" 
+            headerName="ID" 
+            cellEditor={AGridCellTextEditor}
+            editable={(params) => editingRowId?.id == params.data?.id}
+            cellRenderer={(params: ICellEditorParams) => {
+              if (editingRowId?.id === params.data?.id) {
+                return <AGridCellTextView params={params} />;
+              }
+              return params.value;
+            }}
+          />
+          <AFormGridColumn 
+            name="name" 
+            headerName="Name" 
+            cellEditor={AGridCellTextEditor}
+            editable={(params) => editingRowId?.id == params.data?.id}
+            cellRenderer={(params: ICellEditorParams) => {
+              if (editingRowId?.id === params.data?.id) {
+                return <AGridCellTextView params={params} />;
+              }
+              return params.value;
+            }}
+          />
+          <AFormGridColumn 
+            name="_button" 
+            headerName="수정" 
+            suppressColumnsToolPanel={true}
+            cellRenderer={(params: any) => {
+              const isEditing = editingRowId?.id === params.data?.id;
+              return (
+                <Box sx={{ display: 'flex', gap: 1, height: '100%', padding: '3px 0', alignItems: 'center' }}>
+                  {!isEditing ? (
+                    <EditButton onClick={() => handleEdit(params.data?.id, params.data)}>
+                      수정
+                    </EditButton>
+                  ) : (
+                    <>
+                      <SaveButton onClick={() => handleSave(params.data)} />
+                      <CancelButton onClick={handleCancelEdit} />
+                    </>
+                  )}
+                </Box>
+              );
+            }}
+          />
+        </AGrid>
       
       
       {/* 오른쪽 영역 */}

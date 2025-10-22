@@ -21,8 +21,13 @@ export const exportToExcel = async ({
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(sheetName);
 
-    // 컬럼 설정 (숨겨진 컬럼 제외)
-    const visibleColumns = columnDefs.filter(col => col.field && !col.hide);
+    // 컬럼 설정 (숨겨진 컬럼, suppressColumnsToolPanel, _로 시작하는 컬럼 제외)
+    const visibleColumns = columnDefs.filter(col => {
+      if (!col.field || col.hide) return false;
+      if ((col as any).suppressColumnsToolPanel) return false;
+      if (col.field.startsWith('_')) return false;
+      return true;
+    });
     
     worksheet.columns = visibleColumns.map(col => ({
       header: col.headerName || col.field || '',
@@ -30,8 +35,34 @@ export const exportToExcel = async ({
       width: col.width ? col.width / 10 : 15,
     }));
 
+    // 데이터 변환 (valueFormatter 적용)
+    const formattedData = data.map(row => {
+      const formattedRow: any = {};
+      visibleColumns.forEach(col => {
+        const field = col.field || '';
+        const value = row[field];
+        
+        // valueFormatter가 있으면 적용
+        if (col.valueFormatter && typeof col.valueFormatter === 'function') {
+          formattedRow[field] = col.valueFormatter({ 
+            value, 
+            data: row, 
+            column: col,
+            node: null,
+            colDef: col,
+            api: null,
+            columnApi: null,
+            context: null
+          } as any);
+        } else {
+          formattedRow[field] = value;
+        }
+      });
+      return formattedRow;
+    });
+
     // 데이터 추가
-    worksheet.addRows(data);
+    worksheet.addRows(formattedData);
 
     // 헤더 스타일
     const headerRow = worksheet.getRow(1);
@@ -43,17 +74,22 @@ export const exportToExcel = async ({
     };
     headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
-    // 모든 셀에 테두리 추가
-    worksheet.eachRow((row) => {
-      row.eachCell(cell => {
+    // 전체 범위에 테두리 적용 (빈 셀 포함)
+    const rowCount = worksheet.rowCount;
+    const colCount = visibleColumns.length;
+    
+    for (let rowIdx = 1; rowIdx <= rowCount; rowIdx++) {
+      const row = worksheet.getRow(rowIdx);
+      for (let colIdx = 1; colIdx <= colCount; colIdx++) {
+        const cell = row.getCell(colIdx);
         cell.border = {
           top: { style: 'thin' },
           left: { style: 'thin' },
           bottom: { style: 'thin' },
           right: { style: 'thin' }
         };
-      });
-    });
+      }
+    }
 
     // 파일 다운로드
     const buffer = await workbook.xlsx.writeBuffer();

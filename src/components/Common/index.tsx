@@ -4,6 +4,7 @@ export {
   ABox,
   FlexBox,
   RatioBox,
+  AGridToolBarBox,
 } from "./ABox";
 
 export {

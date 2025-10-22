@@ -5,13 +5,16 @@ import { GlobalLoading } from "@/components";
 type ModalItem = {
   key: string;
   title: string;
-  content: (props?: any) => ReactNode;
+  content?: (props?: any) => ReactNode;
+  pagePath?: string;
   props?: any;
+  width?: number | string;
+  height?: number | string;
   onClose?: (result?: any) => void;
 };
 
 type ModalContextType = {
-  openModal: (key: string, title: string, pagePath: string, props?: any) => void;
+  openModal: (options: ModalItem) => void; 
   closeModal: (key: string) => void;
 };
 
@@ -37,7 +40,8 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
   // 페이지 lazy import
   const modules = import.meta.glob("/src/pages/**/*.tsx");
 
-  const openModal = (key: string, title: string, pagePath: string, props?: any, onClose?: (result?: any) => void) => {
+  const openModal = (options: ModalItem) => {
+    const { key, title, pagePath, props, onClose, width, height } = options;
     const modalKey = `${key}-${Date.now()}`;
     let renderContent: (props?: any) => ReactNode;
 
@@ -67,7 +71,7 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
       renderContent = () => <div>Page Not Found</div>;
     }
 
-    setModals(prev => [...prev, { key: modalKey, title, content: renderContent, props, onClose  }]);
+    setModals(prev => [...prev, { key: modalKey, title, content: renderContent, props, onClose, width, height }]);
   };
 
   const closeModal = (key: string, result?: any) => {
@@ -107,6 +111,8 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
                   sx={{
                     maxWidth: 1200,
                     maxHeight: 800,
+                    width: m.width ?? "auto",
+                    height: m.height ?? "auto",
                     bgcolor: "background.paper",
                     border: "2px solid #000",
                     boxShadow: 24,
@@ -128,7 +134,7 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
                       transform: 'translateZ(0)',
                     }}
                   >
-                    <Box sx={{ mt: 2 }}>{m.content(m.props)}</Box>
+                    <Box sx={{ mt: 2 }}>{m.content?.(m.props)}</Box>
                   </Box>
                   <Box sx={{ p: 1, borderTop: "1px solid #ccc", textAlign:"right" }}>
                     <Button onClick={() => closeModal(m.key)} >닫기</Button>
