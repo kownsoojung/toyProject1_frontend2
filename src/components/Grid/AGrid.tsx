@@ -71,6 +71,7 @@ interface AFormGridProps {
   onRowDoubleClicked?: (data: any) => void;
   onSelectionChanged?: (selectedRows: any[]) => void;
   onRowDragEnd?: (data: any) => void;
+  onBeforeRefetch?: () => void; // 조회 전 호출되는 콜백
 }
 
 export interface AFormGridHandle {
@@ -124,6 +125,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       onRowDoubleClicked,
       onSelectionChanged,
       onRowDragEnd,
+      onBeforeRefetch,
       
     },
     ref
@@ -158,7 +160,6 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const [totalCount, setTotalCount] = useState<number>(0);
     const [quickFilterText, setQuickFilterText] = useState<string>("");
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
-    const [refreshKey, setRefreshKey] = useState<number>(0);
 
     const gridRef = useRef<AgGridReact>(null);
     const dialog = useDialog();
@@ -190,11 +191,25 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     }, [rowType, rowSelection]);
     // 서버 자동 조회
     let { data, isLoading, error, refetch } = useApiQuery<Record<string, any>>({
-      queryKey: ["gridData", url, params, page, pageSizeState, refreshKey],
+      queryKey: ["gridData", url, params, page, pageSizeState],
       url: url,
       params: { ...params, page, pageSize: pageSizeState, sortOrder: sort.sortOrder, sortColumn: sort.sortColumn },
       
     });
+
+    const gridSearch = useCallback(() => {
+      refetch();
+    }, []);
+
+    useEffect(() => {
+      if (shouldFetch) {
+        if(onBeforeRefetch) {
+          onBeforeRefetch();
+        }
+        gridSearch();
+        setShouldFetch(false);
+      }
+    }, [shouldFetch, gridSearch]);
 
     // 컬럼 가시성 초기화
     useEffect(() => {
@@ -207,13 +222,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       setVisibleColumns(initialVisibility);
     }, [columnDefs]);
 
-    useEffect(() => {
-      if (shouldFetch) {
-        gridRef.current?.api?.setGridOption('rowData', []);
-        
-        refetch();
-      }
-    }, [page, pageSizeState, params, shouldFetch, sort]);
+
 
     // 에러 감지
     useEffect(() => {
@@ -232,9 +241,6 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             setPage(1);
           }
         }
-        
-        setRefreshKey(prev => prev + 1);
-        
         setShouldFetch(true);
       },
       getRawData: () => data || {},
@@ -597,8 +603,8 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             suppressRowHoverHighlight={true}
             onSortChanged={(e)=> {
               if (e.columns) {
-                setRefreshKey(prev => prev + 1);
                 setSort({sortOrder: e.columns[0].getSort() ?? "", sortColumn: e.columns[0].getColId() ?? ""});
+                setShouldFetch(true); 
               }
             }}
             // 이벤트 핸들러
@@ -623,6 +629,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
                 onChange={(e) => {
                   setPageSizeState(Number(e.target.value));
                   setPage(1);
+                  setShouldFetch(true); 
                 }}
               >
                 {[10, 20, 30, 50, 100].map((n) => (
@@ -640,6 +647,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
               onChange={(_, value) => {
                 const validPage = Math.min(Math.max(1, value), totalPages);
                 setPage(validPage);
+                setShouldFetch(true); 
               }}
               color="primary"
               showFirstButton

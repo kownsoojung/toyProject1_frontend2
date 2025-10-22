@@ -5,5 +5,6 @@ export { AFormCheckbox } from "./AFormCheckbox";
 export { AFormRadio } from "./AFormRadio";
 export { AFormSwitch } from "./AFormSwitch";
 export { AFormSelect } from "./AFormSelect";
+export { AFormAutocomplete } from "./AFormAutocomplete";
 export { AFormDate } from "./AFormDate";
 export { AFormTime } from "./AFormTime";
