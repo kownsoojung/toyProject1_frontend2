@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense, useRef } from "react";
+import React, { useState, lazy, Suspense, useRef, useEffect } from "react";
 import { Box, Tabs, Tab, IconButton, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Sidebar from "./Sidebar";
@@ -9,6 +9,7 @@ import { useLayoutContext } from "@/contexts/LayoutContext";
 import { TabModalProvider } from "@/hooks/ModalProvider";
 import { useTheme } from "@mui/material/styles";
 import { GlobalDialog, GlobalToast } from "@/components";
+import { useNavigate } from "react-router-dom";
 
 
 type TabItem = {
@@ -21,6 +22,7 @@ type TabItem = {
 const LazyDashboard = lazy(() => import("@/pages/Dashboard"));
 
 export default function MainLayout() {
+  const navigate = useNavigate();
   const theme = useTheme();
   const menus = useAppSelector((state) => state.menu.menus);
   const { sidebarOpen } = useLayoutContext();
@@ -28,6 +30,19 @@ export default function MainLayout() {
   const [activeKey, setActiveKey] = useState("");
   const dialogContainerRef = useRef<HTMLDivElement>(null);
   const [initialized, setInitialized] = React.useState(false);
+
+  // 인증 체크
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const token = localStorage.getItem("token");
+    
+    console.log("🔵 MainLayout 인증 체크:", { isLoggedIn, hasToken: !!token });
+    
+    if (isLoggedIn !== "true" || !token) {
+      console.log("🔵 인증 실패 - 로그인 페이지로 이동");
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
 
   // 메뉴가 로드되면 초기 탭 설정
   React.useEffect(() => {

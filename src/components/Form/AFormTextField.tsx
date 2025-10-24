@@ -22,6 +22,7 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
   multiline=false,
   rows=4
 }) => {
+  const { sx: optionSx, ...restOptions } = options || {};
   return (
     <AFormBaseItem name={name} {...base}>
       {(field, error) => (
@@ -34,9 +35,10 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
           maxRows={multiline ? 10 : undefined}
           sx={{
             width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
+            ...(optionSx || {}),
           }}
           type={type}
-          {...options} // 여기서 select, multiline, rows 등 모두 전달 가능
+          {...restOptions } 
         />
       )}
     </AFormBaseItem>

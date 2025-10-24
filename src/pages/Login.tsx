@@ -12,20 +12,33 @@ import { showAlert } from "@/store/slices/dialogSlice";
 import { showToast } from "@/store/slices/toastSlice";
 
 const loginSchema = z.object({
-  username: z.string().min(3, "아이디를 입력하세요"),
-  password: z.string().min(3, "비밀번호를 입력하세요"),
+  loginID: z.string().min(1, "아이디를 입력하세요"),
+  loginPWD: z.string().min(1, "비밀번호를 입력하세요"),
+  dnID: z.string().optional(),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  console.log("🔵 LoginPage 렌더링됨");
+  
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  
+  // 로그인 페이지 진입 시 localStorage 확인
+  React.useEffect(() => {
+    console.log("📝 localStorage 상태:", {
+      isLoggedIn: localStorage.getItem("isLoggedIn"),
+      token: localStorage.getItem("token")
+    });
+  }, []);
+  
   const methods = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      loginID: "",
+      loginPWD: "",
+      dnID: "",
     },
   });
 
@@ -79,21 +92,28 @@ export default function LoginPage() {
           {/* 아이디 / 비밀번호 */}
           <TableRow>
             <TableCell>
-                <AFormTextField name="username" msize={80} options={{label:"id"}} />
+                <AFormTextField name="loginID" msize={80} options={{label:"id"}} />
             </TableCell>
           </TableRow>
           <TableRow>
 
             <TableCell>
-              <AFormTextField name="password" type="password"options={{label:"패스워드"}} />
+              <AFormTextField name="loginPWD" type="password"options={{label:"패스워드"}} />
             </TableCell>
           </TableRow>
           {/* 이메일 */}
           <TableRow>
             <TableCell >
-              <AFormTextField name="email" options={{label:"이메일"}} />
+              <AFormTextField name="dnID"  options={{label:"내선", sx:{input: {maxLength:10}}}}  />
             </TableCell>
           </TableRow>
+          <TableRow>
+          <TableCell>
+            <Button type="submit" variant="contained" fullWidth>
+              로그인
+            </Button>
+          </TableCell>
+        </TableRow>
         </AForm>
       </Card>
     </Box>

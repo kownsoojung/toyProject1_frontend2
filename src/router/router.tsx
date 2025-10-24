@@ -10,7 +10,7 @@ import RegisterPage from "@/pages/register";
 export const routes: RouteObject[] = [
   {
     path: "/login",
-    element: localStorage.getItem("isLoggedIn") === "false" ? <Navigate to="/" /> : <LoginPage />,
+    element: <LoginPage />,  // 로그인 페이지는 항상 접근 가능
   },
   {
     path: "/register",
@@ -18,9 +18,9 @@ export const routes: RouteObject[] = [
   },
   {
     path: "/",
-    element: localStorage.getItem("isLoggedIn") === "true" ? <MainLayout /> : <Navigate to="/login" />,
+    element: <MainLayout />,  // 인증은 MainLayout 내부에서 처리
     children: [
-      { index: true, element: <DashboardPage /> }, // 기본 탭
+      { index: true, element: <DashboardPage /> },
     ],
   },
 ];
