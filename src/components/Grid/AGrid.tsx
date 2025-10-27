@@ -310,11 +310,19 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       },
       updateRow: (rowId: any, newData: any) => {
         const api = gridRef.current?.api;
-        api?.forEachNode(node => {
-          if (node.data.id === rowId) {
-            node.setData({ ...node.data, ...newData });
+        if (!api) return;
+        
+        // rowId가 숫자이고 작은 값(인덱스로 추정)이면 해당 인덱스의 행을 업데이트
+        if (typeof rowId === 'number' && rowId >= 0 && rowId < 10000) {
+          const rowNode = api.getDisplayedRowAtIndex(rowId);
+          if (rowNode) {
+            rowNode.setData(newData);
+            return;
           }
-        });
+        }
+        
+        // 그 외의 경우 applyTransaction 사용 (getRowId가 설정된 경우 자동으로 ID로 찾음)
+        api.applyTransaction({ update: [newData] });
       },
       deleteRows: (rowIds: any[]) => {
         const api = gridRef.current?.api;

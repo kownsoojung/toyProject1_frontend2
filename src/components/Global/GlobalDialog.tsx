@@ -11,11 +11,12 @@ import {
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { closeDialog } from '@/store/slices/dialogSlice';
 
-interface GlobalDialogProps {
+export interface GlobalDialogProps {
   container?: HTMLElement | null;
+  tabKey?: string; // ⭐ 현재 탭 키
 }
 
-export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container }) => {
+export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container, tabKey }) => {
   const dialogs = useAppSelector(state => state.dialog.dialogs);
   const dispatch = useAppDispatch();
 
@@ -23,8 +24,11 @@ export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container }) => {
     dispatch(closeDialog(id));
   };
 
+  // ⭐ 현재 탭의 다이얼로그만 필터링
+  const tabDialogs = dialogs.filter(d => d.tabKey === tabKey || !d.tabKey);
+  
   // 가장 최근 다이얼로그만 표시
-  const currentDialog = dialogs[dialogs.length - 1];
+  const currentDialog = tabDialogs[tabDialogs.length - 1];
 
   if (!currentDialog) return null;
 

@@ -26,21 +26,27 @@ export function useMenus() {
   const menus = useAppSelector((state) => state.menu.menus);
   
   useEffect(() => {
+    // ⭐ 메뉴가 이미 로드되어 있으면 다시 조회하지 않음
+    if (menus.length > 0) {
+      console.log("📋 메뉴가 이미 로드됨, 재조회 생략");
+      return;
+    }
     
     const fetchMenus = async () => {
       try {
-        const res = await apiInstance.get<MenuAgentDTO[]>("/api/common/menu/getList"); // OpenAPI 경로
+        console.log("🔄 메뉴 조회 시작...");
+        const res = await apiInstance.get<MenuAgentDTO[]>("/api/common/menu/getList");
 
-        const menusData = res.data.map(mapMenu);       // DTO → 내부 모델 변환
-        console.log("📋 조회된 메뉴 데이터:", menusData); // 디버깅용
-        dispatch(setMenus(menusData));                 // Redux store에 저장
+        const menusData = res.data.map(mapMenu);
+        console.log("✅ 조회된 메뉴 데이터:", menusData);
+        dispatch(setMenus(menusData));
       } catch (err) {
-        console.error("Menu API error:", err);
+        console.error("❌ Menu API error:", err);
       }
     };
 
     fetchMenus();
-  }, [dispatch]);
+  }, [dispatch, menus.length]); // menus.length를 dependency에 추가
 
 
   return { data: menus, isLoading: false, error: null };

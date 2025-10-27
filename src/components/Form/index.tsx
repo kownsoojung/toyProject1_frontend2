@@ -1,6 +1,7 @@
 export { default as AForm } from "./AForm";
 export { AFormBaseItem } from "./AFormBaseItem";
 export { AFormTextField } from "./AFormTextField";
+export { AFormNumber } from "./AFormNumber";
 export { AFormCheckbox } from "./AFormCheckbox";
 export { AFormRadio } from "./AFormRadio";
 export { AFormSwitch } from "./AFormSwitch";

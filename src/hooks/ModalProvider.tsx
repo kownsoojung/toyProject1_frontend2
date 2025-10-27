@@ -20,6 +20,9 @@ type ModalContextType = {
 
 const ModalContext = createContext<ModalContextType | null>(null);
 
+// OpenerContext 추가 - 부모 참조 전달용
+const OpenerContext = createContext<any>(null);
+
 export const useModal = () => {
   const context = useContext(ModalContext);
   if (!context) {
@@ -31,6 +34,12 @@ export const useModal = () => {
     };
   }
   return context;
+};
+
+// useOpener 훅 - 자식 컴포넌트에서 부모 함수를 자동으로 가져옴
+export const useOpener = () => {
+  const opener = useContext(OpenerContext);
+  return opener;
 };
 
 export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -64,7 +73,9 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
             <Box sx={{ color: "text.secondary", fontSize: 14 }}>로딩 중...</Box>
           </Box>
         }>
-          <Component {...p} />
+          <OpenerContext.Provider value={p?.opener || null}>
+            <Component {...p} />
+          </OpenerContext.Provider>
         </React.Suspense>
       );
     } else {

@@ -1,16 +1,18 @@
-import React, { useState, lazy, Suspense, useRef, useEffect } from "react";
+import React, { useState, lazy, Suspense, useRef } from "react";
 import { Box, Tabs, Tab, IconButton, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { SIDEBAR_WIDTH } from "./constants";
-import { useAppSelector } from "@/store/hooks";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { useLayoutContext } from "@/contexts/LayoutContext";
 import { TabModalProvider } from "@/hooks/ModalProvider";
 import { useTheme } from "@mui/material/styles";
 import { GlobalDialog, GlobalToast } from "@/components";
-import { useNavigate } from "react-router-dom";
-
+import { useMenus } from "@/hooks/useMenus";
+import { TabProvider } from "@/contexts/TabContext";
+import { clearTabDialogs } from "@/store/slices/dialogSlice";
+import { clearTabToasts } from "@/store/slices/toastSlice";
 
 type TabItem = {
   key: string;
@@ -22,27 +24,28 @@ type TabItem = {
 const LazyDashboard = lazy(() => import("@/pages/Dashboard"));
 
 export default function MainLayout() {
-  const navigate = useNavigate();
   const theme = useTheme();
+  const dispatch = useAppDispatch();
   const menus = useAppSelector((state) => state.menu.menus);
   const { sidebarOpen } = useLayoutContext();
   const [tabs, setTabs] = useState<TabItem[]>([]);
   const [activeKey, setActiveKey] = useState("");
+  const prevActiveKeyRef = useRef<string>("");
   const dialogContainerRef = useRef<HTMLDivElement>(null);
   const [initialized, setInitialized] = React.useState(false);
-
-  // 인증 체크
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const token = localStorage.getItem("token");
-    
-    console.log("🔵 MainLayout 인증 체크:", { isLoggedIn, hasToken: !!token });
-    
-    if (isLoggedIn !== "true" || !token) {
-      console.log("🔵 인증 실패 - 로그인 페이지로 이동");
-      navigate("/login", { replace: true });
+  
+  // 메뉴 조회
+  useMenus();
+  
+  // 탭 전환 시 이전 탭의 dialog/toast 정리
+  React.useEffect(() => {
+    if (prevActiveKeyRef.current && prevActiveKeyRef.current !== activeKey) {
+      // 이전 탭의 dialog/toast 모두 정리
+      dispatch(clearTabDialogs(prevActiveKeyRef.current));
+      dispatch(clearTabToasts(prevActiveKeyRef.current));
     }
-  }, [navigate]);
+    prevActiveKeyRef.current = activeKey;
+  }, [activeKey, dispatch]);
 
   // 메뉴가 로드되면 초기 탭 설정
   React.useEffect(() => {
@@ -110,6 +113,10 @@ export default function MainLayout() {
   const handleTabChange = (_: React.SyntheticEvent, newValue: string) => setActiveKey(newValue);
 
   const handleTabClose = (targetKey: string) => {
+    // 탭 닫을 때 해당 탭의 dialog/toast 정리
+    dispatch(clearTabDialogs(targetKey));
+    dispatch(clearTabToasts(targetKey));
+    
     setTabs((prev) => {
       const newTabs = prev.filter((t) => t.key !== targetKey);
       if (activeKey === targetKey && newTabs.length > 0) {
@@ -296,17 +303,22 @@ export default function MainLayout() {
                         height: "100%",
                   }}
                 >
-                  <TabModalProvider>
-                    <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%", overflowX: 'hidden', }}>
-                      {tab.component}
-                    </Box>
-                  </TabModalProvider>
+                  <TabProvider tabKey={tab.key}>
+                    <TabModalProvider>
+                      <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%", overflowX: 'hidden', }}>
+                        {tab.component}
+                      </Box>
+                      {/* ⭐ 각 탭마다 독립적인 Dialog/Toast */}
+                      {activeKey === tab.key && (
+                        <>
+                          <GlobalDialog container={dialogContainerRef.current} tabKey={tab.key} />
+                          <GlobalToast container={dialogContainerRef.current} tabKey={tab.key} />
+                        </>
+                      )}
+                    </TabModalProvider>
+                  </TabProvider>
                 </Box>
             ))}
-            
-            {/* Alert/Confirm/Toast - 탭 영역 내에서만 표시 */}
-            <GlobalDialog container={dialogContainerRef.current} />
-            <GlobalToast container={dialogContainerRef.current} />
           </Box>
         </Box>
       </Box>

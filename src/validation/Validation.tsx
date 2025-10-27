@@ -1,6 +1,17 @@
 import dayjs from "dayjs";
 import { z } from "zod";
 
+// optional number 헬퍼 - 빈 값을 undefined로 처리
+export const optionalNumber = () => {
+  return z.preprocess(
+    (val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return isNaN(num) ? val : num;
+    },
+    z.number().optional()
+  );
+};
 
 export const initZodConfig = () => {
 z.config({

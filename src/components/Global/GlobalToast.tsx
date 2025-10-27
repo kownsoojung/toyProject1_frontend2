@@ -3,16 +3,20 @@ import { Alert, Box, Slide } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { removeToast } from '@/store/slices/toastSlice';
 
-interface GlobalToastProps {
+export interface GlobalToastProps {
   container?: HTMLElement | null;
+  tabKey?: string; // ⭐ 현재 탭 키
 }
 
-export const GlobalToast: React.FC<GlobalToastProps> = () => {
+export const GlobalToast: React.FC<GlobalToastProps> = ({ tabKey }) => {
   const toasts = useAppSelector(state => state.toast.toasts);
   const dispatch = useAppDispatch();
 
+  // ⭐ 현재 탭의 토스트만 필터링
+  const tabToasts = toasts.filter(t => t.tabKey === tabKey || !t.tabKey);
+  
   // 가장 최근 토스트만 표시
-  const currentToast = toasts[toasts.length - 1];
+  const currentToast = tabToasts[tabToasts.length - 1];
 
   useEffect(() => {
     if (currentToast) {
