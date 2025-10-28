@@ -1,13 +1,14 @@
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { useCode } from "@/hooks/useCode";
-import { SiteCodeDTO, SiteCodeSearchDTO } from "@/api/generated";
+import { useCommonCode, CommonCode } from "@/hooks/useCode";
+import { CodeSearchDTO } from "@/api/generated";
 import { Autocomplete, AutocompleteProps, TextField } from "@mui/material";
 import { useFormContext, useWatch } from "react-hook-form";
 
-interface AutocompleteItemProps<T = SiteCodeDTO> {
+interface AutocompleteItemProps<T = CommonCode> {
   name: string;
   list?: T[];
-  selectCode?: SiteCodeSearchDTO;
+  selectCode?: CodeSearchDTO;
+  codeType?: "site" | "subCodeZip" | "counselCode" | "counselCategory";
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   msize?: number | string;
   isDisabledOption?: (item: T) => boolean;
@@ -19,11 +20,12 @@ interface AutocompleteItemProps<T = SiteCodeDTO> {
   options?: AutocompleteProps<T, boolean, boolean, boolean>;
 }
 
-export const AFormAutocomplete = <T extends SiteCodeDTO>({
+export const AFormAutocomplete = <T extends CommonCode>({
   name,
   list = [],
   base,
   selectCode,
+  codeType,
   msize,
   isDisabledOption,
   parent,
@@ -36,31 +38,26 @@ export const AFormAutocomplete = <T extends SiteCodeDTO>({
   const { control, setValue } = useFormContext();
   const parentValue = typeof parent === "string" ? useWatch({ control, name: parent }) : parent;
 
-  let selectOptions: T[];
-
-  if (selectCode) {
-    const { data: codeData } = useCode(selectCode);
-    selectOptions = (codeData as T[]) ?? [];
-  } else {
-    selectOptions = list;
-  }
+  // ✅ 공통 Hook으로 간단하게!
+  const codeData = useCommonCode(codeType, selectCode);
+  let selectOptions: T[] = (codeData as T[]) ?? list;
 
   if (parentValue) {
     selectOptions = selectOptions.filter(
-      (item) => (item as any).parentCodeNumber === parentValue
+      (item) => (item as any).parentValue === parentValue
     );
   }
 
-  // 기본 getOptionLabel: SiteCodeDTO의 label 또는 codeValue 사용
+  // 기본 getOptionLabel: CommonCode의 label 사용
   const defaultGetOptionLabel = (option: T): string => {
     if (!option) return "";
-    return (option as any).label || (option as any).codeValue || String(option);
+    return (option as any).label || String(option);
   };
 
-  // 기본 getOptionValue: SiteCodeDTO의 codeNumber 사용
+  // 기본 getOptionValue: CommonCode의 value 사용
   const defaultGetOptionValue = (option: T): any => {
     if (!option) return null;
-    return (option as any).codeNumber ?? option;
+    return (option as any).value ?? option;
   };
 
   const finalGetOptionLabel = getOptionLabel || defaultGetOptionLabel;
@@ -79,7 +76,7 @@ export const AFormAutocomplete = <T extends SiteCodeDTO>({
             
             options={selectOptions}
             value={selectedOption}
-            onChange={(event, newValue) => {
+            onChange={(_event, newValue) => {
               const value = newValue ? finalGetOptionValue(newValue as T) : null;
               setValue(name, value);
               field.onChange(value);

@@ -1,25 +1,24 @@
 import React from "react";
 import {
-  Checkbox,
-  CheckboxProps,
   FormControlLabel,
-  FormGroup,
   Radio,
   RadioGroup,
   RadioProps,
 } from "@mui/material";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { CodeItem, useCode } from "@/hooks/useCode";
+import { CommonCode, useCommonCode } from "@/hooks/useCode";
+import { CodeSearchDTO } from "@/api/generated";
 
 interface baseProp  {
   name:string
-  selectCode?: SiteCodeSearchDTO;
-  checkList?: CodeItem[] | CodeItem;
+  selectCode?: CodeSearchDTO;
+  checkList?: CommonCode[] | CommonCode;
+  codeType?: "site" | "subCodeZip" | "counselCode" | "counselCategory";
   /** baseProp을 분리해서 별도 전달 가능 */
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   row?: boolean;
   label?: string;
-  isDisabledItem?: (item: CodeItem) => boolean;
+  isDisabledItem?: (item: CommonCode) => boolean;
   options?:RadioProps
 }
 
@@ -27,35 +26,27 @@ export const AFormRadio: React.FC<baseProp> = ({
   name,
   selectCode,
   checkList,
+  codeType,
   base,
   row = true,
   isDisabledItem,
   options
 }) => {
 
-  
-  // ✅ 선택 코드 훅으로 자동 checkList 가져오기 (있으면)
-  if (selectCode) {
-    const { data: codeData } = useCode(selectCode);
-    // codeData가 배열이면 map으로 변환
-    checkList = codeData?.map(item => ({
-      label: item.label ?? "",   // undefined일 경우 빈 문자열
-      value: item.value ?? "", // undefined일 경우 빈 문자열
-      parent: item.parent,
-      disabled:false
-    })) ?? [];
-  } 
+  // ✅ 공통 Hook으로 간단하게!
+  const codeData = useCommonCode(codeType, selectCode);
+  const finalCheckList = codeData ?? checkList;
 
-  const list: CodeItem[] = checkList ? Array.isArray(checkList) ? checkList: [checkList]: [];
+  const list: CommonCode[] = finalCheckList ? Array.isArray(finalCheckList) ? finalCheckList: [finalCheckList]: [];
 
   return (
   <AFormBaseItem name={name} {...base}>
-    {(field, error) => {
+    {(field) => {
 
       return (
         <RadioGroup
           row={row}
-          value={field.value || ""}       // field.value를 그룹 value로 설정
+          value={field.value ?? ""}       // field.value를 그룹 value로 설정
           onChange={(e) => field.onChange(e.target.value)}
         >
           {list.map((item) => (

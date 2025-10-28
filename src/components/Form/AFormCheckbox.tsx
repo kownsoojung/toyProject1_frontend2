@@ -6,17 +6,19 @@ import {
   FormGroup,
 } from "@mui/material";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { CodeItem, useCode } from "@/hooks/useCode";
+import { CommonCode, useCommonCode } from "@/hooks/useCode";
+import { CodeSearchDTO } from "@/api/generated";
 
 interface AFormCheckboxProps{
   name:string
-  selectCode?: SiteCodeSearchDTO;
-  checkList?: CodeItem[] | CodeItem;
+  selectCode?: CodeSearchDTO;
+  checkList?: CommonCode[] | CommonCode;
+  codeType?: "site" | "subCodeZip" | "counselCode" | "counselCategory";
   /** baseProp을 분리해서 별도 전달 가능 */
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   row?: boolean;
   label?: string;
-  isDisabledItem?: (item: CodeItem) => boolean;
+  isDisabledItem?: (item: CommonCode) => boolean;
   options?:CheckboxProps
 }
 
@@ -24,6 +26,7 @@ export const AFormCheckbox: React.FC<AFormCheckboxProps> = ({
   name,
   selectCode,
   checkList={label:"", value:""},
+  codeType,
   base,
   row = true,
   label,
@@ -31,29 +34,20 @@ export const AFormCheckbox: React.FC<AFormCheckboxProps> = ({
   options
 }) => {
 
-  
-  // ✅ 선택 코드 훅으로 자동 checkList 가져오기 (있으면)
-  if (selectCode) {
-    const { data: codeData } = useCode(selectCode);
-    // codeData가 배열이면 map으로 변환
-    checkList = codeData?.map(item => ({
-      label: item.label ?? "",   // undefined일 경우 빈 문자열
-      value: item.value ?? "", // undefined일 경우 빈 문자열
-      parent: item.parent?? "",
-      disabled:false
-    })) ?? [];
-  } 
+  // ✅ 공통 Hook으로 간단하게!
+  const codeData = useCommonCode(codeType, selectCode);
+  const finalCheckList = codeData ?? checkList;
 
-  const list = Array.isArray(checkList) ? checkList : [checkList]; 
+  const list = Array.isArray(finalCheckList) ? finalCheckList : [finalCheckList]; 
 
   return (
     <AFormBaseItem name={name} {...base}>
-      {(field, error) => {
+      {(field) => {
         // ✅ 그룹 체크박스
         if (list && list.length > 0) {
-          const value: string[] = field.value || [];
+          const value: (string | number)[] = field.value || [];
 
-          const handleChange = (codeId: string) => {
+          const handleChange = (codeId: string | number) => {
             const newValue = value.includes(codeId)
               ? value.filter((v) => v !== codeId)
               : [...value, codeId];
@@ -87,7 +81,7 @@ export const AFormCheckbox: React.FC<AFormCheckboxProps> = ({
               <Checkbox
                 checked={!!field.value}
                 onChange={(e) => field.onChange(e.target.checked)}
-                {...rest}
+                {...options}
               />
             }
             label={label}

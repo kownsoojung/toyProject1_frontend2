@@ -1,18 +1,19 @@
+import { CodeSearchDTO } from "@/api/generated";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { useCode } from "@/hooks/useCode";
-import { SiteCodeDTO, SiteCodeSearchDTO } from "@/api/generated";
+import { CommonCode, useCommonCode } from "@/hooks/useCode";
 import { MenuItem, Select, SelectProps } from "@mui/material";
 import { useFormContext, useWatch } from "react-hook-form";
 
 interface SelectItemProps extends Omit<SelectProps, "name">{
   name:string,
-  list?: SiteCodeDTO[];
-  selectCode?:SiteCodeSearchDTO;
+  list?: CommonCode[];
+  selectCode?:CodeSearchDTO;
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   msize?:number|string
-  isDisabledItem?: (item: SiteCodeDTO) => boolean;
-  parent?: string; 
+  isDisabledItem?: (item: CommonCode) => boolean;
+  parent?: string|number; 
   options?:SelectProps
+  codeType?: "site" | "subCodeZip" | "counselCode" | "counselCategory";
 }
 
 export const AFormSelect: React.FC<SelectItemProps> = ({
@@ -24,25 +25,26 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
   msize,
   isDisabledItem,
   parent,
+  codeType="subCodeZip"
 }) => {
   
   const { control } = useFormContext(); 
-  const parentValue = typeof parent === "string" ? useWatch({ control, name: parent }) : parent;
+  
+  // ✅ useWatch는 항상 호출 (Hooks 규칙) - parent가 없으면 빈 문자열로 watch
+  const watchedParent = useWatch({ 
+    control, 
+    name: typeof parent === "string" ? parent : name  // parent 없으면 자기 자신을 watch (사용 안 함)
+  });
+  
+  // parent가 문자열이면 watch된 값, 숫자면 그대로, undefined면 null
+  const parentValue = typeof parent === "string" ? watchedParent : (typeof parent === "number" ? parent : null);
 
-
-  let selectOptions:SiteCodeDTO[];
-
-  if (selectCode) {
-    const { data: codeData } = useCode(selectCode);
-    // codeData가 배열이면 map으로 변환
-    selectOptions = codeData ?? [];
-  } else {
-    selectOptions = list; // 기존 옵션 사용
-  }
+  // ✅ 공통 Hook으로 간단하게!
+  let selectOptions: CommonCode[] = useCommonCode(codeType, selectCode) ?? list;
 
   if (parentValue) {
     selectOptions = selectOptions.filter(
-      (item) => item.parentCodeNumber === parent
+      (item) => item.parentValue == parentValue
     );
   }
 
@@ -57,10 +59,10 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
           }}
           {...options}
         >
-          {selectOptions.map((item:SiteCodeDTO) => (
+          {selectOptions.map((item: CommonCode) => (
             <MenuItem
-              key={item.codeNumber}
-              value={item.codeValue}
+              key={item.label}
+              value={item.value}
               disabled={isDisabledItem?.(item) || item.disabled}
             >
               {item.label}

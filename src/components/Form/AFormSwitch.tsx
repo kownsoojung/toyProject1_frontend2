@@ -6,18 +6,19 @@ import {
   FormGroup,
 } from "@mui/material";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { CodeItem, useCode } from "@/hooks/useCode";
-import { SiteCodeSearchDTO } from "@/api/generated";
+import { CommonCode, useCommonCode } from "@/hooks/useCode";
+import { CodeSearchDTO } from "@/api/generated";
 
 interface AFormSwitchProps {
   name: string;
-  selectCode?: SiteCodeSearchDTO;
-  checkList?: CodeItem[] | CodeItem;
+  selectCode?: CodeSearchDTO;
+  checkList?: CommonCode[] | CommonCode;
+  codeType?: "site" | "subCodeZip" | "counselCode" | "counselCategory";
   /** baseProp을 분리해서 별도 전달 가능 */
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   row?: boolean;
   label?: string;
-  isDisabledItem?: (item: CodeItem) => boolean;
+  isDisabledItem?: (item: CommonCode) => boolean;
   options?: SwitchProps;
 }
 
@@ -25,32 +26,27 @@ export const AFormSwitch: React.FC<AFormSwitchProps> = ({
   name,
   selectCode,
   checkList = { label: "", value: "" },
+  codeType,
   base,
   row = true,
   label,
   isDisabledItem,
   options
 }) => {
-  // ✅ 선택 코드 훅으로 자동 checkList 가져오기 (있으면)
-  if (selectCode) {
-    const { data: codeData } = useCode(selectCode);
-    checkList = codeData?.map(item => ({
-      label: item.label ?? "",
-      value: item.value ?? "",
-      disabled: false
-    })) ?? [];
-  }
+  // ✅ 공통 Hook으로 간단하게!
+  const codeData = useCommonCode(codeType, selectCode);
+  const finalCheckList = codeData ?? checkList;
 
-  const list = Array.isArray(checkList) ? checkList : [checkList];
+  const list = Array.isArray(finalCheckList) ? finalCheckList : [finalCheckList];
 
   return (
     <AFormBaseItem name={name} {...base}>
-      {(field, error) => {
+      {(field) => {
         // ✅ 그룹 스위치 (여러 개)
         if (list && list.length > 1) {
-          const value: string[] = field.value || [];
+          const value: (string | number)[] = field.value || [];
 
-          const handleChange = (codeId: string) => {
+          const handleChange = (codeId: string | number) => {
             const newValue = value.includes(codeId)
               ? value.filter((v) => v !== codeId)
               : [...value, codeId];
