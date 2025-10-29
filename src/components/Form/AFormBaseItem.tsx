@@ -8,10 +8,11 @@ export interface AFormBaseItemProps {
   children: (fieldProps: any, error?: string) => React.ReactElement;
   isShow?: boolean;
   baseProp?: ControllerProps;
+  disabled?: boolean;
 }
 
 export const AFormBaseItem = forwardRef<HTMLElement, AFormBaseItemProps>(
-  ({ name, children, isShow = true, baseProp }, ref) => {
+  ({ name, children, isShow = true, baseProp,disabled }, ref) => {
     const { control } = useFormContext();
 
     return (
@@ -21,7 +22,7 @@ export const AFormBaseItem = forwardRef<HTMLElement, AFormBaseItemProps>(
         {...baseProp} // baseProp 전체 적용
         render={({ field, fieldState }) => {
           const errorMessage = fieldState.error?.message;
-          const fieldProps = { ...field, disabled: baseProp?.disabled, ref }; // disabled는 baseProp에서만
+          const fieldProps = { ...field, disabled: disabled || baseProp?.disabled, ref };
           return (
             <Tooltip
               title={errorMessage || ""}

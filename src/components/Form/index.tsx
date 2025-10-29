@@ -9,3 +9,4 @@ export { AFormSelect } from "./AFormSelect";
 export { AFormAutocomplete } from "./AFormAutocomplete";
 export { AFormDate } from "./AFormDate";
 export { AFormTime } from "./AFormTime";
+export { AFormDynamicFields } from "./AFormDynamicFields";

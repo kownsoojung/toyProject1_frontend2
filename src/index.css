@@ -91,3 +91,7 @@ body {
     --ag-font-size: 13px;
     /*--ag-font-family: monospace;*/
 }
+
+.ag-theme-alpine .ag-header-cell-label {
+  justify-content: center !important;
+}

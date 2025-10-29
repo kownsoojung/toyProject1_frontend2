@@ -9,8 +9,14 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
   tableLayout: "fixed",
   width: "100%",
   borderCollapse: "collapse",
+  userSelect: "none",      // 텍스트 선택 방지
+  outline: "none",         // 포커스 아웃라인 제거
+  cursor: "default", 
+  paddingRight: 12,
   "& tr:first-of-type td": { paddingTop: 12 },
   "& tr:last-of-type td": { paddingBottom: 12 },
+  "& tr:first-of-type th": { paddingTop: 12 },
+  "& tr:last-of-type th": { paddingBottom: 12 },
   ...(type === "search"
     ? {
         backgroundColor: "#f9fafb",
@@ -155,6 +161,31 @@ const theme = createTheme({
         },
       },
     },
+    MuiSelect: {
+      defaultProps: { size: "small", margin: "none" },
+      styleOverrides: {
+        root: {
+          margin: 0,
+        },
+        select: {
+          height: 28,
+          padding: "0 8px !important",
+          fontSize: 13,
+          display: "flex",
+          alignItems: "center",
+          minHeight: "28px !important",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          fontSize: 13,
+          minHeight: "32px !important",
+          padding: "4px 12px",
+        },
+      },
+    },
     MuiTextField: {
       defaultProps: { size: "small" },
       styleOverrides: {
@@ -204,6 +235,11 @@ const theme = createTheme({
             height: 18,
           },
         },
+      },
+    },
+    MuiFormControl: {
+      defaultProps: {
+        margin: "none", // 기본 마진 제거
       },
     },
     MuiFormControlLabel: {

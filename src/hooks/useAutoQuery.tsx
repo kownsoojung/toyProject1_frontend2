@@ -56,7 +56,7 @@ export function useApiQuery<T>({
   params,
   data,
   config,
-  options = { enabled: false, retry: false, refetchOnMount:"always",   staleTime: 0 },  // 기본값: 수동 조회
+  options = { enabled: false, retry: false, refetchOnMount:"always",   staleTime: 0},  // 기본값: 수동 조회
 }: QueryOptions<T>): UseQueryResult<T, Error> {
   const fetcher = createFetcher<T>(url, method, params, data, config);
   

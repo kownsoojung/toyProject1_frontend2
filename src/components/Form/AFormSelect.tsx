@@ -3,17 +3,21 @@ import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CommonCode, useCommonCode } from "@/hooks/useCode";
 import { MenuItem, Select, SelectProps } from "@mui/material";
 import { useFormContext, useWatch } from "react-hook-form";
+import { useEffect, useRef } from "react";
 
-interface SelectItemProps extends Omit<SelectProps, "name">{
+interface SelectItemProps {
   name:string,
   list?: CommonCode[];
   selectCode?:CodeSearchDTO;
   base?: Omit<AFormBaseItemProps, "name" | "children">;
   msize?:number|string
   isDisabledItem?: (item: CommonCode) => boolean;
-  parent?: string|number; 
+  parent?: string; 
   options?:SelectProps
   codeType?: "site" | "subCodeZip" | "counselCode" | "counselCategory";
+  placeholder?: string; // "선택", "전체" 등
+  placeholderValue?: string | number; // placeholder의 value (기본값: "") - 단일 선택용
+  multiple?: boolean; // 다중 선택 여부
 }
 
 export const AFormSelect: React.FC<SelectItemProps> = ({
@@ -22,43 +26,115 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
   list=[],
   base,
   selectCode,
-  msize,
+  msize=0,
   isDisabledItem,
   parent,
-  codeType="subCodeZip"
+  codeType="subCodeZip",
+  placeholder="선택",
+  placeholderValue = "",
+  multiple = false
 }) => {
   
-  const { control } = useFormContext(); 
-  
-  // ✅ useWatch는 항상 호출 (Hooks 규칙) - parent가 없으면 빈 문자열로 watch
-  const watchedParent = useWatch({ 
-    control, 
-    name: typeof parent === "string" ? parent : name  // parent 없으면 자기 자신을 watch (사용 안 함)
-  });
-  
-  // parent가 문자열이면 watch된 값, 숫자면 그대로, undefined면 null
-  const parentValue = typeof parent === "string" ? watchedParent : (typeof parent === "number" ? parent : null);
-
-  // ✅ 공통 Hook으로 간단하게!
+  const { control, setValue } = useFormContext(); 
   let selectOptions: CommonCode[] = useCommonCode(codeType, selectCode) ?? list;
 
-  if (parentValue) {
-    selectOptions = selectOptions.filter(
-      (item) => item.parentValue == parentValue
-    );
+  const watchedParent = parent ? useWatch({ control, name: parent }) : undefined;
+  const currentValue = useWatch({ control, name });
+  const prevParentRef = useRef(watchedParent);
+
+  // 초기 렌더링 시 값이 undefined이면 placeholderValue로 초기화
+  useEffect(() => {
+    if (currentValue === undefined) {
+      const initialValue = multiple ? [] : placeholderValue;
+      setValue(name, initialValue, { shouldValidate: false, shouldDirty: false });
+    }
+  }, []);
+
+  // parent 값이 변경되면 현재 필드 초기화
+  useEffect(() => {
+    if (parent && prevParentRef.current !== watchedParent) {
+      prevParentRef.current = watchedParent;
+      const resetValue = multiple ? [] : placeholderValue;
+      setValue(name, resetValue, { shouldValidate: false, shouldDirty: true });
+    }
+  }, [watchedParent, parent, name, setValue, placeholderValue, multiple]);
+
+  // 현재 값이 옵션 목록에 없으면 초기화
+  useEffect(() => {
+    if (parent && currentValue && currentValue !== placeholderValue) {
+      let isValidValue = false;
+      
+      if (multiple && Array.isArray(currentValue)) {
+        // 다중 선택: 모든 값이 유효한지 확인
+        isValidValue = currentValue.every(val => 
+          selectOptions.some(item => item.value === val)
+        );
+      } else {
+        // 단일 선택
+        isValidValue = selectOptions.some(item => item.value === currentValue);
+      }
+      
+      if (!isValidValue) {
+        const resetValue = multiple ? [] : placeholderValue;
+        setValue(name, resetValue, { shouldValidate: false, shouldDirty: true });
+      }
+    }
+  }, [selectOptions, currentValue, parent, name, setValue, placeholderValue, multiple]);
+
+  if (parent) {
+    
+    const parentValue = typeof parent === "string" ? watchedParent : (typeof parent === "number" ? parent : null);
+
+    if (parentValue) {
+      selectOptions = selectOptions.filter(
+        (item) => item.parentValue == parentValue
+      );
+    }
+    else {
+      selectOptions = [];
+    } 
   }
 
   return (
-    <AFormBaseItem name={name} {...base}>
+    <AFormBaseItem name={name} {...base} disabled={parent ? !watchedParent : false}>
       {(field, error) => (
         <Select
+          displayEmpty
+          fullWidth={msize === 0}
+          multiple={multiple}
           {...field}
+          value={field.value ?? (multiple ? [] : placeholderValue)}
           error={!!error}
+          renderValue={(selected) => {
+            // 다중 선택
+            if (multiple && Array.isArray(selected)) {
+              if (selected.length === 0) {
+                return placeholder;
+              }
+              const labels = selected
+                .map(val => selectOptions.find(item => item.value === val)?.label)
+                .filter(Boolean)
+                .join(', ');
+              return labels || placeholder;
+            }
+            
+            // 단일 선택
+            if (!selected || selected === placeholderValue || selected === undefined) {
+              return placeholder;
+            }
+            const selectedItem = selectOptions.find(item => item.value === selected);
+            return selectedItem?.label || placeholder;
+          }}
           sx={{
             width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
           }}
           {...options}
         >
+          {placeholder && !multiple && (
+            <MenuItem value={placeholderValue}>
+              {placeholder}
+            </MenuItem>
+          )}
           {selectOptions.map((item: CommonCode) => (
             <MenuItem
               key={item.label}

@@ -157,7 +157,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     const [totalCount, setTotalCount] = useState<number>(0);
     const [quickFilterText, setQuickFilterText] = useState<string>("");
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
-
+    
     const gridRef = useRef<AgGridReact>(null);
     const dialog = useDialog();
     const queryClient = useQueryClient();
@@ -219,14 +219,26 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       setVisibleColumns(initialVisibility);
     }, [columnDefs]);
 
+    // 에러 추적을 위한 ref
 
 
-    // 에러 감지
+    // 에러 감지 - 한번만 표시되도록 수정
     useEffect(() => {
-      if (error) {
+      // 초기 마운트 시에는 에러 무시 (캐시된 에러 방지)
+      
+      
+      if (error && error ) {
+       
         dialog.error('데이터를 불러오는 중 오류가 발생했습니다.');
+        queryClient.removeQueries({ 
+          queryKey: ["gridData", url, params, page, pageSizeState] 
+        });
       }
+      // 에러가 없어지면 초기화
     }, [error, dialog]);
+
+    // 컴포넌트 언마운트 시 ref 초기화
+
 
     // imperative handle - 외부에서 사용할 메서드들
     useImperativeHandle(ref, () => ({
@@ -592,6 +604,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
               singleClickEdit: true, 
               comparator: () => 0, 
               cellStyle: { fontSize: "13px" },
+              headerClass: 'ag-center-aligned-header',
             }}
             rowHeight={36}
             headerHeight={36}
