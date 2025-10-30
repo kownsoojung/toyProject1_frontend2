@@ -65,7 +65,6 @@ export const AFormDynamicFields = ({
         return (
           <AFormNumber 
             name={fieldName}
-            placeholder="숫자만 입력"
           />
         );
         
@@ -113,4 +112,5 @@ export const AFormDynamicFields = ({
 
   return <>{renderRows()}</>;
 };
+
 

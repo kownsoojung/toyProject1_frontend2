@@ -12,7 +12,7 @@ import { GlobalDialog, GlobalToast } from "@/components";
 import { useMenus } from "@/hooks/useMenus";
 import { TabProvider } from "@/contexts/TabContext";
 import { clearTabDialogs } from "@/store/slices/dialogSlice";
-import { clearTabToasts } from "@/store/slices/toastSlice";
+import { clearTabToasts, clearAllToasts } from "@/store/slices/toastSlice";
 
 type TabItem = {
   key: string;
@@ -26,7 +26,7 @@ const LazyDashboard = lazy(() => import("@/pages/Dashboard"));
 export default function MainLayout() {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const menus = useAppSelector((state) => state.menu.menus);
+  const menus = useAppSelector((state: any) => state.menu.menus);
   const { sidebarOpen } = useLayoutContext();
   const [tabs, setTabs] = useState<TabItem[]>([]);
   const [activeKey, setActiveKey] = useState("");
@@ -36,6 +36,15 @@ export default function MainLayout() {
   
   // 메뉴 조회
   useMenus();
+  
+  // 로그인 성공 toast를 메인 화면에서 한 번만 표시하고 제거
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(clearAllToasts());
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, [dispatch]);
   
   // 탭 전환 시 이전 탭의 dialog/toast 정리
   React.useEffect(() => {
@@ -50,7 +59,7 @@ export default function MainLayout() {
   // 메뉴가 로드되면 초기 탭 설정
   React.useEffect(() => {
     if (menus.length > 0 && !initialized) {
-      const initialMenu = menus.find(menu => menu.id === 1) || menus[0];
+      const initialMenu = menus.find((menu: any) => menu.id === 1) || menus[0];
       if (initialMenu) {
         const initialTab = {
           key: `${initialMenu.id}-${initialMenu.path}`,
@@ -65,7 +74,10 @@ export default function MainLayout() {
     }
   }, [menus, initialized]);
 
-  const modules = import.meta.glob("/src/pages/**/*.tsx");
+  const modules = import.meta.glob([
+    "/src/pages/**/*.tsx",
+    "!/src/pages/**/popup/**"  // popup 폴더 제외
+  ]);
   const lazyLoad = (path: string) => {
     // path 정규화: 앞에 /가 없으면 추가
     const normalizedPath = path.startsWith('/') ? path : '/' + path;
@@ -75,25 +87,7 @@ export default function MainLayout() {
     
     if (modules[importKey]) {
       const Component = lazy(modules[importKey] as any);
-      return (
-        <Suspense fallback={
-          <Box 
-            sx={{ 
-              display: "flex", 
-              justifyContent: "center", 
-              alignItems: "center", 
-              height: "100%",
-              flexDirection: "column",
-              gap: 2
-            }}
-          >
-            <CircularProgress size={60} thickness={4} />
-            <Box sx={{ color: "text.secondary", fontSize: 14 }}>로딩 중...</Box>
-          </Box>
-        }>
-          <Component />
-        </Suspense>
-      );
+      return <Component />;
     }
     return <div>Page Not Found: {importKey}</div>;
   };
@@ -125,7 +119,7 @@ export default function MainLayout() {
       }
       // 최소 1개 탭은 유지
       if (newTabs.length === 0 && menus.length > 0) {
-        const initialMenu = menus.find(menu => menu.id === 1) || menus[0];
+        const initialMenu = menus.find((menu: any) => menu.id === 1) || menus[0];
         const fallbackTab = {
           key: `${initialMenu.id}-${initialMenu.path}`,
           title: initialMenu.name,
@@ -305,9 +299,25 @@ export default function MainLayout() {
                 >
                   <TabProvider tabKey={tab.key}>
                     <TabModalProvider>
-                      <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%", overflowX: 'hidden', }}>
-                        {tab.component}
-                      </Box>
+                      <Suspense fallback={
+                        <Box 
+                          sx={{ 
+                            display: "flex", 
+                            justifyContent: "center", 
+                            alignItems: "center", 
+                            minHeight: 200,
+                            flexDirection: "column",
+                            gap: 2
+                          }}
+                        >
+                          <CircularProgress size={50} thickness={4} />
+                          <Box sx={{ color: "text.secondary", fontSize: 14 }}>로딩 중...</Box>
+                        </Box>
+                      }>
+                        <Box sx={{  flex: 1, overflowY: "auto", position: "relative", height: "100%", overflowX: 'hidden', }}>
+                          {tab.component}
+                        </Box>
+                      </Suspense>
                       {/* ⭐ 각 탭마다 독립적인 Dialog/Toast */}
                       {activeKey === tab.key && (
                         <>

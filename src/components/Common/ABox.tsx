@@ -33,7 +33,7 @@ export const MainFormBox = ({ children, sxProps, ...props }: CommonBoxProps) => 
     height: "100%",  // 부모 높이를 100%로
     position: "absolute",
     padding: "16px 16px 0 16px",
-    minHeight: 600, 
+    minHeight: 300, 
     overflowX: 'hidden',
     ...sxProps }} 
     {...props}

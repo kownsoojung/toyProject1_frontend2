@@ -19,5 +19,6 @@ export {
   PdfButton,
   PrintButton,
   CloseButton,
+  BasicButton,
 } from "./AButton";
 

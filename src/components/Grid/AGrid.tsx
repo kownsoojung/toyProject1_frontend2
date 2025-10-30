@@ -293,6 +293,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
           columnDefs: enhancedColumnDefs,
           fileName,
         });
+        
       },
       exportToCsv: (fileName = "export.csv") => {
         gridRef.current?.api?.exportDataAsCsv({
@@ -597,12 +598,12 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             ref={gridRef as any}
             columnDefs={enhancedColumnDefs}
             defaultColDef={{
-              flex: 1,
+              
               sortable: true,
               filter: false,
               resizable: true,
               singleClickEdit: true, 
-              comparator: () => 0, 
+              comparator: url ? () => 0 : undefined,
               cellStyle: { fontSize: "13px" },
               headerClass: 'ag-center-aligned-header',
             }}
@@ -620,7 +621,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             animateRows={true}
             suppressRowHoverHighlight={true}
             onSortChanged={(e)=> {
-              if (e.columns) {
+              if (e.columns && url) {
                 setSort({sortOrder: e.columns[0].getSort() ?? "", sortColumn: e.columns[0].getColId() ?? ""});
                 setShouldFetch(true); 
               }

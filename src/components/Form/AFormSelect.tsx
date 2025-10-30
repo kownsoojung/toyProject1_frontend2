@@ -17,6 +17,7 @@ interface SelectItemProps {
   codeType?: "site" | "subCodeZip" | "counselCode" | "counselCategory";
   placeholder?: string; // "선택", "전체" 등
   placeholderValue?: string | number; // placeholder의 value (기본값: "") - 단일 선택용
+  isPlaceholder?: boolean;
   multiple?: boolean; // 다중 선택 여부
 }
 
@@ -32,6 +33,7 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
   codeType="subCodeZip",
   placeholder="선택",
   placeholderValue = "",
+  isPlaceholder = true,
   multiple = false
 }) => {
   
@@ -119,7 +121,7 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
             }
             
             // 단일 선택
-            if (!selected || selected === placeholderValue || selected === undefined) {
+            if (isPlaceholder && (!selected || selected === placeholderValue || selected === undefined)) {
               return placeholder;
             }
             const selectedItem = selectOptions.find(item => item.value === selected);
@@ -130,7 +132,7 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
           }}
           {...options}
         >
-          {placeholder && !multiple && (
+          {isPlaceholder && placeholder && !multiple && (
             <MenuItem value={placeholderValue}>
               {placeholder}
             </MenuItem>

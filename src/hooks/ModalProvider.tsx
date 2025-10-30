@@ -1,52 +1,25 @@
-import React, { createContext, useContext, useState, ReactNode, useRef } from "react";
-import { Box, Button, Modal, Typography, CircularProgress } from "@mui/material";
+import React, { useState, ReactNode, useRef } from "react";
+import { Box, Modal, Typography, CircularProgress, IconButton } from "@mui/material";
 import Draggable from "react-draggable";
 import { GlobalLoading } from "@/components";
-type ModalItem = {
-  key: string;
-  title: string;
-  content?: (props?: any) => ReactNode;
-  pagePath?: string;
-  props?: any;
-  width?: number | string;
-  height?: number | string;
-  onClose?: (result?: any) => void;
-};
+import CloseIcon from "@mui/icons-material/Close";
 
-type ModalContextType = {
-  openModal: (options: ModalItem) => void; 
-  closeModal: (key: string) => void;
-};
+// 🎯 Context는 별도 파일에서 import (HMR 안정성)
+import { 
+  ModalContext, 
+  ModalKeyContext, 
+  OpenerContext,
+  type ModalItem 
+} from "./ModalContext";
 
-const ModalContext = createContext<ModalContextType | null>(null);
-
-// OpenerContext 추가 - 부모 참조 전달용
-const OpenerContext = createContext<any>(null);
-
-export const useModal = () => {
-  const context = useContext(ModalContext);
-  if (!context) {
-    console.error('❌ useModal must be used within TabModalProvider');
-    // 기본 fallback 반환
-    return {
-      openModal: () => console.warn('useModal called outside TabModalProvider'),
-      closeModal: () => console.warn('useModal called outside TabModalProvider'),
-    };
-  }
-  return context;
-};
-
-// useOpener 훅 - 자식 컴포넌트에서 부모 함수를 자동으로 가져옴
-export const useOpener = () => {
-  const opener = useContext(OpenerContext);
-  return opener;
-};
+// 🎯 hooks를 re-export (기존 import 경로 유지)
+export { useModal, useOpener } from "./ModalContext";
 
 export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [modals, setModals] = useState<ModalItem[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 페이지 lazy import
+  // 🎯 popup 폴더만 로드
   const modules = import.meta.glob("/src/pages/**/*.tsx");
 
   const openModal = (options: ModalItem) => {
@@ -55,8 +28,16 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
     let renderContent: (props?: any) => ReactNode;
 
     const importKey = `/src/pages${pagePath}.tsx`;
+    console.log("🔍 팝업 로드:", importKey);
+    
     if (modules[importKey]) {
-      const Component = React.lazy(modules[importKey] as any);
+      const Component = React.lazy(() => {
+        return modules[importKey]().then((mod: any) => {
+          console.log("🔄 팝업 새로 로드:", importKey);
+          return mod;
+        });
+      });
+      
       renderContent = (p?: any) => (
         <React.Suspense fallback={
           <Box 
@@ -74,12 +55,15 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
           </Box>
         }>
           <OpenerContext.Provider value={p?.opener || null}>
-            <Component {...p} />
+            <ModalKeyContext.Provider value={modalKey}>
+              <Component {...p} />
+            </ModalKeyContext.Provider>
           </OpenerContext.Provider>
         </React.Suspense>
       );
     } else {
-      renderContent = () => <div>Page Not Found</div>;
+      console.error("❌ 팝업을 찾을 수 없음:", importKey, "사용 가능:", Object.keys(modules));
+      renderContent = () => <div>Page Not Found: {pagePath}</div>;
     }
 
     setModals(prev => [...prev, { key: modalKey, title, content: renderContent, props, onClose, width, height }]);
@@ -134,21 +118,24 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
                   }}
                 >
                   <Box className="draggable-handle"  sx={{ p: 1, borderBottom: "1px solid #ccc", paddingLeft:3}}>
-                  <Typography variant="h6">{m.title}</Typography>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography >{m.title}</Typography>
+                      <IconButton aria-label="close"   onClick={() => closeModal(m.key)} ><CloseIcon /> </IconButton>
+                    </Box>
                   </Box>
                   <Box 
                     ref={modalContentRef}
                     sx={{ 
-                      overflowY: "auto", 
+                      
                       flexGrow: 1,
                       position: "relative",
                       transform: 'translateZ(0)',
+                      display: "flex",  // 추가
+                      flexDirection: "column",  // 추가
+                      overflow: "hidden", 
                     }}
                   >
-                    <Box sx={{ mt: 2 }}>{m.content?.(m.props)}</Box>
-                  </Box>
-                  <Box sx={{ p: 1, borderTop: "1px solid #ccc", textAlign:"right" }}>
-                    <Button onClick={() => closeModal(m.key)} >닫기</Button>
+                   {m.content?.(m.props)}
                   </Box>
                 </Box>
               </Draggable>
@@ -160,3 +147,12 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
     </ModalContext.Provider>
   );
 };
+
+// ============================================
+// 🎯 HMR 처리
+// ============================================
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    console.log('✅ ModalProvider HMR - popup 업데이트만');
+  });
+}

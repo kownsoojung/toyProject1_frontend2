@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from "@mui/material";
+import { Button, ButtonProps, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
@@ -10,6 +10,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import PrintIcon from "@mui/icons-material/Print";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import { useState } from "react";
 
 export interface CommonButtonProps extends Omit<ButtonProps, 'onClick'> {
   onClick?: () => void;
@@ -56,6 +57,12 @@ export const RefreshButton = ({ onClick, text = "새로고침", ...props }: Comm
   </Button>
 );
 
+export const BasicButton = ({ onClick, text = "", ...props }: CommonButtonProps) => (
+  <Button variant="outlined" color="inherit" onClick={onClick} {...props}>
+    {text}
+  </Button>
+);
+
 export const SearchButton = ({ onClick, text = "검색", ...props }: CommonButtonProps) => (
   <Button variant="contained" startIcon={<SearchIcon />} onClick={onClick} {...props}>
     {text}
@@ -63,12 +70,32 @@ export const SearchButton = ({ onClick, text = "검색", ...props }: CommonButto
 );
 
 // ==================== 데이터 버튼들 ====================
+export const ExcelButton = ({ onClick, text = "Excel", disabled, ...props }: CommonButtonProps) => {
+  const [isLoading, setIsLoading] = useState(false);
 
-export const ExcelButton = ({ onClick, text = "Excel", ...props }: CommonButtonProps) => (
-  <Button variant="outlined" startIcon={<FileDownloadIcon />} onClick={onClick} {...props}>
-    {text}
-  </Button>
-);
+  const handleClick = async () => {
+    if (!onClick) return;
+    
+    setIsLoading(true);
+    try {
+      await onClick();  // async 함수 지원
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Button 
+      variant="outlined" 
+      startIcon={isLoading ? <CircularProgress size={20} /> : <FileDownloadIcon />}
+      onClick={handleClick}
+      disabled={disabled || isLoading}  // 👈 로딩 중 비활성화
+      {...props}
+    >
+      {isLoading ? "다운로드 중..." : text}
+    </Button>
+  );
+};
 
 export const PdfButton = ({ onClick, text = "PDF", ...props }: CommonButtonProps) => (
   <Button variant="outlined" startIcon={<PictureAsPdfIcon />} onClick={onClick} {...props}>

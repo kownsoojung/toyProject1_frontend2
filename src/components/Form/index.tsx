@@ -10,3 +10,6 @@ export { AFormAutocomplete } from "./AFormAutocomplete";
 export { AFormDate } from "./AFormDate";
 export { AFormTime } from "./AFormTime";
 export { AFormDynamicFields } from "./AFormDynamicFields";
+
+// View Components (읽기 전용 표출형)
+export { default as AFormView } from "./AFormView";
