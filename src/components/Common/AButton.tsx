@@ -11,6 +11,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState } from "react";
+import { ClearIcon } from "@mui/x-date-pickers";
 
 export interface CommonButtonProps extends Omit<ButtonProps, 'onClick'> {
   onClick?: () => void;
@@ -58,7 +59,7 @@ export const RefreshButton = ({ onClick, text = "새로고침", ...props }: Comm
 );
 
 export const BasicButton = ({ onClick, text = "", ...props }: CommonButtonProps) => (
-  <Button variant="outlined" color="inherit" onClick={onClick} {...props}>
+  <Button variant="outlined" onClick={onClick} {...props}>
     {text}
   </Button>
 );
@@ -69,6 +70,11 @@ export const SearchButton = ({ onClick, text = "검색", ...props }: CommonButto
   </Button>
 );
 
+export const ClearButton = ({ onClick, text = "초기화", ...props }: CommonButtonProps) => (
+  <Button variant="outlined" startIcon={<ClearIcon />} onClick={onClick} {...props}>
+    {text}
+  </Button>
+);
 // ==================== 데이터 버튼들 ====================
 export const ExcelButton = ({ onClick, text = "Excel", disabled, ...props }: CommonButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);

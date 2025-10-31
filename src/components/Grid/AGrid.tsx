@@ -70,6 +70,7 @@ interface AFormGridProps {
   onSelectionChanged?: (selectedRows: any[]) => void;
   onRowDragEnd?: (data: any) => void;
   onBeforeRefetch?: () => void; // 조회 전 호출되는 콜백
+  onAfterRefetch?: (data: any) => void; 
 }
 
 export interface AFormGridHandle {
@@ -96,7 +97,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       columnDefs: propColumnDefs,
       children,
       height = "100%",
-      minHeight = "300px",
+      minHeight = "230px",
       pageSize = 10,
       gridOptions,
       rowName = "content",
@@ -123,7 +124,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       onSelectionChanged,
       onRowDragEnd,
       onBeforeRefetch,
-      
+      onAfterRefetch
     },
     ref
   ) => {
@@ -138,13 +139,36 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       React.Children.forEach(children, (child) => {
         if (React.isValidElement(child)) {
           const props = child.props as any;
-          // name prop을 field로 변환
-          const colDef: ColDef = {
-            ...props,
-            field: props.field || props.name, // name을 field로 변환
-          };
-          delete (colDef as any).name; // name 속성 제거
-          columns.push(colDef);
+          if (props.type === "rowNumber") {
+            const rowNumColumn: ColDef = {
+              headerName: props.headerName || "번호",
+              width: props.width || 80,
+              pinned: props.pinned || "left",
+              sortable: false,
+              filter: false,
+              cellStyle: { textAlign: props.textAlign || "center", ...props.cellStyle },
+              valueGetter: (params) => {
+                // 페이징이 있는 경우 현재 페이지의 시작 번호를 고려
+                if (isPage && url) {
+                  return (page - 1) * pageSizeState + (params.node?.rowIndex ?? 0) + 1;
+                }
+                // 페이징이 없는 경우 단순히 인덱스 + 1
+                return (params.node?.rowIndex ?? 0) + 1;
+              },
+              ...props, // 다른 props도 병합
+            };
+            delete (rowNumColumn as any).type; // type 속성 제거
+            delete (rowNumColumn as any).name; // name 속성 제거
+            columns.push(rowNumColumn);
+          } else {
+            // 일반 컬럼 처리
+            const colDef: ColDef = {
+              ...props,
+              field: props.field || props.name, // name을 field로 변환
+            };
+            delete (colDef as any).name; // name 속성 제거
+            columns.push(colDef);
+          }
         }
       });
       
@@ -191,7 +215,6 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       queryKey: ["gridData", url, params, page, pageSizeState],
       url: url ?? "",
       params: { ...params, page, pageSize: pageSizeState, sortOrder: sort.sortOrder, sortColumn: sort.sortColumn },
-      
     });
 
     const gridSearch = useCallback(() => {
@@ -200,6 +223,12 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
     useEffect(() => {
       if (shouldFetch && url) {
+        const api = gridRef.current?.api;
+        if (api) {
+          api.setGridOption('rowData', []); // 그리드 데이터를 빈 배열로 설정
+          setTotalCount(0); // 총 건수도 0으로 초기화
+        }
+
         if(onBeforeRefetch) {
           onBeforeRefetch();
         }
@@ -366,13 +395,13 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
       else if (isLoading) {
         
       }
-      else if (!data?.[rowName] || data[rowName].length === 0) {
-        api.showNoRowsOverlay?.();
-        api.setGridOption('rowData', []);
-      } else {
-        api.setGridOption('rowData', data[rowName] || []);
+      else {
+        api.setGridOption('rowData', data?.[rowName] ?? []);
         if (totalName) {
-          setTotalCount(data[totalName] || 0);
+          setTotalCount(data?.[totalName] ?? 0);
+        }
+        if (onAfterRefetch) {
+          onAfterRefetch(data);
         }
         api.hideOverlay();
       }
@@ -441,7 +470,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     // 기본 총건수 표시 컴포넌트
     const defaultTotalDisplay = React.useMemo(() => (
       <Box sx={{fontSize: "13px"}}>
-        총 {totalCount}건
+        총 {totalCount.toLocaleString()}건
       </Box>
     ), [totalCount]);
 

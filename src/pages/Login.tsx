@@ -1,14 +1,13 @@
 // src/pages/LoginPage.tsx
-import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Card, Box, Typography, Alert, TableRow, TableCell } from "@mui/material";
+import { Button, Card, Box, Typography, TableRow, TableCell } from "@mui/material";
 import { useAutoMutation } from "@/hooks/useAutoMutation";
 import { useNavigate } from "react-router-dom";
 import { AForm, AFormTextField, AFormNumber } from "@/components/Form";
 import { useAppDispatch } from "@/store/hooks";
-import { showAlert } from "@/store/slices/dialogSlice";
+import { showAlert, clearAllDialogs } from "@/store/slices/dialogSlice";
 import { showToast } from "@/store/slices/toastSlice";
 import { setUser } from "@/store/slices/userSlice";
 import type { LoginRequestDto } from "@/api/generated/models/login-request-dto";
@@ -53,6 +52,9 @@ export default function LoginPage() {
       const data = resData.data; // 타입 안전하게 접근
       console.log("✅ 로그인 성공 데이터:", data);
       
+      // 이전 에러 다이얼로그 닫기
+      dispatch(clearAllDialogs());
+      
       // 1. localStorage에 토큰과 사용자 정보 저장 (새로고침 대비)
       const token = data.accessToken || "";
       if (token) {
@@ -89,7 +91,9 @@ export default function LoginPage() {
         severity: "success" 
       }));
       
-      // navigate 후에 메뉴는 MainLayout의 useMenus에서 자동으로 조회됨
+      // mutation 에러 상태 초기화
+      loginMutation.reset();
+      
       console.log("🔄 메인 화면으로 이동...");
       navigate("/"); // 로그인 성공 후 메인 화면으로
     },
@@ -119,12 +123,6 @@ export default function LoginPage() {
         <Typography variant="h5" sx={{ mb: 3, textAlign: "center" }}>
           로그인
         </Typography>
-
-        {loginMutation.isError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {(loginMutation.error as Error)?.message || "로그인 실패"}
-          </Alert>
-        )}
 
         <AForm
           onSubmit={onSubmit}

@@ -98,7 +98,7 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
   }
 
   return (
-    <AFormBaseItem name={name} {...base} disabled={parent ? !watchedParent : false}>
+    <AFormBaseItem name={name} {...base} disabled={parent ? !watchedParent : false || base?.disabled}>
       {(field, error) => (
         <Select
           displayEmpty
@@ -111,21 +111,25 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
             // 다중 선택
             if (multiple && Array.isArray(selected)) {
               if (selected.length === 0) {
-                return placeholder;
+                return isPlaceholder ? placeholder : ""; // ⭐ isPlaceholder 체크
               }
               const labels = selected
                 .map(val => selectOptions.find(item => item.value === val)?.label)
                 .filter(Boolean)
                 .join(', ');
-              return labels || placeholder;
+              return labels || (isPlaceholder ? placeholder : ""); // ⭐ isPlaceholder 체크
             }
             
             // 단일 선택
             if (isPlaceholder && (!selected || selected === placeholderValue || selected === undefined)) {
               return placeholder;
             }
+            // ⭐ isPlaceholder가 false일 때 값이 없으면 빈 문자열 반환
+            if (!isPlaceholder && (!selected || selected === placeholderValue || selected === undefined)) {
+              return "";
+            }
             const selectedItem = selectOptions.find(item => item.value === selected);
-            return selectedItem?.label || placeholder;
+            return selectedItem?.label || (isPlaceholder ? placeholder : ""); // ⭐ fallback도 isPlaceholder 체크
           }}
           sx={{
             width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,

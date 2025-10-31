@@ -20,5 +20,6 @@ export {
   PrintButton,
   CloseButton,
   BasicButton,
+  ClearButton,
 } from "./AButton";
 

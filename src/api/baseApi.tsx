@@ -1,5 +1,7 @@
 import axios from "axios";
-import { BASE_URL } from "../config/env"
+import { BASE_URL } from "../config/env";
+import { store } from "../store";
+import { setUser } from "../store/slices/userSlice";
 
 // OpenAPI generator에서 생성된 axios instance에 baseURL 적용
 export const apiInstance = axios.create({
@@ -20,7 +22,20 @@ apiInstance.interceptors.request.use(config => {
 
 // response interceptor - 세션 만료 처리
 apiInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 백엔드에서 새로운 토큰을 헤더로 보내준 경우 자동 저장
+    const newToken = response.headers['x-new-access-token'];
+    if (newToken) {
+      console.log("🔄 새로운 Access Token 받음 - 자동 저장");
+      localStorage.setItem("token", newToken);
+      
+      // Redux store가 있을 경우에만 업데이트
+      if (store && store.dispatch) {
+        store.dispatch(setUser({ accessToken: newToken }));
+      }
+    }
+    return response;
+  },
   (error) => {
     console.log("🔴 API 에러 발생:", {
       status: error.response?.status,
@@ -35,7 +50,11 @@ apiInstance.interceptors.response.use(
     if (error.response?.status === 401 && !isLoginAPI) {
       console.log("🔴 401 에러 - 로그인 페이지로 리다이렉트");
       localStorage.clear();
-      window.location.href = '/login';
+      
+      // 무한 리다이렉트 방지
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     
     return Promise.reject(error);

@@ -31,6 +31,7 @@ export const MainFormBox = ({ children, sxProps, ...props }: CommonBoxProps) => 
   <Box sx={{ display: "flex",
     flexDirection: "column",
     height: "100%",  // 부모 높이를 100%로
+    width: "100%",
     position: "absolute",
     padding: "16px 16px 0 16px",
     minHeight: 300, 
@@ -76,9 +77,15 @@ export const RatioBox = ({
   const childArray = React.Children.toArray(children);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: direction, gap, ...sxProps }} {...props}>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: direction, 
+      gap, 
+      width: '100%', // ⭐ 컨테이너 전체 너비 차지
+      ...sxProps 
+    }} {...props}>
       {childArray.map((child, index) => {
-        let flex = 1;
+        let flex: number | undefined;
         let width: string | number | undefined;
         let height: string | number | undefined;
 
@@ -95,17 +102,27 @@ export const RatioBox = ({
         // ratios가 있으면 비율 사용 (1:2:3)
         else if (ratios && ratios[index] !== undefined) {
           flex = ratios[index];
+          // ratios 사용 시 width/height는 명시적으로 undefined로 설정 (flex만 사용)
+          width = undefined;
+          height = undefined;
+        }
+        // ratios나 sizes가 없으면 기본값 1
+        else {
+          flex = 1;
         }
 
         return (
           <Box
             key={index}
             sx={{
-              flex,
-              width,
-              height,
+              flex: flex ?? 1, // ⭐ flex가 없으면 기본값 1
+              ...(width !== undefined && { width }), // ⭐ width가 있을 때만 설정
+              ...(height !== undefined && { height }), // ⭐ height가 있을 때만 설정
               minWidth: 0, // flex item overflow 방지
               minHeight: 0,
+              overflow: 'hidden', // 넘치는 내용 처리
+              wordBreak: 'break-word', // 긴 텍스트 줄바꿈
+              boxSizing: 'border-box', // ⭐ 패딩/보더 포함 계산
             }}
           >
             {child}

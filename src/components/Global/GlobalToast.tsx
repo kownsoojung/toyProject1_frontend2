@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Alert, Box, Slide } from '@mui/material';
+import { Alert, Box, Fade, Slide } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { removeToast } from '@/store/slices/toastSlice';
 
@@ -31,12 +31,13 @@ export const GlobalToast: React.FC<GlobalToastProps> = ({ tabKey }) => {
   if (!currentToast) return null;
 
   return (
-    <Slide direction="left" in={true} mountOnEnter unmountOnExit>
+    <Fade in={true} mountOnEnter unmountOnExit>
       <Box
         sx={{
           position: 'absolute',
-          top: 16,
-          right: 16,
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
           zIndex: 1500,
           minWidth: 300,
           maxWidth: 500,
@@ -54,7 +55,7 @@ export const GlobalToast: React.FC<GlobalToastProps> = ({ tabKey }) => {
           {currentToast.message}
         </Alert>
       </Box>
-    </Slide>
+    </Fade>
   );
 };
 

@@ -13,14 +13,15 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
   outline: "none",         // 포커스 아웃라인 제거
   cursor: "default", 
   paddingRight: 12,
-  "& tr:first-of-type td": { paddingTop: 12 },
-  "& tr:last-of-type td": { paddingBottom: 12 },
-  "& tr:first-of-type th": { paddingTop: 12 },
-  "& tr:last-of-type th": { paddingBottom: 12 },
+  
   ...(type === "search"
     ? {
         backgroundColor: "#f9fafb",
         border: "1px solid #ddd",
+        "& tr:first-of-type td": { paddingTop: 12 },
+        "& tr:last-of-type td": { paddingBottom: 12 },
+        "& tr:first-of-type th": { paddingTop: 12 },
+        "& tr:last-of-type th": { paddingBottom: 12 },
         "& tr": { border: "none" },
         "& th": {
           border: "none !important",
@@ -38,11 +39,33 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
     ? {
         backgroundColor: "#fff",
         border: "1px solid #ddd",
+        "& tr": {
+          borderBottom: "1px solid #ddd",
+        },
+        "& tr:last-child": {
+          borderBottom: "none",
+        },
         "& th, & td": {
-          padding: "12px 14px",
+          
           verticalAlign: "middle",
           borderBottom: "1px solid #ddd",
           textAlign: "left",
+        },
+        "& tr:last-child th, & tr:last-child td": {
+          borderBottom: "none",
+        },
+        "& th": {
+          borderRight: "1px solid #ddd",
+          backgroundColor: "#f5f5f5",
+        },
+        "& th:last-child": {
+          borderRight: "none",
+        },
+        "& td": {
+          borderRight: "1px solid #ddd",
+        },
+        "& td:last-child": {
+          borderRight: "none",
         },
       }
     : type === "form"
