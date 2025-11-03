@@ -1,5 +1,6 @@
 import { Box, BoxProps, SxProps } from "@mui/material";
 import React from "react";
+import { useTheme } from "@mui/material/styles";
 
 interface CommonBoxProps extends Omit<BoxProps, 'sx'> {
   children: React.ReactNode;
@@ -44,7 +45,7 @@ export const MainFormBox = ({ children, sxProps, ...props }: CommonBoxProps) => 
 );
 
 // 자동 높이 Box - 남은 공간 채우기 (flex: 1)
-export const AutoBox = ({ children, minHeight = 300, sxProps, ...props }: CommonBoxProps) => (
+export const AutoBox = ({ children, minHeight = 200, sxProps, ...props }: CommonBoxProps) => (
   <Box sx={{ flex: 1, minHeight: minHeight, display: "flex", flexDirection: "column", ...sxProps }} {...props}>
     {children}
   </Box>
@@ -58,8 +59,8 @@ export const ABox = ({ children, minHeight = 200, height=50, mb=1, sxProps, ...p
 );
 
 // Flex 컨테이너 Box
-export const FlexBox = ({ children, direction = 'row', gap = 2, sxProps, ...props }: FlexBoxProps) => (
-  <Box sx={{ display: 'flex', flexDirection: direction, gap, ...sxProps }} {...props}>
+export const FlexBox = ({ children, direction = 'row', gap = 0.5, alignItems = 'center', sxProps, ...props }: FlexBoxProps) => (
+  <Box sx={{ display: 'flex', flexDirection: direction, gap, alignItems, ...sxProps }} {...props}>
     {children}
   </Box>
 );
@@ -136,6 +137,42 @@ export const RatioBox = ({
 export const AGridToolBarBox = ({ children, sxProps, props }: CommonBoxProps) => {
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", ...sxProps }} {...props}>
+      {children}
+    </Box>
+  );
+};
+
+// Form 헤더 컴포넌트
+export const FormHeader = ({ children, sxProps, ...props }: CommonBoxProps) => {
+  const theme = useTheme();
+  return (
+    <Box 
+      sx={{ 
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: theme.spacing(1),
+        ...sxProps 
+      }} 
+      {...props}
+    >
+      {children}
+    </Box>
+  );
+};
+
+// Form 버튼 컴포넌트
+export const FormButtons = ({ children, sxProps, ...props }: CommonBoxProps) => {
+  return (
+    <Box 
+      sx={{ 
+        display: "flex",
+        gap: 0.5,
+        alignItems: "center",
+        ...sxProps 
+      }} 
+      {...props}
+    >
       {children}
     </Box>
   );

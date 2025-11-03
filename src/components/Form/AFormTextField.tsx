@@ -1,5 +1,5 @@
 import React from "react";
-import { SxProps, TextField, TextFieldProps } from "@mui/material";
+import { InputAdornment, SxProps, TextField, TextFieldProps } from "@mui/material";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 
 // TextFieldProps 전체 상속, 단 name과 label은 제거
@@ -11,6 +11,7 @@ interface AFormTextFieldProps {
   type?:string
   multiline?:boolean
   rows?:number
+  icon?:React.ReactNode
 }
 
 export const AFormTextField: React.FC<AFormTextFieldProps> = ({
@@ -20,15 +21,17 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
   options,
   type,
   multiline=false,
-  rows=4
+  rows=4,
+  icon,
 }) => {
-  const { sx: optionSx, ...restOptions } = options || {};
+  const { sx: optionSx, InputProps: optionInputProps,...restOptions } = options || {};
   const hasFlex = (optionSx as any)?.flex !== undefined; // ⭐ flex가 있는지 확인
   
   return (
     <AFormBaseItem name={name} {...base}>
       {(field, error) => (
         <TextField
+                    
           {...field}
           fullWidth={msize === 0 && !hasFlex} // ⭐ flex가 있으면 fullWidth 비활성화
           error={!!error}
@@ -42,7 +45,18 @@ export const AFormTextField: React.FC<AFormTextFieldProps> = ({
             ...(optionSx || {}),
           }}
           type={type}
+          InputProps={{
+            ...optionInputProps, // ⭐ options에서 받은 InputProps 먼저 적용
+            ...(icon ? {
+              endAdornment: ( // ⭐ 뒤쪽(오른쪽)에 배치
+                <InputAdornment position="end">
+                  {icon}
+                </InputAdornment>
+              ),
+            } : {}),
+          }}
           {...restOptions } 
+
         />
       )}
     </AFormBaseItem>

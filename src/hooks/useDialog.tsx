@@ -17,8 +17,8 @@ export const useDialog = () => {
   const tabKey = tabContext?.tabKey;
 
   // Alert 표시
-  const alert = useCallback((message: string, type?: 'success' | 'error' | 'warning' | 'info', title?: string) => {
-    dispatch(showAlert({ message, type, title, tabKey }));
+  const alert = useCallback((message: string, type?: 'success' | 'error' | 'warning' | 'info', title?: string, autoClose?: number) => {
+    dispatch(showAlert({ message, type, title, tabKey, autoClose }));
   }, [dispatch, tabKey]);
 
   // Confirm 표시 (Promise 기반)

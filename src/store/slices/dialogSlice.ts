@@ -12,6 +12,7 @@ export interface DialogOptions {
   onConfirm?: () => void;
   onCancel?: () => void;
   tabKey?: string; // ⭐ 어느 탭에서 발생했는지 추적
+  autoClose?: number; // ⭐ 자동으로 닫히는 시간 (밀리초), undefined면 자동으로 닫히지 않음
 }
 
 interface DialogState {
@@ -26,7 +27,7 @@ const dialogSlice = createSlice({
   name: 'dialog',
   initialState,
   reducers: {
-    showAlert: (state, action: PayloadAction<{ message: string; type?: DialogType; title?: string; tabKey?: string }>) => {
+    showAlert: (state, action: PayloadAction<{ message: string; type?: DialogType; title?: string; tabKey?: string; autoClose?: number }>) => {
       // 중복 방지: 같은 탭의 같은 메시지가 이미 있으면 추가하지 않음
       const isDuplicate = state.dialogs.some(
         d => d.message === action.payload.message && 
@@ -46,6 +47,7 @@ const dialogSlice = createSlice({
         message: action.payload.message,
         confirmText: '확인',
         tabKey: action.payload.tabKey,
+        autoClose: action.payload.autoClose,
       });
     },
     showConfirm: (state, action: PayloadAction<{

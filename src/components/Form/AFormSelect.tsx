@@ -121,15 +121,16 @@ export const AFormSelect: React.FC<SelectItemProps> = ({
             }
             
             // 단일 선택
-            if (isPlaceholder && (!selected || selected === placeholderValue || selected === undefined)) {
-              return placeholder;
+            // ⭐ selected가 null, undefined, 또는 placeholderValue와 같은지 확인 (0도 유효한 값으로 처리)
+            const isPlaceholderValue = selected === null || selected === undefined || selected === placeholderValue;
+            
+            if (isPlaceholderValue) {
+              return isPlaceholder ? placeholder : "";
             }
-            // ⭐ isPlaceholder가 false일 때 값이 없으면 빈 문자열 반환
-            if (!isPlaceholder && (!selected || selected === placeholderValue || selected === undefined)) {
-              return "";
-            }
+            
+            // ⭐ 0도 유효한 값으로 처리 (selected가 0이어도 여기서 처리됨)
             const selectedItem = selectOptions.find(item => item.value === selected);
-            return selectedItem?.label || (isPlaceholder ? placeholder : ""); // ⭐ fallback도 isPlaceholder 체크
+            return selectedItem?.label || (isPlaceholder ? placeholder : "");
           }}
           sx={{
             width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,

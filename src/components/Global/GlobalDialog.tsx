@@ -7,7 +7,6 @@ import {
   DialogActions,
   Button,
   Alert,
-  Grow,
 } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { closeDialog } from '@/store/slices/dialogSlice';
@@ -31,9 +30,21 @@ export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container, tabKey })
   // 가장 최근 다이얼로그만 표시
   const currentDialog = tabDialogs[tabDialogs.length - 1];
 
+  // ⭐ 자동으로 닫히는 로직
+  React.useEffect(() => {
+    if (currentDialog && currentDialog.autoClose) {
+      const timer = setTimeout(() => {
+        handleClose(currentDialog.id);
+      }, currentDialog.autoClose);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentDialog?.id, currentDialog?.autoClose]);
+
   if (!currentDialog) return null;
 
   const isConfirm = currentDialog.type === 'confirm';
+  const hasAutoClose = currentDialog.autoClose !== undefined; // ⭐ 자동 닫힘 여부
 
   const getSeverity = () => {
     switch (currentDialog.type) {
@@ -167,15 +178,18 @@ export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container, tabKey })
             </Button>
           </>
         ) : (
-          <Button
-            onClick={() => handleClose(currentDialog.id)}
-            variant="contained"
-            autoFocus
-            size="large"
-            sx={{ minWidth: 120, fontSize: '1rem' }}
-          >
-            {currentDialog.confirmText || '확인'}
-          </Button>
+          // ⭐ autoClose가 있으면 버튼 숨김
+          !hasAutoClose && (
+            <Button
+              onClick={() => handleClose(currentDialog.id)}
+              variant="contained"
+              autoFocus
+              size="large"
+              sx={{ minWidth: 120, fontSize: '1rem' }}
+            >
+              {currentDialog.confirmText || '확인'}
+            </Button>
+          )
         )}
       </DialogActions>
     </Dialog>

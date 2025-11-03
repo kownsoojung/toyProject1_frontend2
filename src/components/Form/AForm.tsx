@@ -1,22 +1,22 @@
 import { StyledTable } from "@/styles/theme";
 import { Box, Paper, Table, TableBody, TableContainer, TableContainerProps } from "@mui/material";
 import React, { ReactNode, useMemo } from "react";
-import { FormProvider, UseFormReturn, SubmitHandler } from "react-hook-form";
-
+import { FormProvider, UseFormReturn, SubmitHandler, useForm } from "react-hook-form";
 
 interface AFormProps {
   children: ReactNode;
   labelSize?: number;
   colCnt?: number;
   type?: "search" | "register" | "form";
-  onSubmit: SubmitHandler<any>;
-  methods: UseFormReturn<any>;
-  minHeight?: number; // 바깥 최소 높이
+  onSubmit?: SubmitHandler<any>;
+  methods?: UseFormReturn<any>;
+  minHeight?: number;
   isLabel?:boolean
   options?:TableContainerProps
   marginB?:string|number
+  isTable?:boolean
+  formStyle?:React.CSSProperties
 }
-
 
 export default function AForm({
   children,
@@ -24,12 +24,27 @@ export default function AForm({
   colCnt=2,
   type = "search",
   onSubmit,
-  methods,
+  methods: externalMethods,
   isLabel=true,
   options,
-  marginB=2
+  marginB=2,
+  isTable=true,
+  formStyle
 }: AFormProps) {
-  const { handleSubmit } = methods; // ✅ methods에서 꺼냄
+  // methods가 없으면 자동으로 생성
+  const internalMethods = useForm();
+  const methods = externalMethods || internalMethods;
+  const { handleSubmit } = methods;
+
+  if (isTable == false) {
+    return (
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit?.(onSubmit || (() => {})) as SubmitHandler<any>} style={{ display: 'inline-block', ...formStyle }}>
+          {children}
+        </form>
+      </FormProvider>
+    );
+  }
 
   const columns = useMemo(() => {
     if (colCnt) return colCnt;
@@ -47,8 +62,7 @@ export default function AForm({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {/* 테이블 폼 영역 */}
+      <form onSubmit={handleSubmit?.(onSubmit || (() => {})) as SubmitHandler<any>}>
         <TableContainer component={Paper} sx={{ boxShadow: "none", mb: marginB}} {...options} >
           <StyledTable type={type}>
             <colgroup>{cols}</colgroup>
@@ -59,4 +73,3 @@ export default function AForm({
     </FormProvider>
   );
 }
-

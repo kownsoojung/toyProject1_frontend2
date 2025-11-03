@@ -4,6 +4,7 @@ import {
   SwitchProps,
   FormControlLabel,
   FormGroup,
+  FormControlLabelProps,
 } from "@mui/material";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 import { CommonCode, useCommonCode } from "@/hooks/useCode";
@@ -20,6 +21,7 @@ interface AFormSwitchProps {
   label?: string;
   isDisabledItem?: (item: CommonCode) => boolean;
   options?: SwitchProps;
+  labelOptions?: Omit<FormControlLabelProps, "control" | "label">;
 }
 
 export const AFormSwitch: React.FC<AFormSwitchProps> = ({
@@ -31,7 +33,8 @@ export const AFormSwitch: React.FC<AFormSwitchProps> = ({
   row = true,
   label,
   isDisabledItem,
-  options
+  options,
+  labelOptions
 }) => {
   // ✅ 공통 Hook으로 간단하게!
   const codeData = useCommonCode(codeType, selectCode);
@@ -67,6 +70,9 @@ export const AFormSwitch: React.FC<AFormSwitchProps> = ({
                     />
                   }
                   label={item.label}
+                  labelPlacement="start"
+                  sx={{ marginRight:0, gap: 0 }}
+                  {...labelOptions}
                 />
               ))}
             </FormGroup>
@@ -84,6 +90,9 @@ export const AFormSwitch: React.FC<AFormSwitchProps> = ({
               />
             }
             label={label || list[0]?.label || ""}
+            labelPlacement="start"
+            sx={{ marginRight:0, gap: 0 }}
+            {...labelOptions}
           />
         );
       }}

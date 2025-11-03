@@ -104,20 +104,7 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
         },
       }
     : {}),
-}));
-
-export const FormHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: theme.spacing(1),
-}));
-
-export const FormButtons = styled(Box)(({ theme }) => ({
-  display: "flex",
-  gap: theme.spacing(1), // 버튼 간격
-  alignItems: "center",   // 버튼 높이 맞추기
-}));
+  }));
 
 // ✅ MUI Theme 생성
 const theme = createTheme({
@@ -295,7 +282,26 @@ const theme = createTheme({
       styleOverrides: { root: { minHeight: 36 }, scroller: { minHeight: 36 } },
     },
     MuiTab: {
-      styleOverrides: { root: { minHeight: 36, textTransform: "none", fontSize: 13, padding: "0 12px" } },
+      styleOverrides: { 
+        root: ({ theme }) => ({
+          minHeight: 36, 
+          textTransform: "none", 
+          fontSize: 13, 
+          padding: "0 12px",
+          borderRadius: "8px 8px 0 0",
+          border: "1px solid #ccc",
+          color: theme.palette.text.secondary,
+          backgroundColor: "#e0e0e0",
+          "&.Mui-selected": {
+            color: theme.palette.primary.main,
+            fontWeight: 600,
+            backgroundColor: "#fff",
+          },
+          "&:hover": {
+            backgroundColor: theme.palette.action.hover,
+          },
+        }),
+      },
     },
     MuiCard: {
       styleOverrides: { root: { borderRadius: 8, backgroundColor: "#fff" } },
