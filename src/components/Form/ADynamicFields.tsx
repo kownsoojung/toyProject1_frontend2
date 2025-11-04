@@ -1,31 +1,27 @@
+import React from "react";
 import { DynamicFieldConfig } from "@/hooks/useDynamicFields";
 import { TableCell, TableRow } from "@mui/material";
 import {
-  AFormCheckbox,
-  AFormDate,
-  AFormNumber,
-  AFormRadio,
-  AFormSelect,
-  AFormTextField,
+  ASelect,
+  ATextField,
+  ANumber,
+  ACheckbox,
+  ARadio,
+  ADate,
 } from "@/components/Form";
 
-interface AFormDynamicFieldsProps {
+interface ADynamicFieldsFormProps {
   fields: DynamicFieldConfig[];
-  namePrefix?: string; // "additionalFields" 등
-  columnsPerRow?: number; // 한 행에 몇 개의 필드를 표시할지 (기본: 2)
+  namePrefix?: string;
+  columnsPerRow?: number;
 }
 
-/**
- * 동적 필드를 렌더링하는 컴포넌트
- * - API로부터 받은 필드 설정에 따라 자동으로 Form 필드 생성
- * - radio, check, select, date, number, text 타입 지원
- */
-export const AFormDynamicFields = ({ 
-  fields, 
+// Form 래퍼 컴포넌트 (react-hook-form 전용)
+const ADynamicFieldsForm: React.FC<ADynamicFieldsFormProps> = ({
+  fields,
   namePrefix = "additionalFields",
-  columnsPerRow = 2 
-}: AFormDynamicFieldsProps) => {
-  
+  columnsPerRow = 2,
+}) => {
   // 필드 타입별 렌더링
   const renderField = (field: DynamicFieldConfig) => {
     const fieldName = `${namePrefix}.${field.key}`;
@@ -33,8 +29,8 @@ export const AFormDynamicFields = ({
     switch (field.type) {
       case "radio":
         return (
-          <AFormRadio 
-            name={fieldName} 
+          <ARadio.Form
+            name={fieldName}
             list={field.options || []}
             row={true}
           />
@@ -42,8 +38,8 @@ export const AFormDynamicFields = ({
         
       case "check":
         return (
-          <AFormCheckbox 
-            name={fieldName} 
+          <ACheckbox.Form
+            name={fieldName}
             list={field.options || []}
             row={true}
           />
@@ -51,26 +47,22 @@ export const AFormDynamicFields = ({
         
       case "select":
         return (
-          <AFormSelect 
-            name={fieldName} 
+          <ASelect.Form
+            name={fieldName}
             list={field.options || []}
             placeholder="선택"
           />
         );
         
       case "date":
-        return <AFormDate name={fieldName} />;
+        return <ADate.Form name={fieldName} />;
         
       case "number":
-        return (
-          <AFormNumber 
-            name={fieldName}
-          />
-        );
+        return <ANumber.Form name={fieldName} />;
         
       case "text":
       default:
-        return <AFormTextField name={fieldName} />;
+        return <ATextField.Form name={fieldName} />;
     }
   };
 
@@ -84,17 +76,17 @@ export const AFormDynamicFields = ({
       rows.push(
         <TableRow key={`dynamic-row-${i}`}>
           {rowFields.map(field => (
-            <>
-              <TableCell component="th" key={`th-${field.key}`}>
+            <React.Fragment key={field.key}>
+              <TableCell component="th">
                 {field.name}
               </TableCell>
-              <TableCell key={`td-${field.key}`}>
+              <TableCell>
                 {renderField(field)}
               </TableCell>
-            </>
+            </React.Fragment>
           ))}
           
-          {/* 빈 셀 채우기 (columnsPerRow보다 필드가 적은 경우) */}
+          {/* 빈 셀 채우기 */}
           {rowFields.length < columnsPerRow && 
             Array.from({ length: (columnsPerRow - rowFields.length) * 2 }).map((_, idx) => (
               <TableCell key={`empty-${i}-${idx}`}></TableCell>
@@ -107,10 +99,13 @@ export const AFormDynamicFields = ({
     return rows;
   };
 
-  // 필드가 없으면 아무것도 렌더링하지 않음
   if (fields.length === 0) return null;
 
   return <>{renderRows()}</>;
 };
 
+// 컴포넌트 합성 (Form 전용)
+export const ADynamicFields = Object.assign(ADynamicFieldsForm, {
+  Form: ADynamicFieldsForm,
+});
 
