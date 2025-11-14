@@ -14,8 +14,9 @@ import { initZodConfig } from "./validation/Validation.tsx";
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import { Provider } from 'react-redux';
 import { store } from './store';
+import { queryClient } from "./queryClient.ts";
 
-const queryClient = new QueryClient();
+
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 
 ModuleRegistry.registerModules([AllCommunityModule]);

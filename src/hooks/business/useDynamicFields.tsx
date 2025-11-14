@@ -1,4 +1,4 @@
-import { useAutoQuery } from "@/hooks/useAutoQuery";
+import { useAutoQuery } from "../api/useAutoQuery";
 import { useMemo } from "react";
 import z from "zod";
 

@@ -1,9 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
+import ctiReducer from './slices/ctiSlice';
+import dialogReducer from './slices/dialogSlice';
+import loadingReducer from './slices/loadingSlice';
 import menuReducer from './slices/menuSlice';
 import tabReducer from './slices/tabSlice';
-import dialogReducer from './slices/dialogSlice';
 import toastReducer from './slices/toastSlice';
-import loadingReducer from './slices/loadingSlice';
 import userReducer from './slices/userSlice';
 
 export const store = configureStore({
@@ -14,6 +15,7 @@ export const store = configureStore({
     toast: toastReducer,
     loading: loadingReducer,
     user: userReducer,
+    cti: ctiReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

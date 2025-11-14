@@ -4,9 +4,7 @@
 
 import React from 'react';
 import { Button, Stack, Paper, Box, Typography } from '@mui/material';
-import { useLoading } from '@/hooks/useLoading';
-import { useAutoMutation } from '@/hooks/useAutoMutation';
-import { useDialog } from '@/hooks/useDialog';
+import { useLoading, useAutoMutation, useDialog } from '@/hooks';
 
 export const LoadingExample: React.FC = () => {
   const { startLoading, stopLoading, withLoading } = useLoading();

@@ -1,6 +1,6 @@
 import { apiInstance } from '@/api/baseApi';
 import { useMutation, UseMutationOptions, UseMutationResult, useQueryClient } from '@tanstack/react-query';
-import { useLoading } from './useLoading';
+import { useLoading } from '../ui/useLoading';
 import { MessageType } from '@/store/slices/loadingSlice';
 
 type HTTPMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -66,3 +66,4 @@ export function useAutoMutation<TData = unknown, TVariables = any>(
     ...options,
   });
 }
+

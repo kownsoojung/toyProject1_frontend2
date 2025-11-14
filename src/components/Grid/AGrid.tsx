@@ -1,26 +1,24 @@
 // src/components/AFormGrid.tsx
-import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, useCallback, useMemo } from "react";
-import { AgGridReact, AgGridReactProps } from "ag-grid-react";
-import { ColDef, GridApi, GridOptions, RowSelectionOptions } from "ag-grid-community";
-import "ag-grid-community/styles/ag-theme-alpine.css";
-import { useApiQuery } from "@/hooks/useAutoQuery";
+import { useDialog } from "@/hooks";
 import { exportToExcel as exportExcel } from "@/utils/excelExport";
-import { useQueryClient } from "@tanstack/react-query";
-import { apiInstance } from "@/api/baseApi";
-import { 
-  Box, 
-  Button, 
-  TextField, 
-  Select, 
-  MenuItem, 
-  FormControl,
-  Pagination,
-  Stack,
+import nAxios from "@/utils/nAxios";
+import {
+  Box,
+  Button,
   Checkbox,
+  FormControl,
   FormControlLabel,
   FormGroup,
+  MenuItem,
+  Pagination,
+  Select,
+  Stack,
+  TextField,
 } from "@mui/material";
-import { useDialog } from "@/hooks/useDialog";
+import { ColDef, GridApi, GridOptions, RowSelectionOptions } from "ag-grid-community";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import { AgGridReact, AgGridReactProps } from "ag-grid-react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 interface AFormGridProps {
   url?: string;
@@ -88,6 +86,7 @@ export interface AFormGridHandle {
   updateRow: (rowId: any, newData: any) => void;
   deleteRows: (rowIds: any[]) => void;
   getAllRows: () => any[];
+  clearGridData: () => void;
 }
 
 export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
@@ -176,22 +175,28 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     }, [propColumnDefs, children]);
 
     const [params, setParams] = useState<Record<string, any>>(initialParams);
+    const paramsRef = useRef<Record<string, any>>(initialParams);
+    
+    // params가 변경될 때 ref도 업데이트
+    useEffect(() => {
+      paramsRef.current = params;
+    }, [params]);
     const [page, setPage] = useState<number>(1);
     const [pageSizeState, setPageSizeState] = useState<number>(pageSize);
     const [totalCount, setTotalCount] = useState<number>(0);
     const [quickFilterText, setQuickFilterText] = useState<string>("");
     const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
-    
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const gridRef = useRef<AgGridReact>(null);
     const dialog = useDialog();
-    const queryClient = useQueryClient();
-   
 
     const [shouldFetch, setShouldFetch] = useState(autoFetch);
     const [sort, setSort] = useState<{sortOrder: string, sortColumn: string}>({sortOrder: "", sortColumn: ""});
     
+    // 데이터 상태 관리
+    const [data, setData] = useState<Record<string, any> | null>(null);
 
-
+    
     const rowTypedata: RowSelectionOptions = useMemo(() => {
       const type = rowType.type;
       const mode: RowSelectionOptions["mode"] = type.match(/multi/) ? "multiRow" : "singleRow";
@@ -210,33 +215,57 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         ...(rowSelection || {}),
       };
     }, [rowType, rowSelection]);
-    // 서버 자동 조회
-    let { data, isLoading, error, refetch } = useApiQuery<Record<string, any>>({
-      queryKey: ["gridData", url, params, page, pageSizeState],
-      url: url ?? "",
-      params: { ...params, page, pageSize: pageSizeState, sortOrder: sort.sortOrder, sortColumn: sort.sortColumn },
-    });
 
-    const gridSearch = useCallback(() => {
-      refetch();
-    }, []);
+    // 데이터 조회 함수
+    const fetchData = async () => {
+      if (!url) return;
+      setIsLoading(true);
+      setData([]); // 데이터 초기화
+      if (onBeforeRefetch) {
+        onBeforeRefetch();
+      }
+      try {
+        // ref를 통해 최신 params 사용
+        const requestParams = {
+          ...paramsRef.current,
+          page,
+          pageSize: pageSizeState,
+          sortOrder: sort.sortOrder,
+          sortColumn: sort.sortColumn,
+        };
+
+        const response: any = await nAxios.get(url, {
+          params: requestParams,
+        });
+
+        if (isPage) {
+          setTotalCount(response.data?.[totalName] ?? 0);
+          setData(response.data?.[rowName] ?? []);
+        }
+        else {
+          setData(response.data);
+          setTotalCount(response.data?.length ?? 0);
+        }
+
+        if (onAfterRefetch) {
+          onAfterRefetch(response.data);
+        }
+      } catch (err : any) {
+        setData([]);
+        setTotalCount(0);
+        dialog.error(err.message);
+        
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
     useEffect(() => {
-      if (shouldFetch && url) {
-        const api = gridRef.current?.api;
-        if (api) {
-          api.setGridOption('rowData', []); // 그리드 데이터를 빈 배열로 설정
-          setTotalCount(0); // 총 건수도 0으로 초기화
-        }
-
-        if(onBeforeRefetch) {
-          onBeforeRefetch();
-        }
-        gridSearch();
-        setShouldFetch(false);
+      if (shouldFetch) {
+        fetchData();
+        
       }
-    }, [shouldFetch, gridSearch]);
-
+    }, [sort, page, pageSizeState, params]);
     // 컬럼 가시성 초기화
     useEffect(() => {
       const initialVisibility: Record<string, boolean> = {};
@@ -251,24 +280,9 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
     // 에러 추적을 위한 ref
 
 
-    // 에러 감지 - 한번만 표시되도록 수정
-    useEffect(() => {
-      // 초기 마운트 시에는 에러 무시 (캐시된 에러 방지)
-      
-      
-      if (error && error ) {
-       
-        dialog.error('데이터를 불러오는 중 오류가 발생했습니다.');
-        queryClient.removeQueries({ 
-          queryKey: ["gridData", url, params, page, pageSizeState] 
-        });
-      }
-      // 에러가 없어지면 초기화
-    }, [error, dialog]);
+    // 에러는 fetchData 내부에서 처리하므로 별도 useEffect 불필요
 
     // 컴포넌트 언마운트 시 ref 초기화
-
-
     // imperative handle - 외부에서 사용할 메서드들
     useImperativeHandle(ref, () => ({
       refetch: (newParams?: Record<string, any>) => {
@@ -290,17 +304,16 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         let dataToExport: any[] = [];
 
         if (exportUrl) {
-          // AGrid에서 전체 데이터 조회 (QueryClient 사용)
+          // AGrid에서 전체 데이터 조회 (nAxios 사용)
           try {
-            const response = await apiInstance.request({
-              url: exportUrl,
-              method: 'GET',
+            const response = await nAxios.get(exportUrl, {
               params: params,
             });
             
             dataToExport = response.data[rowName] || response.data;
           } catch (error) {
-            console.error('데이터 조회 실패:', error);
+            console.error('데이터 조회 실패:', (error as Error).message);
+            dialog.error((error as Error).message || '데이터 조회 실패');
             return;
           }
         } else {
@@ -381,31 +394,13 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
         gridRef.current?.api?.forEachNode(node => rows.push(node.data));
         return rows;
       },
+      clearGridData: () => {
+        setData([]);
+        setTotalCount(0);
+      },
     }));
 
 
-    // 서버 데이터 처리
-    useEffect(() => {
-      const api = gridRef.current?.api;
-      if (!api) return;
-      
-      if (error) {
-        api.showNoRowsOverlay?.();
-      } 
-      else if (isLoading) {
-        
-      }
-      else {
-        api.setGridOption('rowData', data?.[rowName] ?? []);
-        if (totalName) {
-          setTotalCount(data?.[totalName] ?? 0);
-        }
-        if (onAfterRefetch) {
-          onAfterRefetch(data);
-        }
-        api.hideOverlay();
-      }
-    }, [data, error, isLoading, shouldFetch]);
 
     // 컬럼 가시성 변경 처리
     const handleColumnToggle = useCallback((field: string) => {
@@ -531,27 +526,16 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
                   let dataToExport: any[] = [];
 
                   if (exportUrl) {
-                    // AGrid에서 전체 데이터 조회 (QueryClient 사용)
+                    // AGrid에서 전체 데이터 조회 (nAxios 사용)
                     try {
-                      const result = await queryClient.fetchQuery({
-                        queryKey: ['excelExport', exportUrl],
-                        queryFn: async () => {
-                          const response = await fetch(exportUrl, {
-                            method: 'GET',
-                            headers: { 'Content-Type': 'application/json' },
-                          });
-                          
-                          if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                          }
-                          
-                          return response.json();
-                        },
+                      const response = await nAxios.get(exportUrl, {
+                        params: params,
                       });
-                      dataToExport = result[rowName] || result;
-                    } catch (error) {
-                      console.error('데이터 조회 실패:', error);
-                      return;
+                      dataToExport = response.data[rowName] || response.data;
+                      } catch (error) {
+                        console.error('데이터 조회 실패:', (error as Error).message);
+                        dialog.error((error as Error).message || '데이터 조회 실패');
+                        return;
                     }
                   } else {
                     // 현재 화면 데이터
@@ -577,7 +561,6 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
                 selectAll: () => gridRef.current?.api?.selectAll(),
                 refresh: () => {
                   setShouldFetch(true);
-                  refetch();
                 },
               })}
             </Box>
@@ -626,6 +609,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
           <AgGridReact
             ref={gridRef as any}
             columnDefs={enhancedColumnDefs}
+            rowData={(data as any[])} // 직접 data 참조
             defaultColDef={{
               
               sortable: true,
@@ -650,9 +634,15 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
             animateRows={true}
             suppressRowHoverHighlight={true}
             onSortChanged={(e)=> {
-              if (e.columns && url) {
-                setSort({sortOrder: e.columns[0].getSort() ?? "", sortColumn: e.columns[0].getColId() ?? ""});
-                setShouldFetch(true); 
+              if (e.columns && url && e.source === 'uiColumnSorted') {
+                const newSortOrder = e.columns[0].getSort() ?? "";
+                const newSortColumn = newSortOrder == "" ? "" :  e.columns[0].getColId() ?? "";
+                // 실제로 정렬이 변경된 경우에만 처리
+                if (sort.sortOrder !== newSortOrder || sort.sortColumn !== newSortColumn) {
+                  // 편집 상태 초기화
+                  
+                  setSort({sortOrder: newSortOrder, sortColumn: newSortColumn});
+                }
               }
             }}
             // 이벤트 핸들러
@@ -677,7 +667,6 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
                 onChange={(e) => {
                   setPageSizeState(Number(e.target.value));
                   setPage(1);
-                  setShouldFetch(true); 
                 }}
               >
                 {[10, 20, 30, 50, 100].map((n) => (
@@ -696,7 +685,6 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
               onChange={(_, value) => {
                 const validPage = Math.min(Math.max(1, value), totalPages);
                 setPage(validPage);
-                setShouldFetch(true); 
               }}
               color="primary"
               showFirstButton

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Button, Stack, Typography, Paper, Box } from '@mui/material';
-import { useDialog } from '@/hooks/useDialog';
+import { useDialog } from '@/hooks';
 import { useAppDispatch } from '@/store/hooks';
 import { showAlert, showConfirm } from '@/store/slices/dialogSlice';
 import { showToast } from '@/store/slices/toastSlice';
@@ -133,7 +133,7 @@ export const DialogExample: React.FC = () => {
         <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
 {`// 사용법 예제
 
-import { useDialog } from '@/hooks/useDialog';
+import { useDialog } from '@/hooks';
 
 function MyComponent() {
   const dialog = useDialog();

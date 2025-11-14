@@ -1,7 +1,7 @@
-import { useAutoQuery } from "@/hooks/useAutoQuery";
+import { useAutoQuery } from "@/hooks";
 import { Stack } from "@mui/material";
 import { useEffect, useMemo } from "react";
-import { AFormSelect } from "../Form";
+import { ASelect } from "../Form";
 import { useFormContext } from "react-hook-form";
 import { AFormBaseItemProps } from "../Form/AFormBaseItem";
 
@@ -83,8 +83,15 @@ export const AFormCallKindCategory: React.FC<counselCategoryProps> = ({
   const categoryList3 = useMemo(() => {
     if (!category1Value || !category2Value || !callKindList) return [];
     
+    // category2Value가 문자열이 아니면 문자열로 변환하고, 빈 문자열이면 빈 배열 반환
+    const category2ValueStr = category2Value ? String(category2Value) : "";
+    if (!category2ValueStr || category2ValueStr.trim() === "") return [];
+    
     // category2Value를 배열로 변환 (예: "11,15" → [11, 15])
-    const selectedCallKinds = category2Value.split(',').map((ck: string) => parseInt(ck, 10));
+    const selectedCallKinds = category2ValueStr
+      .split(',')
+      .map((ck: string) => parseInt(ck.trim(), 10))
+      .filter((ck: number) => !isNaN(ck));
     
     // category1의 callType과 category2의 callKind 둘 다 일치하는 항목만 필터링
     return callKindList
@@ -94,16 +101,16 @@ export const AFormCallKindCategory: React.FC<counselCategoryProps> = ({
       .map((item: any) => ({
         label: item.codeName,
         value: item.callType + ',' + item.interactionType,
-        parentValue: category2Value // callKinds 문자열을 parentValue로
+        parentValue: category2ValueStr
       }));
   }, [category1Value, category2Value, callKindList]);
 
 
   return (
     <Stack direction="row" spacing={1} sx={{ width: '100%', '& > *': { flex: 1, minWidth: 0 } }}>
-      <AFormSelect name={category1} list={categoryList1} base={base} isPlaceholder={base?.disabled ? false : true}/>
-      <AFormSelect name={category2} list={categoryList2} parent={category1} base={base} isPlaceholder={base?.disabled ? false : true}  />
-      <AFormSelect name={category3} list={categoryList3} parent={category2} base={base} isPlaceholder={base?.disabled ? false : true} />
+      <ASelect.Form name={category1} list={categoryList1} base={base} isPlaceholder={base?.disabled ? false : true}/>
+      <ASelect.Form name={category2} list={categoryList2} parent={category1} base={base} isPlaceholder={base?.disabled ? false : true}  />
+      <ASelect.Form name={category3} list={categoryList3} parent={category2} base={base} isPlaceholder={base?.disabled ? false : true} />
     </Stack>
   )
 }

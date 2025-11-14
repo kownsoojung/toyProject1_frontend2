@@ -95,3 +95,60 @@ body {
 .ag-theme-alpine .ag-header-cell-label {
   justify-content: center !important;
 }
+
+/* CallControlPanel 스타일 */
+.call-control-icon {
+  border-radius: 50%;
+  background-color: #fff;
+  padding: 0.4rem;
+  cursor: pointer;
+}
+
+/* 색상 클래스 */
+.call-control-icon.icon-green {
+  color: green;
+}
+
+.call-control-icon.icon-orange {
+  color: orange;
+}
+
+.call-control-icon.icon-red {
+  color: red;
+}
+
+/* 기본 색상 (색상 클래스가 없을 때) */
+.call-control-icon:not(.icon-green):not(.icon-orange):not(.icon-red) {
+  color: #6A6A6A;
+}
+
+/* disabled 상태 */
+.call-control-icon.disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* disabled일 때는 항상 회색 */
+.call-control-icon.disabled,
+.call-control-icon.disabled.icon-green,
+.call-control-icon.disabled.icon-orange,
+.call-control-icon.disabled.icon-red {
+  color: #6A6A6A !important;
+}
+
+/* Call 버튼 활성화/비활성화 (CSS로 제어) */
+/* 기본적으로 비활성화 상태 */
+.call-button {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* 대기중(204) 또는 휴식중(203)일 때만 활성화 */
+.call-status-204 .call-button,
+.call-status-203 .call-button {
+  opacity: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}

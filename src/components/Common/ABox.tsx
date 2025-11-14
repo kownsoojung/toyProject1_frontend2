@@ -9,6 +9,7 @@ interface CommonBoxProps extends Omit<BoxProps, 'sx'> {
   height?: number | string;
   mb?:number
   props?: BoxProps
+  popup?: boolean;
 }
 
 interface FlexBoxProps extends Omit<BoxProps, 'sx'> {
@@ -16,6 +17,7 @@ interface FlexBoxProps extends Omit<BoxProps, 'sx'> {
   direction?: 'row' | 'column';
   gap?: number | string;
   sxProps?: SxProps;
+  isTable?: boolean;
 }
 
 interface RatioBoxProps extends Omit<BoxProps, 'sx'> {
@@ -28,7 +30,7 @@ interface RatioBoxProps extends Omit<BoxProps, 'sx'> {
 }
 
 // 메인 폼 Box - 100% 높이 차지
-export const MainFormBox = ({ children, sxProps, ...props }: CommonBoxProps) => (
+export const MainFormBox = ({ children, sxProps, popup=false, ...props }: CommonBoxProps) => (
   <Box sx={{ display: "flex",
     flexDirection: "column",
     height: "100%",  // 부모 높이를 100%로
@@ -37,6 +39,11 @@ export const MainFormBox = ({ children, sxProps, ...props }: CommonBoxProps) => 
     padding: "16px 16px 0 16px",
     minHeight: 300, 
     overflowX: 'hidden',
+    ...(popup && {
+      flex: 1, 
+      position: "relative", 
+      minHeight: 0, 
+    }),
     ...sxProps }} 
     {...props}
   >
@@ -44,6 +51,32 @@ export const MainFormBox = ({ children, sxProps, ...props }: CommonBoxProps) => 
   </Box>
 );
 
+// 메인 팝업 폼 Box - 100% 높이 차지
+export const PopupBox = ({ children, sxProps, ...props }: CommonBoxProps) => (
+  <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }} {...props}>
+    
+    {children}
+    
+  </Box>
+);
+export const PopupFooterBox = ({ children, sxProps, ...props }: CommonBoxProps) => (
+  <Box sx={{ 
+    p: 1, 
+    marginTop: 1,
+    borderTop: "1px solid #ccc", 
+    paddingLeft: 3,
+    flexShrink: 0,  // 이미 설정되어 있음
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    backgroundColor: "background.paper",  // 배경색 추가로 더 명확하게 구분
+    ...sxProps
+  }}
+  {...props}
+  >
+    {children}
+  </Box>
+);
 // 자동 높이 Box - 남은 공간 채우기 (flex: 1)
 export const AutoBox = ({ children, minHeight = 200, sxProps, ...props }: CommonBoxProps) => (
   <Box sx={{ flex: 1, minHeight: minHeight, display: "flex", flexDirection: "column", ...sxProps }} {...props}>
@@ -59,8 +92,8 @@ export const ABox = ({ children, minHeight = 200, height=50, mb=1, sxProps, ...p
 );
 
 // Flex 컨테이너 Box
-export const FlexBox = ({ children, direction = 'row', gap = 0.5, alignItems = 'center', sxProps, ...props }: FlexBoxProps) => (
-  <Box sx={{ display: 'flex', flexDirection: direction, gap, alignItems, ...sxProps }} {...props}>
+export const FlexBox = ({ children, direction = 'row', gap = 0.5, alignItems = 'center', isTable = false, sxProps, ...props }: FlexBoxProps) => (
+  <Box sx={{ display: 'flex', flexDirection: direction, gap, alignItems, ...(isTable && { width: '100%', '& > span' :{flex: 1, minWidth: 0, display: "flex"}}), ...sxProps }} {...props}>
     {children}
   </Box>
 );

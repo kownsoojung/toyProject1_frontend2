@@ -1,5 +1,5 @@
 import { Stack } from "@mui/material";
-import { AFormSelect } from "../Form";
+import { ASelect } from "../Form";
 
 interface counselCategoryProps {
   category1: string;
@@ -15,24 +15,22 @@ export const AFormCounselCategory: React.FC<counselCategoryProps> = ({
   category4
 }) => {
 
-  
-  
   return (
     <Stack direction="row" spacing={1} sx={{ width: '100%', '& > *': { flex: 1, minWidth: 0 } }}>
-      <AFormSelect 
+      <ASelect.Form 
         name={category1} 
         selectCode={{depth:0, transferKind: 0}} 
         codeType="counselCategory" 
         msize={0}
       />
-      <AFormSelect 
+      <ASelect.Form  
         name={category2} 
         selectCode={{depth:1, transferKind: 0}} 
         codeType="counselCategory" 
         parent={category1}
         msize={0}
       />
-      <AFormSelect 
+      <ASelect.Form  
         name={category3} 
         selectCode={{depth:2, transferKind: 0}} 
         codeType="counselCategory" 
@@ -40,7 +38,7 @@ export const AFormCounselCategory: React.FC<counselCategoryProps> = ({
         msize={0}
       />
       {category4 && (
-        <AFormSelect 
+        <ASelect.Form  
           name={category4} 
           selectCode={{depth:3, transferKind: 0}} 
           codeType="counselCategory" 

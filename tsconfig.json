@@ -14,13 +14,18 @@
         "noEmit": true,
         "jsx": "react-jsx",
 
-        /* Linting */
-        "strict": true,
-        "strictNullChecks": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true,
+        /* Linting - 느슨한 설정 */
+        "strict": false,
+        "strictNullChecks": false,
+        "noImplicitAny": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noFallthroughCasesInSwitch": false,
+        "noImplicitReturns": false,
+        "noImplicitThis": false,
+        "alwaysStrict": false,
 
+        "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"]
         }

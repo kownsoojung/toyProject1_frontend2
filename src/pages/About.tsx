@@ -1,4 +1,4 @@
-import useHelmetTitle from "@/hooks/useHelmet";
+import { useHelmetTitle } from "@/hooks";
 
 import { Card, CardContent, Stack, Typography } from "@mui/material";
 

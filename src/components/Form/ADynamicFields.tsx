@@ -1,5 +1,5 @@
 import React from "react";
-import { DynamicFieldConfig } from "@/hooks/useDynamicFields";
+import { DynamicFieldConfig } from "@/hooks";
 import { TableCell, TableRow } from "@mui/material";
 import {
   ASelect,
@@ -31,7 +31,7 @@ const ADynamicFieldsForm: React.FC<ADynamicFieldsFormProps> = ({
         return (
           <ARadio.Form
             name={fieldName}
-            list={field.options || []}
+            checkList={field.options || []}
             row={true}
           />
         );
@@ -40,7 +40,7 @@ const ADynamicFieldsForm: React.FC<ADynamicFieldsFormProps> = ({
         return (
           <ACheckbox.Form
             name={fieldName}
-            list={field.options || []}
+            checkList={field.options || []}
             row={true}
           />
         );

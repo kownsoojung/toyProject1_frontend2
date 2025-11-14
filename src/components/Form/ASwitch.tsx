@@ -7,7 +7,7 @@ import {
   FormControlLabelProps,
 } from "@mui/material";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { CommonCode, useCommonCode } from "@/hooks/useCode";
+import { CommonCode, useCommonCode } from "@/hooks";
 import { CodeSearchDTO } from "@/api/generated";
 
 interface ASwitchProps {
@@ -21,7 +21,7 @@ interface ASwitchProps {
   labelOptions?: Omit<FormControlLabelProps, "control" | "label">;
   // 독립 사용을 위한 props
   value?: boolean | (string | number)[];
-  onChange?: (value: boolean | (string | number)[]) => void;
+  changeCallback?: (value: any, event?: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
 }
 
@@ -36,7 +36,7 @@ const ASwitchBase: React.FC<ASwitchProps> = ({
   options,
   labelOptions,
   value,
-  onChange,
+  changeCallback,
   disabled = false,
 }) => {
   const codeData = useCommonCode(codeType, selectCode);
@@ -47,12 +47,12 @@ const ASwitchBase: React.FC<ASwitchProps> = ({
   if (list && list.length > 1) {
     const switchValue: (string | number)[] = (Array.isArray(value) ? value : []) || [];
 
-    const handleChange = (codeId: string | number) => {
-      if (onChange) {
+    const handleChange = (codeId: string | number, e?: React.ChangeEvent<HTMLInputElement>) => {
+      if (changeCallback) {
         const newValue = switchValue.includes(codeId)
           ? switchValue.filter((v) => v !== codeId)
           : [...switchValue, codeId];
-        onChange(newValue);
+        changeCallback(newValue, e);
       }
     };
 
@@ -64,7 +64,7 @@ const ASwitchBase: React.FC<ASwitchProps> = ({
             control={
               <Switch
                 checked={switchValue.includes(item.value)}
-                onChange={() => handleChange(item.value)}
+                onChange={(e) => handleChange(item.value, e)}
                 disabled={disabled || isDisabledItem?.(item) || false}
                 {...options}
               />
@@ -86,8 +86,8 @@ const ASwitchBase: React.FC<ASwitchProps> = ({
         <Switch
           checked={!!value}
           onChange={(e) => {
-            if (onChange) {
-              onChange(e.target.checked);
+            if (changeCallback) {
+              changeCallback(e.target.checked, e);
             }
           }}
           disabled={disabled}
@@ -103,15 +103,17 @@ const ASwitchBase: React.FC<ASwitchProps> = ({
 };
 
 // Form 래퍼 컴포넌트
-interface ASwitchFormProps extends Omit<ASwitchProps, 'value' | 'onChange' | 'disabled'> {
+interface ASwitchFormProps extends Omit<ASwitchProps, 'value' | 'changeCallback' | 'disabled'> {
   name: string;
   base?: Omit<AFormBaseItemProps, "name" | "children">;
+  changeCallback?: (value: any, event?: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const ASwitchForm: React.FC<ASwitchFormProps> = ({
   name,
   base,
   checkList = { label: "", value: "" },
+  changeCallback,
   ...switchProps
 }) => {
   const codeData = useCommonCode(switchProps.codeType, switchProps.selectCode);
@@ -122,13 +124,18 @@ const ASwitchForm: React.FC<ASwitchFormProps> = ({
   return (
     <AFormBaseItem name={name} {...base}>
       {(field) => {
+        const handleChange = (val: any, e?: React.ChangeEvent<HTMLInputElement>) => {
+          field.onChange(val);              // form 값 반영
+          changeCallback?.(val, e);         // 외부 전달
+        };
         if (isGroup) {
           return (
             <ASwitchBase
               {...switchProps}
               checkList={finalCheckList}
               value={field.value}
-              onChange={field.onChange}
+              changeCallback={handleChange}
+              disabled={base?.disabled || field.disabled} // ⭐ disabled 전달
             />
           );
         }
@@ -136,7 +143,8 @@ const ASwitchForm: React.FC<ASwitchFormProps> = ({
           <ASwitchBase
             {...switchProps}
             value={field.value}
-            onChange={field.onChange}
+            changeCallback={handleChange}
+            disabled={base?.disabled || field.disabled} // ⭐ disabled 전달
           />
         );
       }}

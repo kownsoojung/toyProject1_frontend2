@@ -1,5 +1,4 @@
-import { useModal } from "@/hooks/ModalProvider";
-import useHelmetTitle from "@/hooks/useHelmet";
+import { useModal, useHelmetTitle } from "@/hooks";
 
 import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
 

@@ -102,7 +102,8 @@ export const TabModalProvider: React.FC<{ children: ReactNode }> = ({ children }
             <div>
               <Draggable handle=".draggable-handle" nodeRef={nodeRef}>
                 <Box
-                ref={nodeRef}
+                  ref={nodeRef}
+                  tabIndex={-1} 
                   sx={{
                     maxWidth: 1200,
                     maxHeight: 800,
@@ -156,3 +157,4 @@ if (import.meta.hot) {
     console.log('✅ ModalProvider HMR - popup 업데이트만');
   });
 }
+

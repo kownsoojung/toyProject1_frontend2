@@ -116,7 +116,7 @@ const ADateBase: React.FC<ADateProps> = ({
 interface ADateFormProps extends Omit<ADateProps, 'value' | 'onChange' | 'error' | 'disabled'> {
   name: string;
   endName?: string;
-  base?: AFormBaseItemProps;
+  base?: Omit<AFormBaseItemProps, "name" | "children">; // ⭐ name과 children 제외
   endOptions?: DatePickerProps;
 }
 
@@ -169,7 +169,7 @@ const ADateForm: React.FC<ADateFormProps> = ({
             <ADateBase
               formatType={formatType}
               minDate={minDate}
-              maxDate={endValue ? roundToStep(dayjs(endValue), hStep, mStep, sStep) : parseMinMax(maxDate)}
+              maxDate={endValue ? roundToStep(dayjs(endValue), hStep, mStep, sStep) : parseMinMax(maxDate as string)}
               hStep={hStep}
               mStep={mStep}
               sStep={sStep}
@@ -189,7 +189,7 @@ const ADateForm: React.FC<ADateFormProps> = ({
           {(field, error) => (
             <ADateBase
               formatType={formatType}
-              minDate={startValue ? roundToStep(dayjs(startValue), hStep, mStep, sStep) : parseMinMax(minDate)}
+              minDate={startValue ? roundToStep(dayjs(startValue), hStep, mStep, sStep) : parseMinMax(minDate as string)}
               maxDate={maxDate}
               hStep={hStep}
               mStep={mStep}

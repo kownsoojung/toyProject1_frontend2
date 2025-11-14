@@ -1,4 +1,4 @@
-import { Button, ButtonProps, CircularProgress } from "@mui/material";
+import { Button, ButtonProps, CircularProgress, Select } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
@@ -12,6 +12,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState } from "react";
 import { ClearIcon } from "@mui/x-date-pickers";
+import { Check } from "@mui/icons-material";
 
 export interface CommonButtonProps extends Omit<ButtonProps, 'onClick'> {
   onClick?: () => void;
@@ -121,3 +122,8 @@ export const CloseButton = ({ onClick, text = "닫기", ...props }: CommonButton
   </Button>
 );
 
+export const SelectButton = ({ onClick, text = "선택", ...props }: CommonButtonProps) => (
+  <Button variant="contained" startIcon={<Check />} onClick={onClick} {...props}>
+    {text}
+  </Button>
+);

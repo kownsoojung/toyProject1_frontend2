@@ -6,7 +6,7 @@ import {
   FormGroup,
 } from "@mui/material";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { CommonCode, useCommonCode } from "@/hooks/useCode";
+import { CommonCode, useCommonCode } from "@/hooks";
 import { CodeSearchDTO } from "@/api/generated";
 
 interface ACheckboxProps {

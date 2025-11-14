@@ -15,6 +15,15 @@
     </head>
     <body>
         <div id="root"></div>
+        <audio id="rt" src="/audio/ringtone.wav" loop style="display: none;"></audio>
+        <audio id="rbt" src="/audio/ringbacktone.wav" loop style="display: none;"></audio>
+        <audio id="ceb" src="/audio/callendbeef.wav" style="display: none;"></audio>
+        <audio id="audio_remote" autoplay="autoplay" style="display: none;"> </audio>
+        
+        <!-- CTI 라이브러리 (전역 window 객체에 설정) -->
+        <script src="/lib/nxcapi_web.js"></script>
+        <script src="/lib/nxWebApi.min.js"></script>
+        
         <script type="module" src="/src/main.tsx"></script>
     </body>
 </html>

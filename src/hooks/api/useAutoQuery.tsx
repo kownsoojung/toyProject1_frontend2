@@ -1,4 +1,5 @@
 import { apiInstance } from "@/api/baseApi";
+import nAxios from "@/utils/nAxios";
 import { useQuery as useReactQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import { AxiosRequestConfig } from "axios";
 
@@ -13,6 +14,7 @@ export interface QueryOptions<T> {
   data?: any;
   config?: AxiosRequestConfig;
   options?: Omit<UseQueryOptions<T, Error>, 'queryKey' | 'queryFn'>;
+  isGlobal?: boolean;
 }
 
 /**
@@ -21,14 +23,18 @@ export interface QueryOptions<T> {
 const createFetcher = <T,>(url: string, method: string, params?: any, data?: any, config?: AxiosRequestConfig) => {
   return async (): Promise<T> => {
     try {
-      const res = await apiInstance.request<T>({
+      const res = await nAxios.request<T>({
         url,
         method,
         params: method === 'GET' ? params : undefined,
         data: method !== 'GET' ? data : undefined,
         ...config,
       });
-      return res.data;
+      if (method === 'GET') {
+        return res as T;
+      } else {
+        return res.data as T;
+      }
     } catch (error: any) {
       //handleCommonError(error);
       throw error;
@@ -91,21 +97,27 @@ export function useAutoQuery<T>({
   data,
   config,
   options = {},
+  isGlobal = false,
 }: QueryOptions<T>): UseQueryResult<T, Error> {
   const fetcher = createFetcher<T>(url, method, params, data, config);
   
   return useReactQuery<T, Error>({ 
     queryKey: Array.isArray(queryKey) ? queryKey : [queryKey], 
-    queryFn: fetcher,
+    queryFn: async () => {
+      const res = await nAxios.get(url, { params });
+      return res.data; // ← ★ 여기만 고치면 모든 문제가 해결됨
+    },
     // 자동 조회 기본 옵션
     enabled: true,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: 'always',
-    retry: false,
+    staleTime: isGlobal ? Infinity : 0,
+    gcTime: isGlobal ? Infinity : 0,
+    refetchOnMount: isGlobal ? false : 'always',
+    refetchOnWindowFocus: isGlobal ? false : true,
+    retry: isGlobal ? false : true,
     ...options,  // 사용자 옵션으로 오버라이드 가능
   });
 }
+
 
 /**
  * 🔄 하위 호환을 위한 별칭
@@ -113,3 +125,4 @@ export function useAutoQuery<T>({
  */
 export const UseAutoQuery = useAutoQuery;
 export const useQuery = useApiQuery;  // 별칭 (선택적)
+

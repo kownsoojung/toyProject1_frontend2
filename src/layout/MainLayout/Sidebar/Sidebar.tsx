@@ -10,21 +10,35 @@ import {
   useTheme,
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // ⭐ useEffect 추가
 import { useLayoutContext } from "@/contexts/LayoutContext";
 import { SIDEBAR_WIDTH } from "../constants";
+import { MENU_DATA } from "@/config/menu";
 
 interface SidebarProps {
   onMenuClick?: (path: string, name: string, id: number) => void;
-  activeKey:string;
+  activeKey: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onMenuClick, activeKey }) => {
-  const menus = useAppSelector((state) => state.menu.menus);
+  const menus = MENU_DATA;
   const location = useLocation();
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const { sidebarOpen } = useLayoutContext();
   const theme = useTheme();
+
+  // ⭐ isOpen이 true인 메뉴들을 초기에 열어둠
+  useEffect(() => {
+    if (menus.length > 0 && openKeys.length === 0) {
+      const initiallyOpenMenus = menus
+        .filter((menu) => menu.isOpen === true)
+        .map((menu) => menu.id.toString());
+      
+      if (initiallyOpenMenus.length > 0) {
+        setOpenKeys(initiallyOpenMenus);
+      }
+    }
+  }, []); // ⭐ 의존성 배열 수정
 
   // 현재 활성화된 탭 key 추출 (예: "/123-/dashboard" → "123-/dashboard")
   const currentPath = location.pathname;
@@ -38,14 +52,17 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuClick, activeKey }) => {
   const renderMenuTree = (parentId: number = 0, level: number = 0) => {
     return menus
       .filter((menu) => menu.upperId === parentId)
+      .sort((a, b) => (a.seq || 0) - (b.seq || 0)) // ⭐ seq로 정렬 추가
       .map((menu) => {
-        const childrenMenus = menus.filter((m) => m.upperId === menu.id);
+        const childrenMenus = menus
+          .filter((m) => m.upperId === menu.id)
+          .sort((a, b) => (a.seq || 0) - (b.seq || 0)); // ⭐ 하위 메뉴도 정렬
         const hasChild = childrenMenus.length > 0;
         const isOpen = openKeys.includes(menu.id.toString());
 
         // MainLayout과 동일한 key 포맷 (id-path)
         const menuKey = `${menu.id}-${menu.path}`;
-        const isActive = activeKey  === menuKey; // path 기준으로 강조 (or menuKey로도 가능)
+        const isActive = activeKey === menuKey;
 
         if (hasChild) {
           return (

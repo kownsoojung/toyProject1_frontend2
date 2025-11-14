@@ -1,5 +1,5 @@
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
-import { useCommonCode, CommonCode } from "@/hooks/useCode";
+import { useCommonCode, CommonCode } from "@/hooks";
 import { CodeSearchDTO } from "@/api/generated";
 import { Autocomplete, AutocompleteProps, TextField } from "@mui/material";
 import { useFormContext, useWatch } from "react-hook-form";

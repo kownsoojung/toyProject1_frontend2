@@ -12,8 +12,8 @@ import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { closeDialog } from '@/store/slices/dialogSlice';
 
 export interface GlobalDialogProps {
-  container?: HTMLElement | null;
-  tabKey?: string; // ⭐ 현재 탭 키
+  container?: HTMLElement | null; // 사용하지 않지만 호환성을 위해 유지
+  tabKey?: string; // ⭐ 현재 탭 키 (undefined면 전체 화면용)
 }
 
 export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container, tabKey }) => {
@@ -24,8 +24,12 @@ export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container, tabKey })
     dispatch(closeDialog(id));
   };
 
-  // ⭐ 현재 탭의 다이얼로그만 필터링
-  const tabDialogs = dialogs.filter(d => d.tabKey === tabKey || !d.tabKey);
+  // ⭐ tabKey가 없으면 전체 화면용, 있으면 해당 탭의 다이얼로그만 필터링
+  // 탭용: tabKey가 정확히 일치하는 다이얼로그만 표시
+  // 전체용: tabKey가 없는 다이얼로그만 표시
+  const tabDialogs = tabKey === undefined
+    ? dialogs.filter(d => !d.tabKey) // 전체용: tabKey가 없는 다이얼로그만
+    : dialogs.filter(d => d.tabKey === tabKey); // 탭용: 해당 tabKey만
   
   // 가장 최근 다이얼로그만 표시
   const currentDialog = tabDialogs[tabDialogs.length - 1];
@@ -62,37 +66,25 @@ export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container, tabKey })
       onClose={() => handleClose(currentDialog.id)}
       maxWidth="sm"
       fullWidth
-      disablePortal={!!container}
-      container={container ? () => container : undefined}
+      disablePortal={false} // Portal 사용하여 document.body에 렌더링
       sx={{
-        // ⭐ Dialog root에 직접 flex 적용
+        // 전체 화면 기준으로 중앙 정렬
         '& .MuiBackdrop-root': {
-          // backdrop도 가운데 정렬을 위해
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
         '& .MuiDialog-container': {
           display: 'flex !important',
           alignItems: 'center !important',
           justifyContent: 'center !important',
-          minHeight: '100%',
-          position: 'relative',
+          minHeight: '100vh',
         },
-        ...(container && {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }),
       }}
       PaperProps={{
         sx: {
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
           borderRadius: 3,
           minWidth: 400,
-          margin: 'auto', // ⭐ 자동 마진으로 가운데 정렬 보조
+          margin: 'auto',
           '@keyframes popIn': {
             '0%': {
               transform: 'scale(0.7)',

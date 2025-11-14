@@ -1,18 +1,22 @@
-import React, { useState, lazy, Suspense, useRef } from "react";
-import { Box, Tabs, Tab, IconButton, CircularProgress } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
-import { SIDEBAR_WIDTH } from "./constants";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { useLayoutContext } from "@/contexts/LayoutContext";
-import { TabModalProvider } from "@/hooks/ModalProvider";
-import { useTheme } from "@mui/material/styles";
 import { GlobalDialog, GlobalToast } from "@/components";
-import { useMenus } from "@/hooks/useMenus";
+import { CallIncomingPopup } from "@/components/Global/CallIncomingPopup";
+import { MENU_DATA } from "@/config/menu";
+import { useLayoutContext } from "@/contexts/LayoutContext";
 import { TabProvider } from "@/contexts/TabContext";
+import { TabModalProvider } from "@/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearTabDialogs } from "@/store/slices/dialogSlice";
-import { clearTabToasts, clearAllToasts } from "@/store/slices/toastSlice";
+import { clearAllToasts, clearTabToasts } from "@/store/slices/toastSlice";
+import { loadUserFromStorage } from "@/store/slices/userSlice";
+import CloseIcon from "@mui/icons-material/Close";
+import { Box, CircularProgress, IconButton, Tab, Tabs } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import React, { lazy, Suspense, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+import { SIDEBAR_WIDTH } from "./constants";
+import { useAppInitialization } from "@/hooks";
 
 type TabItem = {
   key: string;
@@ -21,21 +25,49 @@ type TabItem = {
   component: React.ReactNode;
 };
 
-const LazyDashboard = lazy(() => import("@/pages/Dashboard"));
+const LazyCounselingCall = lazy(() => import("@/pages/counselor/counselingCall"));
 
 export default function MainLayout() {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const menus = useAppSelector((state: any) => state.menu.menus);
+  const navigate = useNavigate();
+  const menus = MENU_DATA;
   const { sidebarOpen } = useLayoutContext();
   const [tabs, setTabs] = useState<TabItem[]>([]);
   const [activeKey, setActiveKey] = useState("");
   const prevActiveKeyRef = useRef<string>("");
   const dialogContainerRef = useRef<HTMLDivElement>(null);
   const [initialized, setInitialized] = React.useState(false);
+  const user = useAppSelector((state: any) => state.user);
+
+  // 로그인 상태 확인 및 초기화
+  React.useEffect(() => {
+    const token = localStorage.getItem("token");
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    
+    // 토큰이 있지만 Redux store에 사용자 정보가 없는 경우 복원
+    if (token && isLoggedIn && (!user.accessToken || !user.id)) {
+      console.log("🔄 Redux store에 사용자 정보 없음 - localStorage에서 복원");
+      dispatch(loadUserFromStorage());
+    }
+    
+    // 토큰이 없는 경우 로그인 페이지로 리다이렉트
+    if (!token || !isLoggedIn) {
+      console.log("⚠️ 인증 정보 없음 - 로그인 페이지로 이동");
+      navigate("/login", { replace: true });
+      return;
+    }
+    
+    // 사용자 정보가 여전히 없는 경우 리다이렉트
+    if (!user.accessToken && !user.id && !user.userId) {
+      console.log("⚠️ 사용자 정보 없음 - 로그인 페이지로 이동");
+      navigate("/login", { replace: true });
+    }
+  }, [dispatch, navigate, user.accessToken, user.id, user.userId]);
+
   
-  // 메뉴 조회
-  useMenus();
+  // 앱 초기화 (설정 조회 + CTI 연결)
+  useAppInitialization();
   
   // 로그인 성공 toast를 메인 화면에서 한 번만 표시하고 제거
   React.useEffect(() => {
@@ -59,13 +91,13 @@ export default function MainLayout() {
   // 메뉴가 로드되면 초기 탭 설정
   React.useEffect(() => {
     if (menus.length > 0 && !initialized) {
-      const initialMenu = menus.find((menu: any) => menu.id === 1) || menus[0];
+      const initialMenu = menus.find((menu: any) => menu.id === 3) || menus[0];
       if (initialMenu) {
         const initialTab = {
           key: `${initialMenu.id}-${initialMenu.path}`,
           title: initialMenu.name,
           closable: false,
-          component: <LazyDashboard />
+          component: <LazyCounselingCall />
         };
         setTabs([initialTab]);
         setActiveKey(initialTab.key);
@@ -76,14 +108,11 @@ export default function MainLayout() {
 
   const modules = import.meta.glob([
     "/src/pages/**/*.tsx",
-    "!/src/pages/**/popup/**"  // popup 폴더 제외
   ]);
   const lazyLoad = (path: string) => {
     // path 정규화: 앞에 /가 없으면 추가
     const normalizedPath = path.startsWith('/') ? path : '/' + path;
     const importKey = `/src/pages${normalizedPath}.tsx`;
-    console.log("🔍 Lazy Load 시도:", { 원본path: path, 정규화된path: normalizedPath, importKey }); // 디버깅용
-    console.log("📦 사용 가능한 모듈들:", Object.keys(modules)); // 디버깅용
     
     if (modules[importKey]) {
       const Component = lazy(modules[importKey] as any);
@@ -124,7 +153,7 @@ export default function MainLayout() {
           key: `${initialMenu.id}-${initialMenu.path}`,
           title: initialMenu.name,
           closable: false,
-          component: <LazyDashboard />
+          component: <LazyCounselingCall />
         };
         setActiveKey(fallbackTab.key);
         return [fallbackTab];
@@ -135,6 +164,9 @@ export default function MainLayout() {
 
   // 메뉴가 아직 로드되지 않았으면 로딩 표시
   if (menus.length === 0 || tabs.length === 0) {
+    const isLoggedIn = user?.accessToken || user?.userId;
+    const loadingMessage = isLoggedIn ? "메뉴 로딩 중..." : "초기화 중..."; // ⭐ 또는 원하는 메시지
+    
     return (
       <Box
         sx={{
@@ -147,7 +179,7 @@ export default function MainLayout() {
         }}
       >
         <CircularProgress size={60} thickness={4} />
-        <Box sx={{ color: "text.secondary", fontSize: 14 }}>메뉴 로딩 중...</Box>
+        <Box sx={{ color: "text.secondary", fontSize: 14 }}>{loadingMessage}</Box>
       </Box>
     );
   }
@@ -332,6 +364,13 @@ export default function MainLayout() {
           </Box>
         </Box>
       </Box>
+      
+      {/* 전역 콜 팝업 - 모든 페이지에서 작동 */}
+      <CallIncomingPopup />
+      
+      {/* ⭐ 전체 화면 기준 Dialog/Toast - 헤더/메인에서 사용하는 전역 팝업 (로그인 성공 등) */}
+      <GlobalDialog tabKey={undefined} />
+      <GlobalToast tabKey={undefined} />
     </Box>
   );
 }

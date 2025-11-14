@@ -37,9 +37,14 @@ export default function AForm({
   const { handleSubmit } = methods;
 
   if (isTable == false) {
+    const marginBottomValue = typeof marginB === 'number' 
+    ? `${marginB * 8}px` 
+    : typeof marginB === 'string' 
+      ? marginB 
+      : '16px';
     return (
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit?.(onSubmit || (() => {})) as SubmitHandler<any>} style={{ display: 'inline-block', ...formStyle }}>
+        <form onSubmit={handleSubmit?.(onSubmit || (() => {})) as SubmitHandler<any>} style={{ display: 'inline-block', marginBottom: marginBottomValue, ...formStyle }}>
           {children}
         </form>
       </FormProvider>

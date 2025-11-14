@@ -27,3 +27,16 @@ src/pages/counselor/
 *.sln
 *.sw?
 
+public/audio/busyTone.wav
+public/audio/callendbeef.wav
+public/audio/dtmf.wav
+public/audio/ringbacktone.wav
+public/audio/ringtone.wav
+public/audio/WaitCallAlarm.wav
+public/lib/JedaiCubeApi.js
+public/lib/nxcapi_web.js
+public/lib/nxWebApi.min.js
+src/api/counselApi.tsx
+src/store/slices/ctiSlice.ts
+src/services/cti/CtiWebSocketService.ts
+src/services/cti/callEventHandler.ts

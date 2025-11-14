@@ -1,9 +1,11 @@
-import { CodeSearchDTO } from "@/api/generated";
-import { CommonCode, useCommonCode } from "@/hooks/useCode";
+// src/components/Form/ASelect.tsx
 import { MenuItem, Select, SelectProps } from "@mui/material";
 import { useFormContext, useWatch } from "react-hook-form";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
+import { CodeSearchDTO, CommonCode, commonCodeType } from "@/types";
+import { useCommonCode } from "@/hooks";
+
 
 interface ASelectProps {
   list?: CommonCode[];
@@ -12,17 +14,18 @@ interface ASelectProps {
   isDisabledItem?: (item: CommonCode) => boolean;
   parent?: string | number;
   options?: SelectProps;
-  codeType?: "site" | "subCodeZip" | "counselCode" | "counselCategory";
+  codeType?: commonCodeType;
   placeholder?: string;
   placeholderValue?: string | number;
   isPlaceholder?: boolean;
   multiple?: boolean;
   // 독립 사용을 위한 props
   value?: string | number | (string | number)[];
-  onChange?: (value: string | number | (string | number)[]) => void;
+  changeCallback?: (value: string | number | (string | number)[], event?: React.ChangeEvent<{ name?: string; value: unknown }>) => void;
   disabled?: boolean;
   error?: boolean;
   fullWidth?: boolean;
+  firstIndex?: number;
 }
 
 // 기본 Select 컴포넌트 (순수 UI)
@@ -38,22 +41,27 @@ const ASelectBase: React.FC<ASelectProps> = ({
   isPlaceholder = true,
   multiple = false,
   value,
-  onChange,
+  changeCallback,
   disabled = false,
   error = false,
   fullWidth,
   options,
+  firstIndex = 0,
 }) => {
-  let selectOptions: CommonCode[] = useCommonCode(codeType, selectCode) ?? list;
+  // ⭐ list가 있으면 우선 사용 (이미 필터링된 옵션), 없으면 useCommonCode 사용
+  let selectOptions: CommonCode[] = list.length > 0 ? list : (useCommonCode(codeType, selectCode) ?? []);
 
-  // parent 필터링 (독립 사용 시 parent는 number로 전달)
-  if (parent && typeof parent === "number") {
+  // ⭐ parent 필터링 (독립 사용 시 parent는 number로 전달, list가 없을 때만)
+  if (list.length === 0 && parent && typeof parent === "number") {
     selectOptions = selectOptions.filter(
-      (item) => item.parentValue == parent as any
+      (item) => {
+        const itemParentValue = item.parentValue != null ? String(item.parentValue) : "";
+        return itemParentValue === String(parent);
+      }
     );
   }
 
-  const selectValue = value ?? (multiple ? [] : placeholderValue);
+  const selectValue = value ?? (multiple ? [] : firstIndex ? selectOptions[firstIndex].value : placeholderValue);
 
   return (
     <Select
@@ -62,8 +70,8 @@ const ASelectBase: React.FC<ASelectProps> = ({
       multiple={multiple}
       value={selectValue}
       onChange={(e) => {
-        if (onChange) {
-          onChange(e.target.value as any);
+        if (changeCallback) {
+          changeCallback(e.target.value as any, e as React.ChangeEvent<{ name?: string; value: unknown }>);
         }
       }}
       error={error}
@@ -75,7 +83,10 @@ const ASelectBase: React.FC<ASelectProps> = ({
             return isPlaceholder ? placeholder : "";
           }
           const labels = selected
-            .map(val => selectOptions.find(item => item.value === val)?.label)
+            .map(val => selectOptions.find(item => {
+              // 값 비교 시 타입 변환 고려
+              return String(item.value) === String(val) || item.value === val;
+            })?.label)
             .filter(Boolean)
             .join(', ');
           return labels || (isPlaceholder ? placeholder : "");
@@ -88,7 +99,13 @@ const ASelectBase: React.FC<ASelectProps> = ({
           return isPlaceholder ? placeholder : "";
         }
         
-        const selectedItem = selectOptions.find(item => item.value === selected);
+        // ✅ 옵션 목록에서 값 찾기 (코드 리스트가 로드된 후에도 동작)
+        // 타입 변환을 고려하여 값 비교
+        const selectedItem = selectOptions.find(item => {
+          return String(item.value) === String(selected) || item.value === selected;
+        });
+        
+        // ✅ 값이 옵션에 있으면 label 표시, 없어도 일단 값 표시 (코드 리스트 로딩 대기)
         return selectedItem?.label || (isPlaceholder ? placeholder : "");
       }}
       sx={{
@@ -115,9 +132,10 @@ const ASelectBase: React.FC<ASelectProps> = ({
 };
 
 // Form 래퍼 컴포넌트
-interface ASelectFormProps extends Omit<ASelectProps, 'value' | 'onChange' | 'error' | 'disabled'> {
+interface ASelectFormProps extends Omit<ASelectProps, 'value' | 'changeCallback' | 'error' | 'disabled'> {
   name: string;
   base?: Omit<AFormBaseItemProps, "name" | "children">;
+  changeCallback?: (value: string | number | (string | number)[], event?: React.ChangeEvent<{ name?: string; value: unknown }>) => void;
 }
 
 const ASelectForm: React.FC<ASelectFormProps> = ({
@@ -125,77 +143,69 @@ const ASelectForm: React.FC<ASelectFormProps> = ({
   base,
   parent,
   placeholderValue = "",
+  firstIndex,
   multiple = false,
+  changeCallback,
   ...selectProps
 }) => {
-  const { control, setValue } = useFormContext();
-  let selectOptions: CommonCode[] = useCommonCode(selectProps.codeType, selectProps.selectCode) ?? (selectProps.list || []);
-
+  const { control, setValue, getValues } = useFormContext();
+  const allSelectOptions: CommonCode[] = useCommonCode(selectProps.codeType, selectProps.selectCode) ?? (selectProps.list || []);
   const watchedParent = parent ? useWatch({ control, name: parent as string }) : undefined;
-  const currentValue = useWatch({ control, name });
   const prevParentRef = useRef(watchedParent);
+  const initializedRef = useRef(false);
 
-  // 초기 렌더링 시 값이 undefined이면 placeholderValue로 초기화
-  useEffect(() => {
-    if (currentValue === undefined) {
-      const initialValue = multiple ? [] : placeholderValue;
-      setValue(name, initialValue, { shouldValidate: false, shouldDirty: false });
+  const selectOptions = useMemo(() => {
+    if (!parent) return allSelectOptions;
+    const parentValue = typeof parent === "string" ? watchedParent : parent;
+    if (parentValue !== null && parentValue !== undefined && parentValue !== "" && parentValue !== placeholderValue) {
+      return allSelectOptions.filter(
+        (item) => String(item.parentValue ?? "") === String(parentValue)
+      );
     }
-  }, []);
+    return [];
+  }, [allSelectOptions, parent, watchedParent, placeholderValue]);
 
-  // parent 값이 변경되면 현재 필드 초기화
+  // ✅ 처음 한 번만 firstIndex로 값 세팅
+  useEffect(() => {
+    if (!initializedRef.current && firstIndex != null && selectOptions[firstIndex]) {
+      initializedRef.current = true;
+      const current = getValues(name);
+      if (!current || current === placeholderValue) {
+        setValue(name, selectOptions[firstIndex].value, { shouldValidate: false, shouldDirty: false });
+      }
+    }
+  }, [selectOptions, firstIndex, name, setValue, placeholderValue, getValues]);
+
+  // ✅ parent가 바뀌면 필드 초기화
   useEffect(() => {
     if (parent && prevParentRef.current !== watchedParent) {
       prevParentRef.current = watchedParent;
       const resetValue = multiple ? [] : placeholderValue;
       setValue(name, resetValue, { shouldValidate: false, shouldDirty: true });
+      initializedRef.current = false; // 다음 parent 선택 시 다시 초기화 가능하도록
     }
   }, [watchedParent, parent, name, setValue, placeholderValue, multiple]);
 
-  // 현재 값이 옵션 목록에 없으면 초기화
-  useEffect(() => {
-    if (parent && currentValue && currentValue !== placeholderValue) {
-      let isValidValue = false;
-      
-      if (multiple && Array.isArray(currentValue)) {
-        isValidValue = currentValue.every(val => 
-          selectOptions.some(item => item.value === val)
-        );
-      } else {
-        isValidValue = selectOptions.some(item => item.value === currentValue);
-      }
-      
-      if (!isValidValue) {
-        const resetValue = multiple ? [] : placeholderValue;
-        setValue(name, resetValue, { shouldValidate: false, shouldDirty: true });
-      }
-    }
-  }, [selectOptions, currentValue, parent, name, setValue, placeholderValue, multiple]);
-
-  // parent 필터링
-  if (parent) {
-    const parentValue = typeof parent === "string" ? watchedParent : (typeof parent === "number" ? parent : null);
-    if (parentValue) {
-      selectOptions = selectOptions.filter(
-        (item) => item.parentValue == parentValue
-      );
-    } else {
-      selectOptions = [];
-    }
-  }
-
   return (
-    <AFormBaseItem name={name} {...base} disabled={parent ? !watchedParent : false || base?.disabled}>
-      {(field, error) => (
-        <ASelectBase
-          {...selectProps}
-          parent={parent}
-          value={field.value ?? (multiple ? [] : placeholderValue)}
-          onChange={field.onChange}
-          error={!!error}
-          disabled={field.disabled}
-        />
-      )}
+    <AFormBaseItem name={name} {...base} disabled={parent ? !watchedParent : base?.disabled}>
+      {(field, error) => {
+        const handleChange = (val: any, e?: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+          field.onChange(val);
+          changeCallback?.(val, e);
+        };
+
+        return (
+          <ASelectBase
+            {...selectProps}
+            parent={parent}
+            value={field.value}
+            changeCallback={handleChange}
+            error={!!error}
+            disabled={field.disabled}
+            list={selectOptions}
+          />
+        );
+      }}
     </AFormBaseItem>
   );
 };
@@ -204,4 +214,3 @@ const ASelectForm: React.FC<ASelectFormProps> = ({
 export const ASelect = Object.assign(ASelectBase, {
   Form: ASelectForm,
 });
-

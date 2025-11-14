@@ -13,6 +13,7 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
   outline: "none",         // 포커스 아웃라인 제거
   cursor: "default", 
   paddingRight: 12,
+  fontSize: 13,
   
   ...(type === "search"
     ? {
@@ -33,6 +34,8 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
           border: "none !important",
           textAlign: "left",
           verticalAlign: "middle",
+          userSelect: "text", 
+          fontSize: 13,
         },
       }
     : type === "register"
@@ -63,6 +66,7 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
         },
         "& td": {
           borderRight: "1px solid #ddd",
+          userSelect: "text", 
         },
         "& td:last-child": {
           borderRight: "none",
@@ -84,6 +88,7 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
           textAlign: "left",
           verticalAlign: "middle",
           padding: "10px 10px",
+          userSelect: "text", 
         },
        "& .MuiInputBase-root": {
           minHeight: 40,
@@ -111,6 +116,10 @@ const theme = createTheme({
   // --------------------
   // 🎨 기본 색상 팔레트
   // --------------------
+  typography: {
+    fontSize: 13,
+    htmlFontSize: 13, // rem 기준을 13px로 설정
+  },
   palette: {
     mode: "light", // 🔁 "dark" 로 바꾸면 자동 다크테마
     primary: {
@@ -141,6 +150,57 @@ const theme = createTheme({
   // --------------------
   components: {
     // 🔹 Sidebar 관련 공통 스타일 추가
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          fontSize: 13,
+        },
+        html: {
+          fontSize: 13,
+        },
+        // ⭐ fieldset disabled 전역 스타일 (opacity 제거, pointerEvents와 cursor만 적용)
+        "fieldset:disabled": {
+          // opacity 제거 - 개별 컴포넌트에서만 처리하여 중첩 방지
+          pointerEvents: "none",
+          "& *": {
+            cursor: "not-allowed !important",
+          },
+          // ⭐ 색상/투명도는 각 컴포넌트의 disabled에서 처리
+          "& .MuiIconButton-root": {
+            color: "rgba(255, 255, 255, 0.7) !important", // ⭐ 0.5 → 0.7로 더 선명하게
+          },
+          // ⭐ call-control-icon 클래스를 가진 아이콘은 색상 유지 (CSS 클래스로 색상 제어)
+          "& .MuiSvgIcon-root:not(.call-control-icon)": {
+            color: "rgba(255, 255, 255, 0.7) !important", // ⭐ 0.5 → 0.7로 더 선명하게
+          },
+          // ⭐ call-control-icon 클래스를 가진 아이콘은 색상 덮어쓰지 않음 (CSS 클래스 색상 유지)
+          "& .call-control-icon": {
+            opacity: 0.7, // ⭐ 투명도만 적용하여 색상은 CSS 클래스에서 제어
+          },
+          "& .MuiSwitch-root": {
+            opacity: 0.7, // ⭐ 0.5 → 0.7로 더 선명하게
+            "& .MuiSwitch-switchBase": {
+              cursor: "not-allowed",
+            },
+          },
+          "& .MuiOutlinedInput-root": {
+            opacity: 0.7, // ⭐ fieldset disabled 시 Input 투명도
+            cursor: "not-allowed",
+            "& fieldset": {
+              borderColor: "rgba(0, 0, 0, 0.26) !important",
+            },
+          },
+          "& .MuiSelect-root": {
+            opacity: 0.7, // ⭐ fieldset disabled 시 Select 투명도
+            cursor: "not-allowed",
+          },
+          "& .MuiSlider-root": {
+            opacity: 0.7, // ⭐ fieldset disabled 시 Slider 투명도
+            cursor: "not-allowed",
+          },
+        },
+      },
+    },
     MuiListItemButton: {
       styleOverrides: {
         root: ({ theme }) => ({
@@ -160,7 +220,16 @@ const theme = createTheme({
 
     MuiOutlinedInput: {
       styleOverrides: {
-        root: { backgroundColor: "#fff" },
+        root: { 
+          backgroundColor: "#fff",
+          "&.Mui-disabled": {
+            opacity: 0.7, // ⭐ disabled 시 투명도
+            cursor: "not-allowed",
+            "& fieldset": {
+              borderColor: "rgba(0, 0, 0, 0.26) !important",
+            },
+          },
+        },
         input: {
           height: 28,
           padding: "0 8px",
@@ -176,6 +245,10 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           margin: 0,
+          "&.Mui-disabled": {
+            opacity: 0.7, // ⭐ disabled 시 투명도
+            cursor: "not-allowed",
+          },
         },
         select: {
           height: 28,
@@ -256,6 +329,33 @@ const theme = createTheme({
       styleOverrides: {
         label: { fontSize: 13, lineHeight: "24px" },
         root: { margin: 0, alignItems: "center", gap: 4 },
+        
+      },
+    },
+    MuiSwitch: {
+      styleOverrides: {
+        root: {
+          "& .MuiSwitch-switchBase.Mui-disabled": {
+            cursor: "not-allowed",
+            filter: "brightness(0.8)", // ⭐ 0.7 → 0.8로 더 선명하게
+            opacity: 0.7, // ⭐ 0.5 → 0.7로 더 선명하게
+          },
+          "& .MuiSwitch-switchBase.Mui-disabled + .MuiSwitch-track": {
+            opacity: 0.7, // ⭐ 0.5 → 0.7로 더 선명하게
+          },
+        },
+      },
+    },
+    // ⭐ IconButton disabled 스타일 추가
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          "&.Mui-disabled": {
+            color: "rgba(255, 255, 255, 0.7)", // ⭐ 0.5 → 0.7로 더 선명하게
+            cursor: "not-allowed",
+            pointerEvents: "none",
+          },
+        },
       },
     },
     MuiPickersTextField: {

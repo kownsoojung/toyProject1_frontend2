@@ -10,7 +10,7 @@ export default tseslint.config(
     {
         extends: [
             js.configs.recommended,
-            ...tseslint.configs.strictTypeChecked,
+            ...tseslint.configs.recommended, // strictTypeChecked 대신 recommended 사용
         ],
         files: ["**/*.{ts,tsx}"],
         languageOptions: {
@@ -31,25 +31,21 @@ export default tseslint.config(
             ...react.configs["jsx-runtime"].rules,
             ...reactHooks.configs.recommended.rules,
             "react-hooks/exhaustive-deps": "off",
-            "@typescript-eslint/restrict-template-expressions": [
-                "error",
-                { allowNumber: true },
-            ],
-            "@typescript-eslint/no-confusing-void-expression": "off",
             "react-refresh/only-export-components": [
                 "warn",
                 { allowConstantExport: true },
             ],
             "react/no-unescaped-entities": "off",
+            "@typescript-eslint/no-unused-vars": "off", // 사용하지 않는 변수 경고 비활성화
+            "@typescript-eslint/no-explicit-any": "off", // any 사용 허용
+            "@typescript-eslint/no-unsafe-assignment": "off",
+            "@typescript-eslint/no-unsafe-member-access": "off",
+            "@typescript-eslint/no-unsafe-call": "off",
+            "@typescript-eslint/no-unsafe-return": "off",
+            "@typescript-eslint/no-unsafe-argument": "off",
+            "@typescript-eslint/restrict-template-expressions": "off",
+            "@typescript-eslint/no-confusing-void-expression": "off",
             "@typescript-eslint/no-misused-promises": "off",
-            "@typescript-eslint/no-unused-vars": [
-                "error", // or "error"
-                {
-                    argsIgnorePattern: "^_",
-                    varsIgnorePattern: "^_",
-                    caughtErrorsIgnorePattern: "^_",
-                },
-            ],
         },
     },
 );

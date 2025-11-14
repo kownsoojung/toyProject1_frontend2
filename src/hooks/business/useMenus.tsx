@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
 
-import { Menu } from "../store/slices/menuSlice";
-import { setMenus } from "../store/slices/menuSlice";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { Menu } from "../../store/slices/menuSlice";
+import { setMenus } from "../../store/slices/menuSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { MenuAgentDTO } from "@/api/generated";
 import { apiInstance } from "@/api/baseApi";
 // DTO → 내부 모델로 변환 함수
@@ -51,3 +51,4 @@ export function useMenus() {
 
   return { data: menus, isLoading: false, error: null };
 }
+

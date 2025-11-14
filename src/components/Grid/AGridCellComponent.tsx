@@ -2,7 +2,7 @@
 import { MenuItem, Select, SelectProps, TextField, TextFieldProps } from "@mui/material";
 import { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import { ICellRendererParams, ICellEditorParams } from "ag-grid-community";
-import { CommonCode } from "@/hooks/useCode";
+import { CommonCode } from "@/hooks";
 
 // ====================
 // 1️⃣ 셀 컴포넌트 (렌더링 전용)

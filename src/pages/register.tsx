@@ -5,13 +5,10 @@ import { Button, Box, TableRow, TableCell, Stack } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateDateRanges, validateTimeRanges } from "@/validation/Validation";
-import { AFormTextField, AFormDate, AFormTime, AFormCheckbox, AFormRadio, AForm } from "@/components/Form";
+import { ATextField, ADate, ATime, ACheckbox, ARadio, AForm } from "@/components/Form";
 import { AGrid, AFormGridHandle, AFormGridColumn } from "@/components/Grid";
-import { FormButtons, FormHeader } from "@/styles/theme";
-import { useGridActions } from "@/hooks/useGridActions";
-import { AddButton, DeleteButton, RefreshButton, ExcelButton, AutoBox, MainFormBox, RatioBox, EditButton, SaveButton, CancelButton } from "@/components/Common";
-import { useLoading } from "@/hooks/useLoading";
-import { useDialog } from "@/hooks/useDialog";
+import { useLoading, useDialog } from "@/hooks";
+import { AddButton, DeleteButton, RefreshButton, ExcelButton, AutoBox, MainFormBox, RatioBox, EditButton, SaveButton, CancelButton, FormHeader, FormButtons } from "@/components/Common";
 import { AGridCellTextEditor, AGridCellTextView } from "@/components/Grid/AGridCellComponent";
 import { ICellEditorParams } from "ag-grid-community";
 
@@ -21,8 +18,7 @@ export default function RegisterPage() {
   const { withLoading } = useLoading();
   const dialog = useDialog();
 
-  // ✨ 액션 함수들을 간편하게 사용
-  const { getSelectedRows, refresh, exportToExcel, addRow, deleteRows } = useGridActions(gridRef);
+  
 
   const registerSchema = z.object({
     username: z.string().nonempty().min(3),
@@ -67,12 +63,12 @@ export default function RegisterPage() {
   const handleAdd = async () => {
     await withLoading(async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      addRow({ id: Date.now(), name: "새 항목" });
+      gridRef.current?.addRow({ id: Date.now(), name: "새 항목" });
     }, 'save');
   };
 
   const handleDelete = async () => {
-    const selected = getSelectedRows();
+    const selected = gridRef.current?.getSelectedRows();
     
     if (selected.length === 0) {
       
@@ -81,13 +77,13 @@ export default function RegisterPage() {
     }
     // 삭제 확인
     const confirmed = await dialog.confirm(`선택한 ${selected.length}개 항목을 삭제하시겠습니까?`);
-    deleteRows(selected);
+    gridRef.current?.deleteRows(selected);
     if (!confirmed) { return;}
     
     await withLoading(async () => {
       const ids = selected.map(row => row.id);
       await new Promise(resolve => setTimeout(resolve, 1500));
-      deleteRows(ids);
+      gridRef.current?.deleteRows(ids);
       console.log("삭제된 데이터:", selected);
     }, 'delete');
     
@@ -97,13 +93,13 @@ export default function RegisterPage() {
   const handleRefresh = async () => {
     await withLoading(async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      refresh();
+      gridRef.current?.refetch();
     }, 'search');
     
   };
 
   const handleExportAll = async () => {
-    await exportToExcel("전체데이터.xlsx");
+    await gridRef.current?.exportToExcel("전체데이터.xlsx");
   };
 
   // 행 수정 핸들러
@@ -146,11 +142,11 @@ export default function RegisterPage() {
         <TableRow>
           <TableCell component="th" className="required">아이디</TableCell>
           <TableCell>
-              <AFormTextField name="username" msize={80} />
+              <ATextField.Form name="username" msize={80} />
           </TableCell>
           <TableCell component="th" className="required">비밀번호</TableCell>
           <TableCell>
-            <AFormTextField name="password" type="password" />
+            <ATextField.Form name="password" type="password" />
           </TableCell>
         </TableRow>
 
@@ -158,7 +154,7 @@ export default function RegisterPage() {
         <TableRow>
           <TableCell component="th" className="required">이메일</TableCell>
           <TableCell colSpan={3}>
-            <AFormTextField name="email"  />
+            <ATextField.Form name="email"  />
           </TableCell>
         </TableRow>
 
@@ -166,7 +162,7 @@ export default function RegisterPage() {
         <TableRow>
           <TableCell component="th">내용</TableCell>
           <TableCell colSpan={3}>
-            <AFormTextField name="textbox" multiline rows={4} />
+            <ATextField.Form name="textbox" multiline rows={4} />
           </TableCell>
         </TableRow>
 
@@ -174,22 +170,22 @@ export default function RegisterPage() {
         <TableRow>
           <TableCell component="th">체크박스</TableCell>
           <TableCell>
-            <AFormCheckbox name="dd" checkList={{label:"test10", value:"test"}} />
+            <ACheckbox.Form name="dd" checkList={{label:"test10", value:"test"}} />
           </TableCell>
           <TableCell component="th">시간</TableCell>
           <TableCell>
-            <AFormTime  name="startTime" formatType="hour" endName="endTime" />
+            <ATime.Form name="startTime" formatType="hour" endName="endTime" />
           </TableCell>
         </TableRow>
 
         <TableRow>
           <TableCell component="th">체크박스</TableCell>
           <TableCell>
-            <AFormRadio name="dd" checkList={[{label:"test10", value:"test"}, {label:"test11", value:"test11"}]} />
+            <ARadio.Form name="dd" checkList={[{label:"test10", value:"test"}, {label:"test11", value:"test11"}]} />
           </TableCell>
           <TableCell component="th">시간</TableCell>
           <TableCell>
-            <AFormTime  name="startTime" formatType="hour" endName="endTime" />
+            <ATime.Form name="startTime" formatType="hour" endName="endTime" />
           </TableCell>
         </TableRow>
 
@@ -197,7 +193,7 @@ export default function RegisterPage() {
         <TableRow>
           <TableCell component="th">조회일자</TableCell>
           <TableCell colSpan={3}>
-            <AFormDate label="test" name="start" endName="endDate" formatType="year" mStep={5} isString={true}/>
+            <ADate.Form name="start" endName="endDate" formatType="year" mStep={5} isString={true}/>
           </TableCell>
         </TableRow>
       </AForm>

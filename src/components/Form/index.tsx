@@ -11,9 +11,10 @@ export { ARadio } from "./ARadio";
 export { AAutocomplete } from "./AAutocomplete";
 export { ADate } from "./ADate";
 export { ADynamicFields } from "./ADynamicFields";
+export { ASlider } from "./ASlider";
+export { ATime } from "./ATime";
 
-// 기존 컴포넌트들
-export { AFormTime } from "./AFormTime";
+
 
 // View Components (읽기 전용 표출형)
 export { default as AFormView } from "./AFormView";

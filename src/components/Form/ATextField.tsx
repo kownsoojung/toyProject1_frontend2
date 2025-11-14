@@ -1,5 +1,5 @@
-import React from "react";
 import { InputAdornment, TextField, TextFieldProps } from "@mui/material";
+import React, { useState } from "react";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 
 interface ATextFieldProps {
@@ -9,13 +9,18 @@ interface ATextFieldProps {
   multiline?: boolean;
   rows?: number;
   icon?: React.ReactNode;
+  maxLength?: number;
   // 독립 사용을 위한 props
   value?: string;
-  onChange?: (value: string) => void;
+  changeCallback?: (value: string) => void;
   disabled?: boolean;
   error?: boolean;
   fullWidth?: boolean;
   label?: string;
+  onEnter?: () => void;
+  isNumeric?: boolean;
+  regEx?: RegExp;
+  readOnly?: boolean;
 }
 
 // 기본 TextField 컴포넌트 (순수 UI)
@@ -26,23 +31,42 @@ const ATextFieldBase: React.FC<ATextFieldProps> = ({
   multiline = false,
   rows = 4,
   icon,
+  maxLength,
   value,
-  onChange,
+  changeCallback,
   disabled = false,
   error = false,
   fullWidth,
   label,
+  onEnter,
+  isNumeric = false,
+  regEx,
+  readOnly = false,
 }) => {
-  const { sx: optionSx, InputProps: optionInputProps, ...restOptions } = options || {};
+  const { sx: optionSx, slotProps: optionSlotProps, ...restOptions } = options || {};
   const hasFlex = (optionSx as any)?.flex !== undefined;
-
+  const finalPattern = isNumeric ?  /[^0-9]/g : regEx;
+  
+  const inputSlotProps: React.InputHTMLAttributes<HTMLInputElement> = {
+    maxLength: maxLength,
+    inputMode: isNumeric ? 'numeric' : undefined,
+  };
   return (
     <TextField
       label={label}
-      value={value ?? ""}
+      value={value}
       onChange={(e) => {
-        if (onChange) {
-          onChange(e.target.value);
+        if (finalPattern) {
+          e.target.value = e.target.value.replace(finalPattern, '');
+       }
+
+        if (changeCallback) {  
+          changeCallback(e.target.value);
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && onEnter) {
+          onEnter();
         }
       }}
       fullWidth={fullWidth ?? (msize === 0 && !hasFlex)}
@@ -58,8 +82,11 @@ const ATextFieldBase: React.FC<ATextFieldProps> = ({
         ...(optionSx || {}),
       }}
       type={type}
-      InputProps={{
-        ...optionInputProps,
+      slotProps={{
+        input: {
+          readOnly: readOnly,
+        },
+        htmlInput: inputSlotProps ,
         ...(icon ? {
           endAdornment: (
             <InputAdornment position="end">
@@ -68,6 +95,7 @@ const ATextFieldBase: React.FC<ATextFieldProps> = ({
           ),
         } : {}),
       }}
+   
       {...restOptions}
     />
   );
@@ -86,16 +114,22 @@ const ATextFieldForm: React.FC<ATextFieldFormProps> = ({
 }) => {
   return (
     <AFormBaseItem name={name} {...base}>
-      {(field, error) => (
+      {(field, error) => {
+        const handleChange = (val: any) => {
+          field.onChange(val);              // form 값 반영
+          textFieldProps.changeCallback?.(val);         // 외부 전달
+        };
+        return (
         <ATextFieldBase
           
           {...textFieldProps}
           value={field.value}
-          onChange={field.onChange}
+          changeCallback={handleChange}
           error={!!error}
           disabled={field.disabled}
         />
-      )}
+      );
+      }}
     </AFormBaseItem>
   );
 };
