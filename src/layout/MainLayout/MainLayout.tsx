@@ -25,7 +25,7 @@ type TabItem = {
   component: React.ReactNode;
 };
 
-const LazyCounselingCall = lazy(() => import("@/pages/counselor/counselingCall"));
+const LazyCounselingCall = lazy(() => import("@/pages/Dashboard"));
 
 export default function MainLayout() {
   const theme = useTheme();
@@ -65,9 +65,6 @@ export default function MainLayout() {
     }
   }, [dispatch, navigate, user.accessToken, user.id, user.userId]);
 
-  
-  // 앱 초기화 (설정 조회 + CTI 연결)
-  useAppInitialization();
   
   // 로그인 성공 toast를 메인 화면에서 한 번만 표시하고 제거
   React.useEffect(() => {
