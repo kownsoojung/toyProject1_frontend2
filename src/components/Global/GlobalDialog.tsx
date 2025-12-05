@@ -82,7 +82,6 @@ export const GlobalDialog: React.FC<GlobalDialogProps> = ({ container, tabKey })
       PaperProps={{
         sx: {
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-          borderRadius: 3,
           minWidth: 400,
           margin: 'auto',
           '@keyframes popIn': {

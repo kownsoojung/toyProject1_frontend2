@@ -1,5 +1,5 @@
 import { InputAdornment, TextField, TextFieldProps } from "@mui/material";
-import React, { useState } from "react";
+import React from "react";
 import { AFormBaseItem, AFormBaseItemProps } from "./AFormBaseItem";
 
 interface ATextFieldProps {
@@ -10,8 +10,9 @@ interface ATextFieldProps {
   rows?: number;
   icon?: React.ReactNode;
   maxLength?: number;
-  // 독립 사용을 위한 props
-  value?: string;
+
+  /** 독립 사용 */
+  value?: string | null;
   changeCallback?: (value: string) => void;
   disabled?: boolean;
   error?: boolean;
@@ -23,8 +24,10 @@ interface ATextFieldProps {
   readOnly?: boolean;
 }
 
-// 기본 TextField 컴포넌트 (순수 UI)
-const ATextFieldBase: React.FC<ATextFieldProps> = ({
+/* ===========================
+   1) Base Component
+   =========================== */
+export const ATextFieldBase: React.FC<ATextFieldProps> = ({
   msize = 0,
   options,
   type,
@@ -44,29 +47,38 @@ const ATextFieldBase: React.FC<ATextFieldProps> = ({
   readOnly = false,
 }) => {
   const { sx: optionSx, slotProps: optionSlotProps, ...restOptions } = options || {};
-  const hasFlex = (optionSx as any)?.flex !== undefined;
-  const finalPattern = isNumeric ?  /[^0-9]/g : regEx;
-  
+
+  /** null-safe 처리 */
+  const safeValue = value ?? "";
+
+  /** 정규식 처리(숫자 + 사용자 regex 모두 지원) */
+  const finalPattern = isNumeric ? /[^0-9]/g : regEx;
+
+  /** input slotProps */
   const inputSlotProps: React.InputHTMLAttributes<HTMLInputElement> = {
-    maxLength: maxLength,
-    inputMode: isNumeric ? 'numeric' : undefined,
+    maxLength,
+    inputMode: isNumeric ? "numeric" : undefined,
+    readOnly,
   };
+
+  const hasFlex = (optionSx as any)?.flex !== undefined;
+
   return (
     <TextField
       label={label}
-      value={value}
+      value={safeValue}
       onChange={(e) => {
-        if (finalPattern) {
-          e.target.value = e.target.value.replace(finalPattern, '');
-       }
+        let v = e.target.value;
 
-        if (changeCallback) {  
-          changeCallback(e.target.value);
+        if (finalPattern) {
+          v = v.replace(finalPattern, "");
         }
+
+        changeCallback?.(v);
       }}
       onKeyDown={(e) => {
-        if (e.key === "Enter" && onEnter) {
-          onEnter();
+        if (e.key === "Enter") {
+          onEnter?.();
         }
       }}
       fullWidth={fullWidth ?? (msize === 0 && !hasFlex)}
@@ -74,68 +86,82 @@ const ATextFieldBase: React.FC<ATextFieldProps> = ({
       disabled={disabled}
       multiline={multiline}
       minRows={multiline ? rows : undefined}
-      maxRows={multiline ? 10 : undefined}
+      maxRows={multiline ? rows : undefined}
+      type={type}
       sx={{
-        ...(hasFlex ? {} : {
-          width: typeof msize === "string" ? msize : msize === 0 ? "100%" : `calc(100% - ${msize}px)`,
-        }),
+        ...(hasFlex
+          ? {}
+          : {
+              width:
+                typeof msize === "string"
+                  ? msize
+                  : msize === 0
+                  ? "100%"
+                  : `calc(100% - ${msize}px)`,
+            }),
         ...(optionSx || {}),
       }}
-      type={type}
       slotProps={{
         input: {
-          readOnly: readOnly,
+          ...(optionSlotProps?.input || {}),
+          readOnly,
+          endAdornment: icon ? (
+            <InputAdornment position="end">{icon}</InputAdornment>
+          ) : undefined,
         },
-        htmlInput: inputSlotProps ,
-        ...(icon ? {
-          endAdornment: (
-            <InputAdornment position="end">
-              {icon}
-            </InputAdornment>
-          ),
-        } : {}),
+        htmlInput: {
+          ...(optionSlotProps?.htmlInput || {}),
+          ...inputSlotProps,
+        },
       }}
-   
       {...restOptions}
     />
   );
 };
 
-// Form 래퍼 컴포넌트
-interface ATextFieldFormProps extends Omit<ATextFieldProps, 'value' | 'onChange' | 'error' | 'disabled'> {
+/* ===========================
+   2) Form Component
+   =========================== */
+interface ATextFieldFormProps
+  extends Omit<ATextFieldProps, "value" | "onChange" | "error" | "disabled"> {
   name: string;
   base?: Omit<AFormBaseItemProps, "name" | "children">;
 }
 
-const ATextFieldForm: React.FC<ATextFieldFormProps> = ({
+export const ATextFieldForm: React.FC<ATextFieldFormProps> = ({
   name,
   base,
-  ...textFieldProps
+  ...props
 }) => {
   return (
     <AFormBaseItem name={name} {...base}>
       {(field, error) => {
-        const handleChange = (val: any) => {
-          field.onChange(val);              // form 값 반영
-          textFieldProps.changeCallback?.(val);         // 외부 전달
+        /** form value null-safe */
+        const safeValue =
+          field.value === null || field.value === undefined ? "" : field.value;
+
+        const handleChange = (v: string) => {
+          field.onChange(v);
+          props.changeCallback?.(v);
         };
+
         return (
-        <ATextFieldBase
-          
-          {...textFieldProps}
-          value={field.value}
-          changeCallback={handleChange}
-          error={!!error}
-          disabled={field.disabled}
-        />
-      );
+          <ATextFieldBase
+            {...props}
+            value={safeValue}
+            changeCallback={handleChange}
+            error={!!error}
+            disabled={field.disabled}
+          />
+        );
       }}
     </AFormBaseItem>
   );
 };
 
-// 컴포넌트 합성
+/* ===========================
+   export
+   =========================== */
 export const ATextField = Object.assign(ATextFieldBase, {
   Form: ATextFieldForm,
 });
-

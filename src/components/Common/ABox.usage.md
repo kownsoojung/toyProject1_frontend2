@@ -111,13 +111,13 @@ import { FlexBox } from '@/components/Common';
 <MainFormBox>
   <RatioBox sizes={['250px', 'auto']} direction="row" gap={2}>
     {/* 좌측 메뉴 - 고정 250px */}
-    <Box sx={{ bgcolor: 'background.paper', p: 2, borderRadius: 1 }}>
+    <Box sx={{ bgcolor: 'background.paper', p: 2}}>
       <Typography variant="h6">메뉴</Typography>
       <List>...</List>
     </Box>
     
     {/* 메인 컨텐츠 - 나머지 영역 */}
-    <Box sx={{ bgcolor: 'background.paper', p: 2, borderRadius: 1 }}>
+    <Box sx={{ bgcolor: 'background.paper', p: 2,  }}>
       <Typography variant="h5">컨텐츠</Typography>
       <div>...</div>
     </Box>

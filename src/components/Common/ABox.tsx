@@ -78,7 +78,7 @@ export const PopupFooterBox = ({ children, sxProps, ...props }: CommonBoxProps) 
   </Box>
 );
 // 자동 높이 Box - 남은 공간 채우기 (flex: 1)
-export const AutoBox = ({ children, minHeight = 200, sxProps, ...props }: CommonBoxProps) => (
+export const AutoBox = ({ children, minHeight = 300, sxProps, ...props }: CommonBoxProps) => (
   <Box sx={{ flex: 1, minHeight: minHeight, display: "flex", flexDirection: "column", ...sxProps }} {...props}>
     {children}
   </Box>

@@ -22,7 +22,8 @@ export const AFormCallKindCategory: React.FC<counselCategoryProps> = ({
 }) => {
   const {data: callKindList } = useAutoQuery<any[]>({
     queryKey: ["callKind"], 
-    url: "/api/common/callkind/getCallKindList"
+    url: "/api/common/callkind/getCallKindList",
+    isGlobal: true,
   });
   
   const { watch, setValue } = useFormContext();

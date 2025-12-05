@@ -20,10 +20,17 @@ const convertToCommonCode = <T extends Record<string, any>>(dto: T, options?: { 
  */
 const useCodeFetcher = (url: string, params?: CodeSearchDTO): CommonCode[] | undefined => {
   const codeName = params?.codeName ?? "";
+
+  let isGlobal = false;
+  if (codeName === "counselCategory") {  
+    isGlobal = true;
+  }
+
   const { data } = useAutoQuery<any[]>({
     queryKey: [url, codeName, params],
     url,
     params,
+    isGlobal,
   });
 
   return data?.map((value) => convertToCommonCode(value, { valueAsNumber: false }));

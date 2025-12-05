@@ -578,7 +578,7 @@ export const AGrid = forwardRef<AFormGridHandle, AFormGridProps>(
 
         {/* 컬럼 표시/숨김 토글 (showColumnToggle이 true일 때) */}
         {showColumnToggle && (
-          <Box sx={{ mb: 1, p: 1, border: "1px solid #ddd", borderRadius: 1, bgcolor: "#f9f9f9", flexShrink: 0 }}>
+          <Box sx={{ mb: 1, p: 1, border: "1px solid #ddd",  bgcolor: "#f9f9f9", flexShrink: 0 }}>
             <FormGroup row>
               {columnDefs.filter((col) => col.field).map((col) => (
                 <FormControlLabel
