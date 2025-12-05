@@ -101,7 +101,7 @@ export const StyledTable = styled(Table)<{ type: "search" | "register" | "form" 
             boxSizing: "border-box",
           },
           "& textarea": {
-            padding: "8px",
+            padding: "0 8px",
             height: "auto !important", // textarea는 자동 높이
           },
           display: "flex",
@@ -229,6 +229,20 @@ const theme = createTheme({
               borderColor: "rgba(0, 0, 0, 0.26) !important",
             },
           },
+          // ⭐ readonly 스타일 추가
+          "& .MuiInputBase-input[readonly]": {
+            backgroundColor: "#f5f5f5",
+            cursor: "text",
+            "&:focus": {
+              backgroundColor: "#f5f5f5",
+            },
+          },
+          "&.Mui-focused .MuiInputBase-input[readonly]": {
+            backgroundColor: "#f5f5f5",
+            "& fieldset": {
+              borderColor: "#ccc",
+            },
+          },
         },
         input: {
           height: 28,
@@ -273,6 +287,9 @@ const theme = createTheme({
       defaultProps: { size: "small" },
       styleOverrides: {
         root: {
+          "& .MuiInputBase-multiline": {
+            padding: "8px 0",
+          },
           "& .MuiInputLabel-root": {
             fontSize: 13,
             transform: "translate(8px, 6px) scale(1)",
@@ -285,6 +302,14 @@ const theme = createTheme({
             fontSize: 13,
             "&:not(.MuiInputBase-multiline)": {
               height: 28, // multiline이 아닐 때만 고정 높이
+            },
+            // ⭐ readonly 스타일 추가
+            "& .MuiInputBase-input[readonly]": {
+              backgroundColor: "#f5f5f5",
+              cursor: "text",
+            },
+            "&.Mui-focused .MuiInputBase-input[readonly]": {
+              backgroundColor: "#f5f5f5",
             },
           },
         },
@@ -379,7 +404,15 @@ const theme = createTheme({
       styleOverrides: { root: { minHeight: 28, fontSize: 13, padding: "0px 4px" } },
     },
     MuiTabs: {
-      styleOverrides: { root: { minHeight: 36 }, scroller: { minHeight: 36 } },
+      styleOverrides: { 
+        root: { minHeight: 36 }, 
+        scroller: { minHeight: 36 },
+        scrollButtons: {
+          "&.Mui-disabled": {
+            opacity: 0.3,
+          },
+        },
+      },
     },
     MuiTab: {
       styleOverrides: { 
@@ -390,6 +423,7 @@ const theme = createTheme({
           padding: "0 12px",
           borderRadius: "8px 8px 0 0",
           border: "1px solid #ccc",
+          borderBottom: "none",
           color: theme.palette.text.secondary,
           backgroundColor: "#e0e0e0",
           "&.Mui-selected": {
@@ -404,7 +438,7 @@ const theme = createTheme({
       },
     },
     MuiCard: {
-      styleOverrides: { root: { borderRadius: 8, backgroundColor: "#fff" } },
+      styleOverrides: { root: { backgroundColor: "#fff" } },
     },
     MuiTableCell: {
       styleOverrides: { root: { padding: "4px 8px", verticalAlign: "middle" } },
